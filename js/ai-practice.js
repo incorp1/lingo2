@@ -1239,25 +1239,10 @@ function drawPracticeHistoryWindow() {
   list.replaceChildren(fragment);
 }
 
-function savePracticeToHistory(payload, words) {
-  const safePayload = clonePracticePayload(payload);
-  if (!safePayload?.text) return;
-  if (!Array.isArray(state.settings.practiceHistory)) state.settings.practiceHistory = [];
-  state.settings.practiceHistory.unshift({
-    id: uid(),
-    title: safePayload.title,
-    text: safePayload.text,
-    glossary: safePayload.glossary,
-    words: (words || []).map(w => String(w?.front || "")).filter(Boolean),
-    at: Date.now(),
-  });
-  markPracticeHistoryDirty(state.settings.practiceHistory[0]);
-  if (state.settings.practiceHistory.length > PRACTICE_HISTORY_MAX) {
-    const removed = state.settings.practiceHistory.splice(PRACTICE_HISTORY_MAX);
-    removed.forEach(entry => markPracticeHistoryDeleted(entry.id));
-  }
-  save();
-}
+/* Practice sessions are persisted only through addPracticeHistory(), which
+   stamps learningLanguage and applies the per-language cap. A second, untagged
+   writer used to exist here and would have leaked nb sessions into the en
+   history, so it was removed instead of being duplicated. */
 
 function togglePracticeHistory() {
   const list = $("#practiceHistoryList");
