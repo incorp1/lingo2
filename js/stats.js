@@ -127,6 +127,10 @@ let swUpdateCheckInFlight = false;
 let swUpdateCheckTimer = null;
 let swUpdateFallbackTimer = null;
 const SW_UPDATE_FALLBACK_MS = 4_000;
+// Обновление применяется за доли секунды, поэтому без минимальной длительности
+// blur-анимацию просто не успеваешь заметить.
+const SW_UPDATE_OVERLAY_MIN_MS = 1_400;
+let swUpdateOverlayShownAt = 0;
 
 function isStandalonePwa() {
   return navigator.standalone === true || window.matchMedia?.("(display-mode: standalone)")?.matches === true;
@@ -139,6 +143,14 @@ function reloadForServiceWorkerUpdate() {
     window.clearTimeout(swUpdateFallbackTimer);
     swUpdateFallbackTimer = null;
   }
+  // Держим blur-оверлей на экране минимум SW_UPDATE_OVERLAY_MIN_MS, иначе
+  // перезагрузка происходит раньше, чем пользователь успевает её заметить.
+  const shown = swUpdateOverlayShownAt ? Date.now() - swUpdateOverlayShownAt : SW_UPDATE_OVERLAY_MIN_MS;
+  const wait = Math.max(0, SW_UPDATE_OVERLAY_MIN_MS - shown);
+  if (wait > 0) {
+    window.setTimeout(() => window.location.reload(), wait);
+    return;
+  }
   window.location.reload();
 }
 
@@ -148,12 +160,14 @@ function showUpdateOverlay() {
   const text = overlay.querySelector(".update-overlay-text");
   if (text) text.textContent = t("pwa.updating");
   overlay.hidden = false;
+  swUpdateOverlayShownAt = Date.now();
   document.body.classList.add("is-updating");
 }
 
 function hideUpdateOverlay() {
   const overlay = $("#updateOverlay");
   if (overlay) overlay.hidden = true;
+  swUpdateOverlayShownAt = 0;
   document.body.classList.remove("is-updating");
 }
 
@@ -181,10 +195,7 @@ async function applyServiceWorkerUpdate({ button = null, automatic = false } = {
     waitingWorker.postMessage({ type: "SKIP_WAITING" });
     swUpdateFallbackTimer = window.setTimeout(() => {
       swUpdateFallbackTimer = null;
-      if (swUpdateReloadPending && !swRefreshing) {
-        swRefreshing = true;
-        window.location.reload();
-      }
+      reloadForServiceWorkerUpdate();
     }, SW_UPDATE_FALLBACK_MS);
     return true;
   } catch (error) {
