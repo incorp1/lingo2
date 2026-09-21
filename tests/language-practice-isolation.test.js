@@ -55,6 +55,14 @@ test("generation-токен реально используется, а не т�
   assert.match(practice, /!isLanguageGenerationCurrent\(snapshot\.languageGeneration\)\) return false;/);
 });
 
+test("массовое добавление карточек не пишет результат в чужой язык", () => {
+  const decks = read("js/decks.js");
+  assert.match(decks, /const bulkLearnCode = activeLearningLanguageCode\(\);/);
+  assert.match(decks, /const bulkLearnGeneration = currentLanguageGeneration\(\);/);
+  assert.match(decks, /activeLearningLanguageCode\(\) !== bulkLearnCode/);
+  assert.match(decks, /!isLanguageGenerationCurrent\(bulkLearnGeneration\)/);
+});
+
 test("черновик практики сбрасывается при смене языка", () => {
   const practice = read("js/ai-practice.js");
   assert.match(practice, /function resetPracticeRuntime\(\)/);

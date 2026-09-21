@@ -1009,6 +1009,10 @@ async function commitBulkAdd() {
   }
 
   const contextId = `bulk-add:${deckId}`;
+  // Bulk enrichment is long-running: pin it to the language generation that
+  // started it, otherwise a switch mid-flight would write foreign cards.
+  const bulkLearnCode = activeLearningLanguageCode();
+  const bulkLearnGeneration = currentLanguageGeneration();
   const job = await startAiJob("bulk-add", contextId);
   if (!job) return;
   const btn = $("#bulkAddBtn");
@@ -1044,6 +1048,11 @@ async function commitBulkAdd() {
     for (let index = 0; index < pool.results.length; index++) enriched[index] = pool.results[index];
     if (!isCurrentAiJob(job) || $("#bulkModal").hidden || $("#bulkDeck").value !== deckId) {
       throw new DOMException("stale", "AbortError");
+    }
+    // The learning language must still be the one this batch was enriched for.
+    if (activeLearningLanguageCode() !== bulkLearnCode
+      || !isLanguageGenerationCurrent(bulkLearnGeneration)) {
+      throw new DOMException("stale language", "AbortError");
     }
 
     stateSnapshot = structuredClone(state);
