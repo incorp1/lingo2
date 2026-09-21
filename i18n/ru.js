@@ -607,6 +607,7 @@ window.I18N.ru = {
     "language.learning.help": "Колоды, карточки и прогресс хранятся отдельно для каждого языка обучения. Язык интерфейса не меняется.",
     "language.learning.switched": "Язык обучения: {lang}",
     "language.learning.switchFailed": "Не удалось переключить язык обучения",
+    "language.learning.switchFailedInterrupted": "Не удалось переключить язык обучения. Прежний язык сохранён, выполняемые AI-операции прерваны.",
     "language.name.en": "Английский",
     "language.name.nb": "Норвежский",
     "settings.route.generation": "Генерация карточек",

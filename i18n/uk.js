@@ -126,6 +126,7 @@ window.I18N.uk = {
     "language.learning.help": "Колоди, картки та прогрес зберігаються окремо для кожної мови навчання. Мова інтерфейсу не змінюється.",
     "language.learning.switched": "Мова навчання: {lang}",
     "language.learning.switchFailed": "Не вдалося перемкнути мову навчання",
+    "language.learning.switchFailedInterrupted": "Не вдалося перемкнути мову навчання. Попередню мову збережено, виконувані AI-операції перервано.",
     "language.name.en": "Англійська",
     "language.name.nb": "Норвезька",
     "settings.route.generation": "Створення карток",

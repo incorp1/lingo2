@@ -607,6 +607,7 @@ window.I18N.en = {
     "language.learning.help": "Decks, cards and progress are stored separately for each learning language. The interface language stays the same.",
     "language.learning.switched": "Learning language: {lang}",
     "language.learning.switchFailed": "Could not switch the learning language",
+    "language.learning.switchFailedInterrupted": "Could not switch the learning language. The previous language is kept and running AI operations were interrupted.",
     "language.name.en": "English",
     "language.name.nb": "Norwegian",
     "settings.route.generation": "Card generation",

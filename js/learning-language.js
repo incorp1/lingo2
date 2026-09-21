@@ -49,6 +49,19 @@ function clearVolatileLanguageContext() {
   if (typeof viewingDeckId !== "undefined") viewingDeckId = null;
 }
 
+// AUD-008: погасить UI отменённых языковых операций, не трогая данные текущего
+// языка. Используется, когда запись переключения не удалась: задания уже
+// отменены и не возобновятся, поэтому их индикаторы и модалки должны исчезнуть,
+// но session и undoStack прежнего языка остаются валидными.
+function clearCancelledLanguageRuntime() {
+  if (typeof closeModal === "function") closeModal();
+  if (typeof resetPracticeRuntime === "function") resetPracticeRuntime();
+  if (typeof invalidateStudyStage === "function") invalidateStudyStage();
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+}
+
 // Restore the compatibility mirror of the selected profile.
 function adoptLanguageProfile(code) {
   const profile = activeLanguageProfile(state);
@@ -100,12 +113,19 @@ async function switchLearningLanguage(rawCode) {
       markMetaDirty();
     });
     if (!applied) {
-      // The write failed: keep the previous language and the previous control
-      // value. adoptLanguageProfile is not reverted here because mutateAndFlush
-      // already restored the whole previous state object.
+      // AUD-008: запись не удалась, но поколение уже инвалидировано, а AI-задания
+      // и проверка практики уже отменены и не возобновляются. Поэтому ветка
+      // отказа явно гасит именно этот отменённый runtime (модалки, практика,
+      // индикаторы), оставляя язык прежним. Пользовательские данные прежнего
+      // языка — session и undoStack — сохраняются, так как язык не изменился.
       state.activeLearningLanguage = normalizeLearningLanguage(state?.activeLearningLanguage, previous);
+      adoptLanguageProfile(state.activeLearningLanguage);
+      clearCancelledLanguageRuntime();
       syncLearningLanguageControl();
-      if (typeof toast === "function") toast(t("language.learning.switchFailed"), { error: true });
+      if (typeof renderAll === "function") renderAll();
+      if (typeof toast === "function") {
+        toast(t("language.learning.switchFailedInterrupted"), { error: true });
+      }
       return false;
     }
 
