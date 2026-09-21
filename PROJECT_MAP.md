@@ -4,7 +4,7 @@
 # Карта проекта Lingo Cards
 
 
-Проверена по исходникам **v3.18.34** из пользовательского архива. Код приложения при подготовке документации не изменялся. Карта — указатель, а не замена чтению изменяемой функции. Ищи по **именам функций, DOM-id и заголовкам**, а не по номерам строк: строки смещаются после правок.
+Проверена по исходникам **v3.20.0** из пользовательского архива. Код приложения при подготовке документации не изменялся. Карта — указатель, а не замена чтению изменяемой функции. Ищи по **именам функций, DOM-id и заголовкам**, а не по номерам строк: строки смещаются после правок.
 
 
 **Порядок:** `AGENTS.md` → таблица ниже → только нужный раздел → выбранная функция и ближайшие зависимости. Всю карту при каждой задаче читать не нужно.
@@ -66,6 +66,7 @@
 ├── fsrs.js                     Математика FSRS-4.5
 ├── ai.js                       Словарь, перевод, LLM-запросы, промпты, retry/timeout
 ├── backup.js                   Формат копий, валидация/санитайзеры; без DOM
+├── languages.js                Реестр языков обучения (en/nb): коды, локали, i18nKey, пустой профиль
 ├── seed.js                     Начальные колоды для нового локального состояния
 ├── tooltips.js                 Общие всплывающие подсказки
 ├── sw.js                       Кэш оболочки и офлайн-ответы Service Worker
@@ -91,6 +92,7 @@
 │   ├── cards.js               Редакторы карточки/колоды, адресное обновление UI
 │   ├── import-export.js       Действия пользователя над копиями и опасные операции
 │   ├── selection.js           Выделение текста по удержанию, lookup, ширина select
+│   ├── learning-language.js   Переключение языка обучения, generation guard, очистка сессии
 │   ├── edge-menu.js           Жесты и действия бокового меню учёбы
 │   ├── motion.js              Координатор анимаций, window.LCMotion
 │   └── app-shell.js           Общий TTS, bindEvents, viewport, финальный запуск
@@ -113,11 +115,13 @@
 
 ```text
 storage.js → fsrs.js → ai.js → seed.js
+→ languages.js
 → i18n/uk.js → i18n/ru.js → i18n/en.js → i18n/runtime.js
 → tooltips.js → backup.js
 → js/state.js → js/scheduler.js → js/ui.js → js/study.js
 → js/decks.js → js/stats.js → js/settings.js → js/ai-practice.js
 → js/cards.js → js/import-export.js → js/selection.js
+→ js/learning-language.js
 → js/edge-menu.js → js/motion.js → js/app-shell.js
 ```
 
@@ -149,7 +153,9 @@ storage.js → fsrs.js → ai.js → seed.js
 - IndexedDB: БД `lingo-cards`, версия схемы **3**. Хранилища: `kv`, `cards`, `decks`, `settings`, `reviewEvents`, `practiceHistory`, `recoverySnapshots`.
 - `STORAGE_KEY = "lingo-cards-v1"` — логический/исторический ключ; это **не версия релиза**. Есть миграция из localStorage.
 - localStorage также используется для отдельных UI-предпочтений, например темы `lingo-theme` и положения меню `lingo-cards-edge-anchor`. Это не основное хранилище карточек.
-- `state`: `decks`, `cards`, `activeDeckId`, `settings`, `history`, `streak`, `sessionReviewedIds`, `studyCycles`; механизм хранения поддерживает `revision` / `updatedAt`.
+- `state`: `decks`, `cards`, `activeDeckId`, `settings`, `history`, `streak`, `sessionReviewedIds`, `studyCycles`, а также языковая модель — `activeLearningLanguage`, `languageProfiles`, `dataModelVersion`; механизм хранения поддерживает `revision` / `updatedAt`.
+- Колода и карточка содержат `learningLanguage`; активные выборки (`activeCards()`, `getDeckCards`) ограничены текущим языком обучения. Профиль языка (`languageProfiles[code]`) канонически хранит `history`, `streak`, `sessionReviewedIds`, `activeDeckId`, `practiceDraft`, `studyResume`; одноимённые поля `state` — зеркало активного профиля.
+- `reviewEvents` и `practiceHistory` помечены `learningLanguage`; лимит истории практики независим для каждого языка.
 - `session` и `undoStack` — временные структуры. Не предполагать, что перезагрузка восстанавливает их целиком.
 - Карточка: идентификаторы `id`/`deckId`; контент `front`, `back`, `example`, `exampleSentence`, `exampleTranslation`, `exampleTargetTerm`, `hint`, `cloze`; учебные поля `state`, `step`, `ease`, `interval`, `due`, `reps`, `lapses`, `lastReview`; дополнительно `fsrs`, `difficultyCache` и другие поддерживаемые поля. Полный контракт — в `createCard`, нормализации и `sanitizeCard`, а не в этом сокращённом списке.
 - `cardById`, `deckById`, `cardsByDeck` — индексы памяти. При замене состояния нужен `rebuildEntityIndexes()`; при обычной операции используй существующие помощники.
@@ -183,7 +189,7 @@ UI-оценка: `0=Again`, `1=Hard`, `2=Good`, `3=Easy`; `FSRS.schedule` пол
 ### Копии и опасные операции
 
 
-Актуальный формат `backup.js / CONFIG.format` — **2**. `buildFullExport` сохраняет состояние, reviewEvents и practiceDraft; рабочий экспорт вызывает его с `{ includeSecrets: true }`. Копия может содержать AI-ключ.
+Актуальный формат `backup.js / CONFIG.format` — **3** (копия включает языковые профили и `learningLanguage` колод/карточек; форматы 1–2 читаются как legacy). `buildFullExport` сохраняет состояние, reviewEvents и practiceDraft; рабочий экспорт вызывает его с `{ includeSecrets: true }`. Копия может содержать AI-ключ.
 
 
 `buildDeckExport` экспортирует содержимое одной колоды без её учебного прогресса, идентичности и настроек. Не заменять им полную резервную копию.
@@ -284,6 +290,15 @@ SW обслуживает навигацию из кэша с фоновым о�
 | Стиль вопросов практики | `practice-question-editor-style.test.js` |
 | Скорость озвучивания | `tts-speed.test.js` |
 | Режимы бокового меню | `edge-mode-picker.test.js` |
+| Языковая модель и миграция данных | `language-model-migration.test.js`, `legacy-language-fixture.test.js` |
+| Изоляция колод, карточек и учёбы по языку | `language-deck-isolation.test.js`, `language-study-isolation.test.js` |
+| Переключение языка обучения | `language-switch.test.js` |
+| AI, словарь и перевод по языку | `language-ai-dictionary.test.js` |
+| Практика и её история по языку | `language-practice-isolation.test.js`, `language-practice-history-writer.test.js` |
+| TTS и выделение по языку | `language-tts-selection.test.js`, `language-practice-tts-locale.test.js` |
+| Review events по языку | `language-review-events.test.js` |
+| Локализация названий языков | `language-label-i18n.test.js` |
+| Копия формата 3 и импорт колод | `backup-format-3.test.js`, `deck-import-language.test.js` |
 
 
 Многие тесты — статические проверки исходников; часть выполняет выбранную логику через VM. Наличие теста не доказывает реальную работу touch-жеста, IndexedDB на iPhone, API-провайдера или обновления установленной PWA. Эти сценарии проверяются отдельно. В рамках подготовки документации приложение и его тесты не запускались: проверены структура, символы и контракты по коду.
