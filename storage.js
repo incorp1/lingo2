@@ -503,6 +503,7 @@
                 name: String(deckInput.name || "Imported"),
                 desc: String(deckInput.desc || ""),
                 direction: deckInput.direction === "reverse" ? "reverse" : "forward",
+                learningLanguage: deckInput.learningLanguage === "nb" ? "nb" : "en",
                 createdAt: now,
               };
               const cards = deckInput.cards.map(cardInput => ({
@@ -517,6 +518,7 @@
                 exampleSentence: String(cardInput.exampleSentence || ""),
                 exampleTranslation: String(cardInput.exampleTranslation || ""),
                 exampleTargetTerm: String(cardInput.exampleTargetTerm || ""),
+                info: String(cardInput.info || ""),
                 state: "new",
                 step: 0,
                 ease: 250,

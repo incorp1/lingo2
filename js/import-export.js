@@ -54,28 +54,86 @@ function resetCardProgress(card, startingEase, now) {
   return reset;
 }
 
+async function resolveDeckImportLanguage(deckLanguage) {
+  const activeLanguage = normalizeLearningLanguage(state.activeLearningLanguage);
+  const languageLabel = code => t(`language.name.${code}`);
+  // An unlabeled legacy deck must be assigned explicitly; default is English.
+  if (!deckLanguage) {
+    const useActive = await confirmDialog({
+      title: t("confirm.deckImport.title"),
+      message: t("confirm.deckImport.unlabeled", { lang: languageLabel(activeLanguage) }),
+      detail: t("confirm.deckImport.detail"),
+      confirmLabel: t("confirm.deckImport.action"),
+    });
+    if (useActive === null) return null;
+    return useActive ? activeLanguage : "en";
+  }
+  if (deckLanguage === activeLanguage) return deckLanguage;
+  const keepDeckLanguage = await confirmDialog({
+    title: t("confirm.deckImport.title"),
+    message: t("confirm.deckImport.mismatch", {
+      deckLang: languageLabel(deckLanguage),
+      activeLang: languageLabel(activeLanguage),
+    }),
+    detail: t("confirm.deckImport.detail"),
+    confirmLabel: t("confirm.deckImport.action"),
+  });
+  return keepDeckLanguage ? deckLanguage : null;
+}
+
 async function resetProgress() {
+  const activeLanguage = normalizeLearningLanguage(state.activeLearningLanguage);
   const confirmed = await confirmDialog({
     title: t("confirm.resetProgress.title"),
     message: t("settings.resetConfirm"),
-    detail: t("confirm.resetProgress.detail"),
+    detail: t("confirm.resetProgress.languageDetail", {
+      lang: t(`language.name.${activeLanguage}`),
+    }),
     confirmLabel: t("confirm.resetProgress.action"),
     danger: true,
   });
   if (!confirmed) return;
   const now = Date.now();
   const nextState = structuredClone(state);
-  nextState.cards = nextState.cards.map(card =>
-    resetCardProgress(card, nextState.settings.startingEase, now)
+  // Only the active language is reset; other languages keep their progress.
+  const languageDeckIds = new Set(
+    nextState.decks
+      .filter(deck => normalizeLearningLanguage(deck.learningLanguage) === activeLanguage)
+      .map(deck => deck.id)
   );
+  nextState.cards = nextState.cards.map(card =>
+    languageDeckIds.has(card.deckId)
+      ? resetCardProgress(card, nextState.settings.startingEase, now)
+      : card
+  );
+  const profile = nextState.languageProfiles?.[activeLanguage];
+  if (profile) {
+    profile.history = {};
+    profile.streak = { current: 0, lastDay: null };
+    profile.sessionReviewedIds = [];
+    profile.practiceDraft = null;
+    profile.studyResume = null;
+  }
   nextState.history = {};
   nextState.streak = { current: 0, lastDay: null };
   nextState.sessionReviewedIds = [];
-  nextState.studyCycles = {};
+  nextState.practiceDraft = null;
+  nextState.studyResume = null;
+  nextState.studyCycles = Object.fromEntries(
+    Object.entries(nextState.studyCycles || {}).filter(([cardId]) => {
+      const card = nextState.cards.find(item => item.id === cardId);
+      return card ? !languageDeckIds.has(card.deckId) : false;
+    })
+  );
+  const keptEvents = (await window.LCStorage.readAppSnapshot()).reviewEvents
+    .filter(event => normalizeLearningLanguage(event.learningLanguage) !== activeLanguage);
+  const keptPractice = (nextState.practiceHistory || [])
+    .filter(entry => normalizeLearningLanguage(entry.learningLanguage) !== activeLanguage);
+  nextState.practiceHistory = keptPractice;
   try {
     const committed = await commitDestructiveSnapshot({
       state: nextState,
-      reviewEvents: [],
+      reviewEvents: keptEvents,
       practiceDraft: null,
     }, "reset-progress");
     if (committed) toast(t("toast.progressReset"));
@@ -88,7 +146,7 @@ async function resetProgress() {
 async function wipeAll() {
   const typed = await requestTextInput({
     title: t("confirm.wipeAll.title"),
-    message: t("confirm.wipeAll.typedMessage"),
+    message: t("confirm.wipeAll.allLanguages"),
     placeholder: t("confirm.wipeAll.placeholder"),
     confirmLabel: t("confirm.wipeAll.action"),
     required: true,
@@ -363,7 +421,12 @@ async function importDeckBackup(text) {
     if (committedDrafts === false) return;
   }
   await window.LCStorage.flush();
-  const committed = await window.LCStorage.appendDeck(result.deck, {
+  const importLanguage = await resolveDeckImportLanguage(result.deck.learningLanguage);
+  if (!importLanguage) return;
+  const committed = await window.LCStorage.appendDeck({
+    ...result.deck,
+    learningLanguage: importLanguage,
+  }, {
     expectedRevision: Number(state.revision) || 0,
   });
   state.decks.push(committed.deck);

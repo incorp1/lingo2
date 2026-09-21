@@ -17,7 +17,10 @@ test("P46: additive deck append is atomic, revision guarded, and preserves activ
   assert.match(storage, /const cards = deckInput\.cards\.map/);
   assert.match(storage, /direction: deckInput\.direction === "reverse"/);
   assert.doesNotMatch(storage.slice(storage.indexOf("async function appendDeck"), storage.indexOf("async function replaceAppSnapshot")), /activeDeckId\s*=/);
-  assert.match(importer, /LCStorage\.appendDeck\(result\.deck,\s*\{\s*expectedRevision: Number\(state\.revision\)/s);
+  assert.match(
+    importer,
+    /LCStorage\.appendDeck\(\{\s*\.\.\.result\.deck,\s*learningLanguage: importLanguage,\s*\},\s*\{\s*expectedRevision: Number\(state\.revision\)/s
+  );
 });
 
 test("P47: settings expose only repeatable full restore while legacy deck parsing remains compatible", () => {

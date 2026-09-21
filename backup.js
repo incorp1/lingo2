@@ -30,6 +30,10 @@
   const DEFAULT_LEARNING_LANGUAGE = "en";
   const SUPPORTED_FORMATS = [1, 2, 3];
 
+  function languageCodeList() {
+    return Array.from(LEARNING_LANGUAGES);
+  }
+
   const LIMITS = {
     decks: 10000,
     cards: 500000,
@@ -410,9 +414,16 @@
   function sanitizeDeckContent(raw) {
     if (!isRecord(raw) || typeof raw.name !== "string" || !Array.isArray(raw.cards)
       || raw.cards.length > LIMITS.cards || raw.cards.some(card => !isRecord(card))) return null;
+    // A deck export keeps its language when it is known; an unlabeled legacy
+    // deck stays null so the import flow can ask the user explicitly.
+    const languageCode = typeof raw.learningLanguage === "string"
+      && languageCodeList().includes(raw.learningLanguage)
+      ? raw.learningLanguage
+      : null;
     return {
       name: cleanString(raw.name, LIMITS.shortText) || "Imported",
       desc: cleanString(raw.desc),
+      learningLanguage: languageCode,
       direction: enumValue(raw.direction, DIRECTIONS, "forward"),
       cards: raw.cards.map(card => {
         if (!isRecord(card)) return null;
