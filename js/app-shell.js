@@ -1,7 +1,6 @@
 /* Lingo Cards — TTS, utilities, application wiring and mobile viewport */
 
 /* ----- TTS ----- */
-const TTS_UI_LOCALES = { ru: "ru-RU", uk: "uk-UA", en: "en-US" };
 
 // Становится true после первой попытки дождаться voiceschanged: не даём
 // бесконечно откладывать озвучку, если голоса языка в системе нет вообще.
@@ -17,10 +16,11 @@ function learningSpeechLocale(code) {
   return registry?.getLanguage(normalized)?.locale || "en-US";
 }
 
-/* Locale of the translation side: it follows the interface language. */
+/* Озвучивание всегда идёт на языке обучения. Локаль интерфейса (ru/uk)
+   намеренно не используется для TTS: приложение произносит только изучаемый
+   язык, а перевод остаётся текстовым. */
 function translationSpeechLocale() {
-  const lang = state?.settings?.language;
-  return TTS_UI_LOCALES[lang] || "en-US";
+  return learningSpeechLocale();
 }
 
 function baseLocaleCode(locale) {

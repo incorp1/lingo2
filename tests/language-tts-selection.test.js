@@ -25,13 +25,29 @@ test("hus озвучивается как nb-NO, когда активен но�
   assert.equal(registry.LCLanguages.getLanguage("en").locale, "en-US");
 });
 
-test("перевод озвучивается по языку интерфейса, а термин — по языку обучения", () => {
+test("озвучивание всегда идёт на языке обучения, а не на языке интерфейса", () => {
   const shell = read("js/app-shell.js");
   const study = read("js/study.js");
-  assert.match(shell, /function translationSpeechLocale/);
-  assert.match(shell, /ru: "ru-RU", uk: "uk-UA", en: "en-US"/);
-  assert.match(study, /speaksTranslation \? translationSpeechLocale\(\) : learningSpeechLocale\(\)/);
+  const settings = read("js/settings.js");
+  // Таблица локалей интерфейса для TTS удалена: ru/uk больше не озвучиваются.
+  assert.doesNotMatch(shell, /TTS_UI_LOCALES/);
+  assert.match(shell, /function translationSpeechLocale\(\) \{\s*return learningSpeechLocale\(\);/);
+  // Обе стороны карточки читаются голосом изучаемого языка.
+  assert.doesNotMatch(study, /speaksTranslation/);
+  assert.match(study, /speak\(toSpeak, \{ lang: learningSpeechLocale\(\) \}\)/);
   assert.match(study, /speak\(textToSpeak, \{ lang: learningSpeechLocale\(\) \}\)/);
+  // Превью скорости в настройках тоже использует язык обучения.
+  assert.match(settings, /speak\(t\("settings\.ttsRate\.sample"\), \{ rate, lang: learningSpeechLocale\(\) \}\)/);
+});
+
+test("ни один вызов speak не использует локаль интерфейса", () => {
+  for (const file of ["js/study.js", "js/selection.js", "js/settings.js", "js/ai-practice.js"]) {
+    const source = read(file);
+    const calls = source.match(/\bspeak\((?:[^;]*?)\)\s*;/gs) || [];
+    for (const call of calls) {
+      assert.match(call, /lang:\s*learningSpeechLocale\(\)/, `${file}: вызов без языка обучения: ${call.trim()}`);
+    }
+  }
 });
 
 test("скорость сохраняется, голос ищется по локали и не подменяется английским", () => {

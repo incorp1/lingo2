@@ -778,7 +778,8 @@ function bindSettings() {
         "ui"
       );
       commitTtsRate(rate);
-      speak(t("settings.ttsRate.sample"), { rate });
+      // Превью скорости тоже звучит на языке обучения, а не на языке интерфейса.
+      speak(t("settings.ttsRate.sample"), { rate, lang: learningSpeechLocale() });
     });
   }
 

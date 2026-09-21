@@ -24,7 +24,7 @@ test("раздел Звук содержит доступный ползунок
   assert.match(html, /id="ttsPreviewBtn"/);
   assert.match(settings, /setTtsRate/);
   assert.match(settings, /commitTtsRate/);
-  assert.match(settings, /speak\(t\("settings\.ttsRate\.sample"\), \{ rate \}\)/);
+  assert.match(settings, /speak\(t\("settings\.ttsRate\.sample"\), \{ rate, lang: learningSpeechLocale\(\) \}\)/);
 });
 
 test("общая функция озвучивания применяет сохранённую скорость", () => {

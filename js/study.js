@@ -270,14 +270,14 @@ function renderStudy() {
     $("#wordInfoBtn").onclick = () => openWordInfo(card);
     $("#ttsBtn").onclick = () => {
       const visibleFrontSpeech = contextFront ? contextFront.sentence : frontText;
-      // The spoken locale follows the role of the text, not its characters:
-      // the term/cloze side is the learning language, the back side of a
-      // normal card is the translation and follows the interface language.
-      const speaksTranslation = session.revealed && !reversed;
+      // Озвучивание всегда идёт на языке обучения: русская/украинская сторона
+      // карточки не произносится, вместо неё читается термин на изучаемом
+      // языке, иначе кнопка TTS проговаривала бы перевод голосом интерфейса.
+      const learningSideText = reversed ? card.back : card.front;
       const toSpeak = session.revealed
-        ? (reversed ? card.front : card.back)
+        ? (reversed ? card.front : (learningSideText || card.front))
         : (card.type === "cloze" ? stripCloze(card.cloze) : visibleFrontSpeech);
-      speak(toSpeak, { lang: speaksTranslation ? translationSpeechLocale() : learningSpeechLocale() });
+      speak(toSpeak, { lang: learningSpeechLocale() });
     };
   }
 
