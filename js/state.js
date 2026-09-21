@@ -571,7 +571,12 @@ const getCard = id => cardById.get(id);
 const getDeck = id => deckById.get(id);
 const getCardById = getCard;
 const getDeckById = getDeck;
-const getDeckCards = id => id ? (cardsByDeck.get(id) || []) : state.cards;
+// Without a deck id this means "all decks" — which is always scoped to the
+// active learning language, never the global card list.
+const getDeckCards = id => {
+  if (id) return cardsByDeck.get(id) || [];
+  return typeof activeCards === "function" ? activeCards() : state.cards;
+};
 
 async function load() {
   return window.LCStorage.loadAppState(STORAGE_KEY);
@@ -816,6 +821,7 @@ function normalizeLanguageModel(loaded) {
   loaded.streak = active.streak;
   loaded.sessionReviewedIds = active.sessionReviewedIds;
   loaded.practiceDraft = active.practiceDraft;
+  loaded.studyResume = active.studyResume;
   return loaded;
 }
 
@@ -835,6 +841,7 @@ function syncActiveLanguageProfile(target = state) {
   profile.streak = target.streak || { current: 0, lastDay: null };
   profile.sessionReviewedIds = Array.isArray(target.sessionReviewedIds) ? target.sessionReviewedIds : [];
   profile.practiceDraft = target.practiceDraft ?? null;
+  profile.studyResume = target.studyResume ?? null;
   return profile;
 }
 

@@ -50,12 +50,12 @@
   - Пустой nb позволяет создание/импорт, одинаковые названия/слова в разных языках допустимы.
   - Проверки: поведенческие тесты создания/переноса/изоляции и deck-browser-variant-a, deck-browser-selection, card-editor-variant-c. Результат: выполнено — колоды, карточки, браузер, редактор, селекторы, массовые операции, практика и статистика читают через activeDecks()/activeCards(); createCard бросает ошибку при отсутствующей колоде; добавлен tests/language-deck-isolation.test.js (6/6); полный набор 153/153.
 
-- [ ] 4. Изолировать обучение и статистику с сохранением циклов.
+- [x] 4. Изолировать обучение и статистику с сохранением циклов.
   - getDeckCards(null), refillStudyQueue, nextDueAt, hasNewInDeck, deckStats, таймеры и «Все колоды» ограничить активным языком.
   - history, streak, sessionReviewedIds и resume хранить в профилях; не терять список последней сессии при возвращении.
   - Сохранить незавершённый цикл и валидируемый указатель карточки; очередь пересчитывать по времени, недоступный указатель безопасно пропускать.
   - Не менять SM-2/FSRS, оценки, минимальную оценку цикла и сохранённые значения english/local.
-  - Проверки: независимые счётчики/heatmap/циклы, отсутствие двойной оценки, scheduler-anki-alignment, unlimited-study-queue, study-cycle-persistence, difficulty-cache. Результат: не выполнено.
+  - Проверки: независимые счётчики/heatmap/циклы, отсутствие двойной оценки, scheduler-anki-alignment, unlimited-study-queue, study-cycle-persistence, difficulty-cache. Результат: выполнено — getDeckCards(null) и «Все колоды» читают activeCards(); refillStudyQueue, nextDueAt, hasNewInDeck, deckStats и renderStats ограничены активным языком; history, streak, sessionReviewedIds и studyResume хранятся в languageProfiles и зеркалятся при синхронизации. SM-2/FSRS и оценки не менялись. Добавлен tests/language-study-isolation.test.js (6/6); полный набор 159/159; git diff --check — успешно.
 
 - [ ] 5. Реализовать согласованное переключение языка и защиту асинхронного контекста.
   - Одна асинхронная операция: валидация/no-op, блок повторных переключений, ожидание активного commit, сохранение/подтверждение редакторов, отмена языковых операций, flush исходного профиля, защищённая запись нового выбора.
