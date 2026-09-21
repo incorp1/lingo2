@@ -884,7 +884,9 @@ function parseBulkInput() {
 async function enrichBulkCard(card, options = {}) {
   const targetLang = aiTargetLangName();
   const code = (state.settings.language || window.I18N_LANG || "uk");
-  const lookup = window.LCAi?.quickLookup ? await window.LCAi.quickLookup(card.front, code, options) : null;
+  const learnCode = activeLearningLanguageCode();
+  const lookupOptions = { ...options, learningLanguage: learnCode, sourceLangCode: learnCode };
+  const lookup = window.LCAi?.quickLookup ? await window.LCAi.quickLookup(card.front, code, lookupOptions) : null;
   const enriched = {
     front: card.front,
     back: lookup?.back || "",
@@ -909,7 +911,8 @@ async function enrichBulkCard(card, options = {}) {
       model: s.aiModel || undefined,
       targetLang,
       targetLangCode: code,
-      sourceLang: "auto",
+      sourceLang: learningLangName(),
+      learningLanguage: learnCode,
       ...options,
     });
     if (ai?.example) {
@@ -928,7 +931,7 @@ async function enrichBulkCard(card, options = {}) {
 
   if (enriched.example && window.LCAi?.quickTranslate) {
     const sentence = enriched.example;
-    const tr = (await window.LCAi.quickTranslate(sentence, code, options)).trim();
+    const tr = (await window.LCAi.quickTranslate(sentence, code, lookupOptions)).trim();
     if (tr) {
       enriched.example = `${sentence}\n${tr}`;
       enriched.exampleSentence = sentence;

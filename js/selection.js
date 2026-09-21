@@ -503,6 +503,8 @@ async function translateSelection() {
     translated = String(await window.LCAi.quickTranslate(word, lang, {
       signal: controller.signal,
       timeoutMs: SELECTION_TRANSLATE_TIMEOUT_MS,
+      learningLanguage: activeLearningLanguageCode(),
+      sourceLangCode: activeLearningLanguageCode(),
     }) || "").trim();
     if (!isCurrentAiJob(job)
       || requestId !== selectionTranslateRequestId

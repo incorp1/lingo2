@@ -57,7 +57,8 @@ test("генерация информации идёт через AI-прова�
   assert.match(ai, /ОБЪЯСНИ СЛОВО `;/);
   assert.match(ai, /Правила ответа:/);
   assert.match(ai, /Похожие слова/);
-  assert.match(ai, /WORD_INFO_SYSTEM_PROMPT,/);
+  assert.match(ai, /wordInfoSystemPrompt\(learnedName\),/);
+  assert.match(ai, /wordInfoPrompt\(word, learnedName\),/);
 
   const study = read("js/study.js");
   assert.match(study, /window\.LCAi\.generateWordInfo\(card/);

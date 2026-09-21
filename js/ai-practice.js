@@ -12,6 +12,21 @@ function aiTargetLangName() {
   return UI_LANG_NAMES[code] || "Ukrainian";
 }
 
+/* The learning language is independent from the interface/translation
+   language: it decides the source language of prompts, the dictionary
+   endpoint and the translator source code. */
+function activeLearningLanguageCode() {
+  return window.LCLanguages?.normalizeLanguageCode
+    ? window.LCLanguages.normalizeLanguageCode(state.activeLearningLanguage)
+    : (state.activeLearningLanguage || "en");
+}
+
+function learningLangName() {
+  return window.LCLanguages?.getLanguage
+    ? window.LCLanguages.getLanguage(activeLearningLanguageCode()).aiName
+    : "English";
+}
+
 function applyAdvancedReviewState() {
   const show = !!state.settings.showAdvancedReview;
   ["#reviewAdvanced", "#reviewAdvanced2"].forEach(sel => {
@@ -230,7 +245,8 @@ async function generateCard() {
       key: state.settings.aiKey,
       model: state.settings.aiModel || undefined,
       targetLang: aiTargetLangName(),
-      sourceLang: "English",
+      sourceLang: learningLangName(),
+      learningLanguage: activeLearningLanguageCode(),
       targetLangCode: state.settings.language || "uk",
       signal: job.controller.signal,
       timeoutMs: AI_TIMEOUT_MS,

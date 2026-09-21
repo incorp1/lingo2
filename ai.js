@@ -3,8 +3,31 @@
    (OpenAI / Google Gemini / xAI Grok).
 */
 (function () {
-  const DICT_URL = w =>
-    `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`;
+  const DICT_URL = (w, code = "en") =>
+    `https://api.dictionaryapi.dev/api/v2/entries/${encodeURIComponent(code)}/${encodeURIComponent(w)}`;
+
+  // Learning-language descriptor helpers. The registry is the single source of
+  // truth: it decides whether the free dictionary supports the language and
+  // which code the existing translator adapter expects (nb -> "no").
+  function learningLanguage(code) {
+    const registry = (typeof window !== "undefined" ? window : globalThis).LCLanguages;
+    return registry?.getLanguage ? registry.getLanguage(code) : null;
+  }
+
+  function learningAiName(code, fallback = "English") {
+    return learningLanguage(code)?.aiName || fallback;
+  }
+
+  function dictionaryCodeFor(code) {
+    const lang = learningLanguage(code);
+    if (!lang) return code === "en" || !code ? "en" : null;
+    return lang.dictionary ? (lang.dictionaryCode || lang.code) : null;
+  }
+
+  function translatorCodeFor(code, fallback = "en") {
+    const lang = learningLanguage(code);
+    return lang?.translatorCode || (code ? String(code).toLowerCase() : fallback);
+  }
   const DEFAULT_TIMEOUT_MS = 30000;
 
   function abortError(reason = "cancelled") {
@@ -82,12 +105,13 @@ Output ONLY valid JSON. No prose, no markdown, no code fences.`;
 
   function userPrompt(word, targetLang, sourceLang) {
     return `Generate a vocabulary card for the EXACT word/phrase: "${word}"
-Source language: ${sourceLang || "auto-detect, usually English"}
+Source language (the language being learned): ${sourceLang || "English"}
 Translate into: ${targetLang}
 
 STRICT RULES:
+- The word "${word}" belongs to ${sourceLang || "English"}. Never treat it as a word of another language.
 - Every field MUST describe the EXACT word/phrase "${word}" — never a different word.
-- "example" MUST be ONE natural sentence that literally contains "${word}".
+- "example" MUST be ONE natural ${sourceLang || "English"} sentence that literally contains "${word}".
 - "exampleTranslation" MUST NOT be empty: always translate your example sentence into ${targetLang}.
 - "exampleTargetTerm" MUST be the exact word or phrase as it appears in "exampleTranslation" that corresponds to the vocabulary word "${word}". Preserve its exact spelling and capitalization from the translated sentence. It must not be a definition or a list of alternatives.
 
@@ -95,11 +119,22 @@ Return ONLY JSON with these exact keys (use empty string/array if truly not appl
 {
   "translation": "natural translation into ${targetLang}, comma-separate variants",
   "ipa":         "IPA transcription with slashes, e.g. /ˈwɜːrd/",
-  "example":     "ONE natural example sentence using \"${word}\", in source language",
+  "example":     "ONE natural example sentence using \"${word}\", in ${sourceLang || "English"}",
   "exampleTranslation": "the example sentence translated into ${targetLang}",
   "exampleTargetTerm": "the exact translated word or phrase in exampleTranslation corresponding to ${word}",
-  "synonyms":    ["2-4 source-language synonyms"]
+  "synonyms":    ["2-4 synonyms in ${sourceLang || "English"}"]
 }`;
+  }
+
+  // The word-info prompt is written for a concrete learning language: the
+  // hard-coded "английские слова" wording produced English explanations even
+  // for Norwegian cards, so the language name is injected instead.
+  function wordInfoSystemPrompt(learnedName) {
+    return `Ты объясняешь слова языка ${learnedName} русскоязычным студентам, которые знают перевод, но не понимают "суть" и оттенки слова. Все примеры давай на языке ${learnedName}. Отвечай только валидным JSON.`;
+  }
+
+  function wordInfoPrompt(word, learnedName) {
+    return `${WORD_INFO_PROMPT_PREFIX.replace(/английские слова/g, `слова языка ${learnedName}`).replace(/на английском/g, `на языке ${learnedName}`)}"${word}" (язык слова: ${learnedName})${WORD_INFO_PROMPT_SUFFIX}`;
   }
 
   const WORD_INFO_SYSTEM_PROMPT = `Ты объясняешь английские слова русскоязычным студентам, которые знают перевод, но не понимают "суть" и оттенки слова. Отвечай только валидным JSON.`;
@@ -153,6 +188,7 @@ Return ONLY JSON with these exact keys (use empty string/array if truly not appl
     const topics = parsePromptList(promptOptions?.topics, "example topics");
     const situations = parsePromptList(promptOptions?.situations, "example situations");
     const styles = parsePromptList(promptOptions?.styles, "example styles");
+    const learned = promptOptions?.learningLangName || "English";
     const items = (cards || []).map(card => ({
       id: String(card.id || ""),
       word: String(card.front || "").trim(),
@@ -162,11 +198,12 @@ Return ONLY JSON with these exact keys (use empty string/array if truly not appl
       style: randomItem(styles),
     }));
     return `Replace the example sentences for these vocabulary cards.
+Learning language of the cards: ${learned}.
 Target translation language: ${targetLang}.
 
 STRICT RULES:
 - Return exactly one item for every input id, in the same order.
-- "example" must be ONE natural English sentence that literally contains the exact English word/phrase from "word".
+- "example" must be ONE natural ${learned} sentence that literally contains the exact ${learned} word/phrase from "word".
 - Build each sentence around that item's assigned "topic" and "situation", and write it in the assigned "style".
 - Make the examples varied and specific; avoid generic textbook sentences and repeated sentence patterns.
 - Keep sarcastic or humorous examples natural, harmless, and appropriate for language learners.
@@ -333,8 +370,13 @@ Return ONLY JSON in this exact shape:
   }
 
   async function callDictionary(word, options = {}) {
+    // Never query the English endpoint for another learning language: for
+    // unsupported languages we simply have no dictionary data and leave the
+    // fields empty instead of silently returning English facts.
+    const dictCode = dictionaryCodeFor(options.learningLanguage);
+    if (!dictCode) return null;
     try {
-      const r = await fetchWithTimeout(DICT_URL(word.trim().toLowerCase()), {}, options);
+      const r = await fetchWithTimeout(DICT_URL(word.trim().toLowerCase(), dictCode), {}, options);
       if (!r.ok) return null;
       const data = await r.json();
       const entry = data[0];
@@ -352,8 +394,13 @@ Return ONLY JSON in this exact shape:
 
   async function quickTranslate(text, targetLangCode, options = {}) {
     throwIfAborted(options.signal);
-    const target = (targetLangCode || "uk").trim().toLowerCase() || "uk";
-    const sourceLang = String(options.sourceLangCode || "en").trim().toLowerCase() || "en";
+    const target = translatorCodeFor((targetLangCode || "uk").trim().toLowerCase() || "uk", "uk");
+    // The source is the learning language when supplied; "nb" is mapped to the
+    // translator's own "no" code inside the adapter, no new service is added.
+    const sourceLang = translatorCodeFor(
+      String(options.sourceLangCode || options.learningLanguage || "en").trim().toLowerCase() || "en",
+      "en"
+    );
     const source = String(text || "").trim();
     if (!source) return "";
     if (sourceLang === target) return source;
@@ -387,7 +434,10 @@ Return ONLY JSON in this exact shape:
     if (!word) throw new Error("empty");
     const [dict, translation] = await Promise.all([
       callDictionary(word, options),
-      quickTranslate(word, targetLangCode, options),
+      quickTranslate(word, targetLangCode, {
+        ...options,
+        sourceLangCode: options.sourceLangCode || options.learningLanguage || "en",
+      }),
     ]);
     return normalize({
       translation,
@@ -497,11 +547,13 @@ Return ONLY JSON in this exact shape:
     throwIfAborted(opts.signal);
     word = String(word || "").trim();
     if (!word) throw new Error("empty");
-    const { mode = "off", provider, key, model, targetLang, sourceLang, targetLangCode } = opts || {};
+    const { mode = "off", provider, key, model, targetLang, sourceLang, targetLangCode, learningLanguage: learnCode } = opts || {};
     if (mode === "off") throw new Error("disabled");
+    const learnedName = sourceLang || learningAiName(learnCode);
     const requestOptions = {
       ...opts,
-      sourceLangCode: opts.sourceLangCode || "en",
+      learningLanguage: learnCode,
+      sourceLangCode: opts.sourceLangCode || learnCode || "en",
       deadlineAt: Number.isFinite(opts.deadlineAt)
         ? opts.deadlineAt
         : Date.now() + Math.max(1, Number(opts.timeoutMs) || DEFAULT_TIMEOUT_MS),
@@ -510,7 +562,7 @@ Return ONLY JSON in this exact shape:
     const results = await Promise.allSettled([
       callDictionary(word, requestOptions),
       mode === "ai" ? callLLM(provider, model || PROVIDER_DEFAULTS[provider]?.model,
-                              key, word, targetLang, sourceLang, requestOptions) : Promise.resolve(null),
+                              key, word, targetLang, learnedName, requestOptions) : Promise.resolve(null),
       quickTranslate(word, targetLangCode || "uk", requestOptions),
     ]);
     throwIfAborted(opts.signal);
@@ -569,12 +621,13 @@ Return ONLY JSON in this exact shape:
     const temperatureValue = Number.isFinite(modelTemperature) && modelTemperature >= 0 && modelTemperature <= 2
       ? modelTemperature
       : 0.4;
+    const learnedName = opts.learningLangName || learningAiName(opts.learningLanguage);
     const raw = await withRetry(attemptOptions => chatJson(
       provider,
       selectedModel,
       key,
-      WORD_INFO_SYSTEM_PROMPT,
-      `${WORD_INFO_PROMPT_PREFIX}${word}${WORD_INFO_PROMPT_SUFFIX}`,
+      wordInfoSystemPrompt(learnedName),
+      wordInfoPrompt(word, learnedName),
       temperatureValue,
       { ...opts, ...attemptOptions }
     ), {
@@ -607,7 +660,12 @@ Return ONLY JSON in this exact shape:
       selectedModel,
       key,
       SYSTEM_PROMPT,
-      batchExamplesPrompt(items, targetLang || "the interface language", { topics, situations, styles }),
+      batchExamplesPrompt(items, targetLang || "the interface language", {
+        topics,
+        situations,
+        styles,
+        learningLangName: opts.learningLangName || learningAiName(opts.learningLanguage),
+      }),
       modelTemperature,
       { ...opts, ...attemptOptions }
     ), {

@@ -53,7 +53,7 @@ test("темы, ситуации, стили и температура обно�
   assert.match(ai, /topic: randomItem\(topics\)/);
   assert.match(ai, /situation: randomItem\(situations\)/);
   assert.match(ai, /style: randomItem\(styles\)/);
-  assert.match(ai, /batchExamplesPrompt\(items,[\s\S]*?\{ topics, situations, styles \}\)/);
+  assert.match(ai, /batchExamplesPrompt\(items,[\s\S]*?topics,[\s\S]*?situations,[\s\S]*?styles,/);
   assert.match(ai, /modelTemperature/);
   assert.match(state, /exampleTopics:/);
   assert.match(state, /exampleSituations:/);
