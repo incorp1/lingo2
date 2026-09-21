@@ -107,8 +107,12 @@ test("progress reset touches only the active language and keeps content", () => 
     "events of other languages are kept"
   );
   assert.ok(
-    source.includes('normalizeLearningLanguage(entry.learningLanguage) !== activeLanguage'),
-    "completed practice of other languages is kept"
+    source.includes("nextState.practiceHistory"),
+    "история практики обрабатывается явно"
+  );
+  assert.ok(
+    !source.includes('normalizeLearningLanguage(entry.learningLanguage) !== activeLanguage'),
+    "AUD-007: история практики активного языка больше не удаляется при сбросе"
   );
   assert.ok(source.includes('"reset-progress"'), "reset keeps a recovery operation label");
 });
