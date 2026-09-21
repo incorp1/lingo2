@@ -125,8 +125,14 @@ async function resetProgress() {
       return card ? !languageDeckIds.has(card.deckId) : false;
     })
   );
+  // Legacy events predate `learningLanguage`, so deck membership is the
+  // authoritative signal and the stored label is only a fallback.
   const keptEvents = (await window.LCStorage.readAppSnapshot()).reviewEvents
-    .filter(event => normalizeLearningLanguage(event.learningLanguage) !== activeLanguage);
+    .filter(event => {
+      if (languageDeckIds.has(event.deckId)) return false;
+      if (event.deckId) return true;
+      return normalizeLearningLanguage(event.learningLanguage) !== activeLanguage;
+    });
   const keptPractice = (nextState.practiceHistory || [])
     .filter(entry => normalizeLearningLanguage(entry.learningLanguage) !== activeLanguage);
   nextState.practiceHistory = keptPractice;

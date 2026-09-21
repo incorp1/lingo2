@@ -618,6 +618,7 @@ function recordReviewEvent(card, grade, at = Date.now()) {
     id: uid(),
     cardId: card.id,
     deckId: card.deckId,
+    learningLanguage: cardLearningLanguage(card),
     grade,
     state: card.state,
     due: card.due,
