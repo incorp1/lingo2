@@ -142,6 +142,21 @@ function reloadForServiceWorkerUpdate() {
   window.location.reload();
 }
 
+function showUpdateOverlay() {
+  const overlay = $("#updateOverlay");
+  if (!overlay) return;
+  const text = overlay.querySelector(".update-overlay-text");
+  if (text) text.textContent = t("pwa.updating");
+  overlay.hidden = false;
+  document.body.classList.add("is-updating");
+}
+
+function hideUpdateOverlay() {
+  const overlay = $("#updateOverlay");
+  if (overlay) overlay.hidden = true;
+  document.body.classList.remove("is-updating");
+}
+
 async function applyServiceWorkerUpdate({ button = null, automatic = false } = {}) {
   const registration = swRegistration;
   if (!registration?.waiting || swUpdateApplying) return false;
@@ -162,6 +177,7 @@ async function applyServiceWorkerUpdate({ button = null, automatic = false } = {
     if (typeof storage?.flush === "function") await storage.flush();
     const waitingWorker = registration.waiting;
     swUpdateReloadPending = true;
+    showUpdateOverlay();
     waitingWorker.postMessage({ type: "SKIP_WAITING" });
     swUpdateFallbackTimer = window.setTimeout(() => {
       swUpdateFallbackTimer = null;
@@ -176,6 +192,7 @@ async function applyServiceWorkerUpdate({ button = null, automatic = false } = {
     if (typeof reportSaveError === "function") reportSaveError(error);
     if (typeof toast === "function") toast(t("toast.saveFailed"), { error: true });
     swUpdateReloadPending = false;
+    hideUpdateOverlay();
     if (swUpdateFallbackTimer !== null) {
       window.clearTimeout(swUpdateFallbackTimer);
       swUpdateFallbackTimer = null;

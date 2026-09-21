@@ -132,6 +132,9 @@ function bindCheckboxMenu(trigger, menu, commit) {
   const reposition = () => {
     if (!menu.hidden) positionCheckboxMenu(trigger, menu);
   };
+  // Меню позиционируется в координатах viewport, поэтому любой скролл предка
+  // (не только окна) должен пересчитывать его позицию, иначе список "уезжает".
+  const onDocumentScroll = () => reposition();
   trigger.addEventListener("click", event => {
     event.stopPropagation();
     const opening = menu.hidden;
@@ -154,6 +157,8 @@ function bindCheckboxMenu(trigger, menu, commit) {
     }
   });
   window.addEventListener("resize", reposition);
+  window.addEventListener("scroll", onDocumentScroll, { passive: true, capture: true });
+  document.addEventListener("scroll", onDocumentScroll, { passive: true, capture: true });
   window.visualViewport?.addEventListener("resize", reposition);
   window.visualViewport?.addEventListener("scroll", reposition);
   menu.addEventListener("change", event => {

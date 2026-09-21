@@ -1372,6 +1372,10 @@ FSRS — современный умный режим: он подстраива
       <span data-i18n="pwa.updateAvailable">Update available</span>
       <button class="btn small primary" id="applyUpdateBtn" type="button" data-i18n="pwa.restart">Restart</button>
     </aside>
+    <div class="update-overlay" id="updateOverlay" hidden role="status" aria-live="assertive">
+      <div class="update-overlay-spinner" aria-hidden="true"></div>
+      <div class="update-overlay-text" data-i18n="pwa.updating">Updating the app…</div>
+    </div>
 
     <script src="languages.js?v=3.20.5"></script>
     <script src="storage.js?v=3.20.5"></script>

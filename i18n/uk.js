@@ -340,6 +340,7 @@ window.I18N.uk = {
     "pwa.offline": "Офлайн",
     "pwa.updateAvailable": "Доступне оновлення",
     "pwa.restart": "Перезапустити",
+    "pwa.updating": "Оновлюємо застосунок…",
     "toast.unknownFormat": "Невідомий формат файлу",
     "toast.pickDeck": "Оберіть колоду",
     "toast.frontRequired": "Лицьова сторона обов'язкова",

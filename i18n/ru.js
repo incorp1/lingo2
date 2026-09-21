@@ -278,6 +278,7 @@ window.I18N.ru = {
     "pwa.offline": "Офлайн",
     "pwa.updateAvailable": "Доступно обновление",
     "pwa.restart": "Перезапустить",
+    "pwa.updating": "Обновляем приложение…",
     "toast.unknownFormat": "Неизвестный формат файла",
     "toast.pickDeck": "Выберите колоду",
     "toast.frontRequired": "Лицевая сторона обязательна",

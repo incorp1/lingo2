@@ -279,6 +279,7 @@ window.I18N.en = {
     "pwa.offline": "Offline",
     "pwa.updateAvailable": "Update available",
     "pwa.restart": "Restart",
+    "pwa.updating": "Updating the app…",
     "toast.unknownFormat": "Unknown file format",
     "toast.pickDeck": "Pick a deck",
     "toast.frontRequired": "Front required",
