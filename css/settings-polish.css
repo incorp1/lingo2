@@ -1,0 +1,795 @@
+/* Lingo Cards — compact Settings polish for touch-first PWA surfaces. */
+
+@media (max-width: 899px) {
+  body[data-view="settings"] {
+    background: var(--bg);
+  }
+
+  body[data-view="settings"] .main {
+    background:
+      radial-gradient(circle at 50% -12%, color-mix(in srgb, var(--accent-soft) 45%, transparent), transparent 34%),
+      var(--bg);
+  }
+
+  body[data-view="settings"] .view-settings.active {
+    width: 100%;
+    max-width: 560px;
+    margin-inline: auto;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-inline: max(14px, env(safe-area-inset-left));
+  }
+
+  .view-settings .settings-title-row {
+    min-height: 28px;
+    margin-bottom: 6px;
+  }
+
+  .view-settings .settings-home-title {
+    margin: 4px 0 18px;
+    font-size: clamp(1.55rem, 7vw, 1.9rem);
+    line-height: 1.08;
+  }
+
+  .view-settings .settings-route-list {
+    gap: 17px;
+  }
+
+  .view-settings .settings-group-label {
+    padding: 0 5px 6px;
+    font-size: 10px;
+    line-height: 1.2;
+    letter-spacing: .075em;
+  }
+
+  .view-settings .settings-route-btn {
+    grid-template-columns: 30px minmax(0, 1fr) 16px;
+    gap: 10px;
+    min-height: 58px;
+    margin: 0;
+    padding: 9px 12px;
+    border-radius: 0;
+    border-bottom-width: 0;
+    box-shadow: none;
+  }
+
+  .view-settings .settings-route-btn:first-of-type {
+    border-radius: 13px 13px 0 0;
+  }
+
+  .view-settings .settings-route-btn:last-of-type {
+    border-bottom-width: 1px;
+    border-radius: 0 0 13px 13px;
+  }
+
+  .view-settings .settings-route-btn:only-of-type {
+    border-radius: 13px;
+  }
+
+  .view-settings .route-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .view-settings .route-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .view-settings .route-label {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .view-settings .route-summary {
+    margin-top: 2px;
+    font-size: 10.5px;
+    line-height: 1.25;
+  }
+
+  .view-settings .settings-back-row {
+    min-height: 36px;
+    margin-bottom: 4px;
+  }
+
+  .view-settings .settings-back-btn {
+    min-height: 36px;
+    padding: 6px 2px;
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  .view-settings .settings-panel-title {
+    margin: 2px 0 15px;
+    font-size: 1.45rem;
+    line-height: 1.12;
+  }
+
+  .view-settings .settings-grid {
+    gap: 12px;
+  }
+
+  .view-settings .settings-block {
+    padding: 12px;
+    margin-bottom: 11px;
+    border-radius: 13px;
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 3%, transparent);
+  }
+
+  .view-settings .settings-block h3 {
+    margin-bottom: 9px;
+    font-size: 15px;
+  }
+
+  /* Appearance follows the same compact grouped-row vocabulary as Settings. */
+  .view-settings #settings-appearance .appearance-settings-block {
+    padding: 0;
+    overflow: hidden;
+    background: var(--panel);
+  }
+
+  .view-settings #settings-appearance .appearance-settings-block .settings-row {
+    grid-template-columns: minmax(0, 1fr) minmax(124px, 46%);
+    min-height: 52px;
+    margin: 0;
+    padding: 6px 14px;
+    border-top: 0;
+  }
+
+  .view-settings #settings-appearance .appearance-settings-block .appearance-theme-row {
+    border-top: 1px solid var(--border) !important;
+  }
+
+  .view-settings #settings-appearance .appearance-settings-block label {
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .view-settings #settings-appearance .appearance-settings-block select {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 40px;
+    padding-left: 4px !important;
+    padding-right: 26px !important;
+    justify-self: stretch;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .view-settings .settings-row {
+    grid-template-columns: minmax(0, 1fr) minmax(104px, 42%);
+    gap: 10px;
+    min-height: 46px;
+    padding: 8px 0;
+  }
+
+  .view-settings .settings-row.toggle {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .view-settings .settings-row.with-hint {
+    padding: 9px 0;
+  }
+
+  .view-settings .settings-row label,
+  .view-settings .stepper-label,
+  .view-settings .settings-action-row {
+    font-size: 12.5px;
+    line-height: 1.3;
+  }
+
+  .view-settings .settings-row .row-hint,
+  .view-settings .stepper-hint {
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+
+  .view-settings .settings-row input[type="text"],
+  .view-settings .settings-row input[type="password"],
+  .view-settings .settings-row input[type="number"],
+  .view-settings .settings-row select {
+    height: 36px;
+    min-height: 36px;
+    padding: 5px 9px;
+    border-radius: 9px;
+    font-size: 16px;
+  }
+
+  .view-settings .settings-row input[type="number"],
+  .view-settings .stepper-input {
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .view-settings input[type="checkbox"] {
+    width: 42px;
+    height: 24px;
+  }
+
+  .view-settings .settings-segmented {
+    min-height: 36px;
+    padding: 3px;
+    border-radius: 10px;
+  }
+
+  .view-settings .settings-segmented button {
+    min-height: 28px;
+    padding: 5px 7px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+
+  .view-settings .stepper-control {
+    min-height: 38px;
+    border-radius: 9px;
+  }
+
+  .view-settings .stepper-btn {
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .view-settings .settings-action-list > .settings-action-row {
+    border-radius: 0;
+  }
+
+  .view-settings .settings-action-list > .settings-action-row:first-of-type {
+    border-radius: 10px 10px 0 0;
+  }
+
+  .view-settings .settings-action-list > .settings-action-row:last-of-type {
+    border-radius: 0 0 10px 10px;
+  }
+
+  .view-settings .settings-action-list > .settings-action-row:only-of-type {
+    border-radius: 10px;
+  }
+
+  /*
+   * Learning settings use the same quiet, grouped-row vocabulary as the
+   * Settings home screen. The legacy colored rails, oversized emoji and
+   * nested card decoration are intentionally removed throughout this route.
+   */
+  .view-settings #settings-learning {
+    display: grid;
+    gap: 17px;
+  }
+
+  .view-settings #settings-learning[hidden] {
+    display: none !important;
+  }
+
+  .view-settings #settings-learning .settings-back-row {
+    margin-bottom: -2px;
+  }
+
+  .view-settings #settings-learning .settings-block {
+    position: relative;
+    margin: 0;
+    padding: 0 14px;
+    overflow: hidden;
+    border-radius: 13px;
+    background: var(--panel);
+    box-shadow: none;
+  }
+
+  /* This compact block owns popover menus, so it must not clip them. */
+  .view-settings #settings-learning .card-front-mode-block {
+    overflow: visible;
+  }
+
+  .view-settings #settings-learning .button-block::before {
+    display: none;
+  }
+
+  .view-settings #settings-learning .block-header {
+    min-height: 58px;
+    margin: 0;
+    padding: 10px 30px 10px 0;
+    border-bottom: 0;
+    gap: 10px;
+  }
+
+  .view-settings #settings-learning .block-icon {
+    display: none;
+  }
+
+  .view-settings #settings-learning .block-heading h3,
+  .view-settings #settings-learning .settings-block > h3 {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .view-settings #settings-learning .block-heading .block-desc,
+  .view-settings #settings-learning .settings-block > .block-desc {
+    margin: 2px 0 0;
+    color: var(--ink-muted);
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+
+  .view-settings #settings-learning .button-preview {
+    min-width: 58px;
+    padding: 5px 9px;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  .view-settings #settings-learning .settings-row {
+    min-height: 52px;
+    margin: 0;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .view-settings #settings-learning .block-header + .settings-row {
+    border-top: 1px solid var(--border);
+  }
+
+  .view-settings #settings-learning .settings-row label {
+    font-weight: 500;
+  }
+
+  .view-settings #settings-learning .example-row,
+  .view-settings #settings-learning .fsrs-preview {
+    margin: 0;
+    padding: 10px 0 12px;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    font-size: 11px;
+  }
+
+  .view-settings #settings-learning .preset-controls,
+  .view-settings #settings-learning .step-input,
+  .view-settings #settings-learning .ai-key-row,
+  .view-settings #settings-learning .ai-model-controls {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .view-settings #settings-learning .algo-options {
+    margin: 0 0 10px;
+  }
+
+  .view-settings #settings-learning .ai-privacy-note,
+  .view-settings #settings-learning .ai-test-status {
+    margin: 0;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  /*
+   * Card generation follows the same grouped Settings vocabulary while
+   * preserving every AI control and its existing event bindings.
+   */
+  .view-settings #settings-generation {
+    display: grid;
+    gap: 17px;
+  }
+
+  .view-settings #settings-generation[hidden] {
+    display: none !important;
+  }
+
+  .view-settings #settings-generation .settings-back-row {
+    margin-bottom: -2px;
+  }
+
+  .view-settings #settings-generation .ai-block {
+    margin: 0;
+    padding: 0 14px;
+    overflow: hidden;
+    border-radius: 13px;
+    background: var(--panel);
+    box-shadow: none;
+  }
+
+  .view-settings #settings-generation .ai-block::before {
+    display: none;
+  }
+
+  .view-settings #settings-generation .block-header {
+    min-height: 58px;
+    margin: 0;
+    padding: 10px 0;
+    gap: 0;
+    border-bottom: 0;
+  }
+
+  .view-settings #settings-generation .block-icon {
+    display: none;
+  }
+
+  .view-settings #settings-generation .block-heading h3 {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .view-settings #settings-generation .block-heading .block-desc {
+    margin: 2px 0 0;
+    color: var(--ink-muted);
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+
+  .view-settings #settings-generation .settings-row {
+    min-height: 52px;
+    margin: 0;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .view-settings #settings-generation .settings-row label {
+    font-weight: 500;
+  }
+
+  .view-settings #settings-generation .ai-mode-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .view-settings #settings-generation .ai-mode-segmented {
+    width: 100%;
+    min-height: 38px;
+  }
+
+  .view-settings #settings-generation .ai-key-row,
+  .view-settings #settings-generation .ai-model-controls {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .view-settings #settings-generation .ai-privacy-note,
+  .view-settings #settings-generation .ai-test-status {
+    margin: 0;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    font-size: 10.5px;
+    line-height: 1.4;
+  }
+
+  .view-settings #settings-generation .ai-test-status.error {
+    color: var(--bad);
+  }
+
+  .view-settings #settings-generation .ai-test-status.success {
+    color: var(--good);
+  }
+
+  body[data-view="settings"] .modal-backdrop {
+    background: color-mix(in srgb, #171512 38%, transparent);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+  }
+
+  body[data-view="settings"] .modal-panel,
+  body[data-view="settings"] .modal-panel.small {
+    width: 100%;
+    max-height: min(78vh, 620px);
+    border-radius: 20px 20px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -16px 45px color-mix(in srgb, #171512 18%, transparent);
+  }
+
+  body[data-view="settings"] .modal-panel::before {
+    width: 34px;
+    height: 4px;
+    margin: 8px auto 2px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: var(--border-strong);
+    content: "";
+    display: block;
+  }
+
+  body[data-view="settings"] .modal-panel .btn {
+    min-height: 44px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 370px) {
+  body[data-view="settings"] .view-settings.active {
+    padding-inline: 10px;
+  }
+
+  .view-settings .settings-row {
+    grid-template-columns: minmax(0, 1fr) minmax(108px, 42%);
+  }
+
+  .view-settings .settings-row.settings-control-stack,
+  .view-settings .settings-row.ai-mode-row,
+  .view-settings .settings-row.backup-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/*
+ * Data-management actions use the same soft, rounded vocabulary as the rest
+ * of Settings. Keep the primary labels intact; explanatory copy may wrap.
+ */
+.view-settings #settings-data .settings-action-list {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-elev);
+}
+
+.view-settings #settings-data .settings-action-row {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+  min-width: 0;
+  border-radius: 0;
+  transition: background-color 160ms cubic-bezier(.25, 1, .5, 1);
+}
+
+.view-settings :is(#settings-backup, #settings-data) .settings-action-row > span:first-child {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.view-settings :is(#settings-backup, #settings-data) .settings-action-row > span:first-child > b,
+.view-settings :is(#settings-backup, #settings-data) .settings-action-row > span:first-child > small {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-overflow: ellipsis;
+}
+
+.view-settings #settings-data .settings-action-row > span:last-child {
+  flex: none;
+  justify-self: end;
+}
+
+.view-settings #settings-data .settings-action-row:hover {
+  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+}
+
+.view-settings #settings-data .settings-action-row:active {
+  background: color-mix(in srgb, var(--accent-soft) 68%, transparent);
+}
+
+.view-settings #settings-data .settings-action-row b {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+@media (max-width: 899px) {
+  body[data-view="settings"] #textInputModal {
+    box-sizing: border-box;
+    place-items: end center;
+    padding: max(12px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      0
+      max(10px, env(safe-area-inset-left));
+    background: color-mix(in srgb, #171512 38%, transparent);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+  }
+
+  body[data-view="settings"] #textInputModal .compact-modal-card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 520px);
+    max-width: 520px;
+    max-height: calc(var(--app-vh, 1vh) * 88);
+    max-height: min(88dvh, 620px);
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    background: var(--panel);
+    box-shadow: 0 -16px 45px color-mix(in srgb, #171512 18%, transparent);
+  }
+
+  body[data-view="settings"] #textInputModal .compact-modal-card::before {
+    display: block;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 4px;
+    margin: 8px auto 2px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    content: "";
+  }
+
+  body[data-view="settings"] #textInputModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  body[data-view="settings"] #textInputModal .modal-header h2 {
+    min-width: 0;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body[data-view="settings"] #textInputModal .modal-header .icon-btn {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  body[data-view="settings"] #textInputModal .modal-body {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body[data-view="settings"] #textInputModal #textInputField {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--bg-elev);
+    font-size: 16px;
+  }
+
+  body[data-view="settings"] #textInputModal .modal-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    flex: 0 0 auto;
+    gap: 10px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+  }
+
+  body[data-view="settings"] #textInputModal .modal-footer .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  body[data-view="settings"] #textInputModal #textInputConfirm {
+    border-color: var(--bad);
+    background: var(--bad);
+    color: #fff;
+  }
+
+  body[data-view="settings"] #confirmModal {
+    box-sizing: border-box;
+    align-items: end;
+    padding: max(12px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      0
+      max(10px, env(safe-area-inset-left));
+  }
+
+  body[data-view="settings"] #confirmModal .confirm-panel {
+    width: min(100%, 520px);
+    max-width: 520px;
+    max-height: calc(var(--app-vh, 1vh) * 88);
+    max-height: min(88dvh, 620px);
+    margin: 0 auto;
+    overflow: hidden;
+    padding-bottom: 0;
+    border-radius: 20px 20px 0 0;
+  }
+
+  body[data-view="settings"] #confirmModal .modal-head {
+    gap: 12px;
+    padding: 10px 16px 12px;
+  }
+
+  body[data-view="settings"] #confirmModal .modal-head h2 {
+    min-width: 0;
+    font-size: 18px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  body[data-view="settings"] #confirmModal .modal-head .icon-btn {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  body[data-view="settings"] #confirmModal .confirm-body {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    gap: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body[data-view="settings"] #confirmModal .confirm-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    flex: 0 0 auto;
+    gap: 10px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  body[data-view="settings"] #confirmModal .confirm-actions .btn {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  body[data-view="settings"] #confirmModal .confirm-actions .btn.danger {
+    border-color: var(--bad);
+    background: var(--bad);
+    color: #fff;
+  }
+}
+
+@media (max-width: 370px) {
+  .view-settings #settings-backup .settings-action-row {
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  .view-settings #settings-backup .settings-action-row b {
+    font-size: 12px;
+  }
+
+  .view-settings :is(#settings-backup, #settings-data) .settings-action-row > span:first-child > b,
+  .view-settings :is(#settings-backup, #settings-data) .settings-action-row > span:first-child > small {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  body[data-view="settings"] #confirmModal .confirm-actions,
+  body[data-view="settings"] #textInputModal .modal-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 320px) {
+  .view-settings .settings-row,
+  .view-settings .settings-row.toggle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .view-settings .settings-row.toggle input[type="checkbox"] {
+    justify-self: end;
+  }
+}

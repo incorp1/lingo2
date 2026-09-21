@@ -1,0 +1,563 @@
+/* Lingo Cards — responsive layout and mobile navigation */
+
+/* Mobile */
+.mobile-only { display: none; }
+.tool-label { display: none; }
+@media (max-width: 860px) {
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  #app { grid-template-columns: 1fr; min-height: 0; }
+  /* iOS zooms into focused form controls whose computed font size is below 16px. */
+  input, textarea, select,
+  .search, .filter, #browseSearch { font-size: 16px; }
+  .sidebar { display: none; }
+  .mobile-only { display: inline-grid; }
+  .main {
+    height: calc(var(--app-vh, 1vh) * 100 - 60px - env(safe-area-inset-bottom));
+    min-height: 0;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .topbar {
+    position: static;
+    flex: none;
+    padding: 10px 12px 8px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+  }
+  .topbar-left {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .page-title { font-size: 18px; }
+  .topbar-right {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .deck-selector {
+    order: -1;
+    flex: 1 1 100%;
+    width: 100%;
+    gap: 6px;
+  }
+  .deck-selector label { display: none; }
+  .deck-selector select { min-width: 0; width: 100%; }
+  /* Compact, app-style action row: the deck selector spans the full width,
+     "Add card" is the single dominant action, and the rarely-used tools
+     (bulk add, reading practice, swap sides, undo) collapse to small
+     square icon buttons so they stop competing for attention. */
+  .topbar-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .topbar-right .deck-selector {
+    order: -1;
+    flex: 1 1 100%;
+  }
+  .topbar-right .topbar-add {
+    order: 1;
+    flex: 0 0 auto;
+    justify-content: center;
+    padding: 6px 2px;
+    font-size: 14.5px;
+    font-weight: 600;
+    min-height: 0;
+    height: auto;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--accent);
+  }
+  .topbar-right .topbar-add:hover,
+  .topbar-right .topbar-add:active {
+    background: transparent;
+    border: none;
+    color: var(--accent-hover);
+  }
+  /* Bulk add ("Список") sits right next to Add card — same concept
+     (adding cards), so keep its label visible. */
+  .topbar-right .btn.topbar-bulk {
+    order: 2;
+    flex: 0 0 auto;
+    justify-content: center;
+    padding: 6px 2px;
+    font-size: 14.5px;
+    min-height: 0;
+    height: auto;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--ink-muted);
+    box-shadow: none;
+    font-weight: 500;
+  }
+  .topbar-right .btn.topbar-bulk:hover,
+  .topbar-right .btn.topbar-bulk:active {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+  }
+  .topbar-right .topbar-add svg,
+  .topbar-right .btn.topbar-bulk svg { width: 15px; height: 15px; }
+  /* Secondary tools → plain text-style icons (no box, no border) */
+  .topbar-tools {
+    order: 3;
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    margin-left: 0;
+  }
+  .topbar-right .btn.topbar-study,
+  .topbar-right .icon-btn.topbar-tool {
+    order: 3;
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    padding: 2px;
+    display: inline-grid;
+    place-items: center;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink-muted);
+    box-shadow: none;
+  }
+  .topbar-right .btn.topbar-study:hover,
+  .topbar-right .icon-btn.topbar-tool:hover {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+  }
+  .topbar-right .btn.topbar-study svg,
+  .topbar-right .icon-btn.topbar-tool svg { width: 18px; height: 18px; }
+  /* Hide the text labels on the compact tools — icon + title is enough */
+  .topbar-right .btn.topbar-study span,
+  .topbar-right .icon-btn.topbar-tool .tool-label { display: none; }
+  .lang-switcher { display: none; }
+  .view {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+  .view-stats {
+    overflow-x: hidden;
+  }
+  .view-study.active { gap: 16px; padding: 0 12px 24px; }
+  .study-stats { gap: 6px; }
+  .stat-chip { padding: 8px 11px; font-size: 13px; }
+  .card-stage { padding: 24px 18px; min-width: 0; }
+  .card-stage .card-front { font-size: 26px; }
+  .card-stage .card-back { font-size: 17px; }
+  .card-stage .card-example { font-size: 13px; }
+  .card-actions { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .grade-btn { padding: 12px 10px; }
+  .grade-btn .grade-label { font-size: 14px; }
+  .grade-btn .grade-interval { font-size: 12px; }
+  .reveal-bar { padding: 0 6px; }
+  .reveal-btn { width: min(100%, 420px); }
+  .toolbar { gap: 6px; margin-bottom: 14px; }
+  .table-head, .table-row { grid-template-columns: 28px minmax(0, 1fr) auto auto; gap: 8px; padding: 8px 10px; }
+  .table-head > div:nth-child(3), .table-row > div:nth-child(3),
+  .table-head > div:nth-child(4), .table-row > div:nth-child(4),
+  .table-head > div:nth-child(6), .table-row > div:nth-child(6) { display: none; }
+  .table-row > div:nth-child(5) { overflow: visible; }
+  .table-row > div:nth-child(5) .state-pill { white-space: nowrap; }
+  #tableBody {
+    height: max(260px, calc(var(--app-vh, 1vh) * 100 - 330px));
+    max-height: none;
+    min-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .form-row.two { grid-template-columns: 1fr; }
+  .mobile-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    box-shadow: 0 -10px 28px rgba(30, 27, 22, 0.08);
+  }
+  .mobile-tabs .nav-item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .mobile-tabs .nav-item svg { width: 18px; height: 18px; }
+  .mobile-tabs .nav-item span { display: block; }
+}
+
+@media (max-width: 640px) {
+  /* Study view fills the visible screen so grade buttons never need scrolling.
+     --app-vh is set in JS to 1% of the real viewport height (iOS-safe). */
+  .view-study.active {
+    height: 100%;
+    min-height: 0;
+    gap: 10px;
+    padding: 10px 12px 12px;
+    overflow: hidden;
+  }
+  .view-study .study-stats { flex: none; }
+  .view-study .reveal-bar,
+  .view-study .card-actions { flex: none; }
+  .card-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 14px 14px;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .card-stage .edit-link,
+  .card-stage .speaker-btn {
+    top: 12px;
+  }
+  .card-stage .edit-link {
+    left: 12px;
+    font-size: 12px;
+  }
+  .card-stage .speaker-btn {
+    right: 12px;
+    width: 32px;
+    height: 32px;
+  }
+  .card-stage .card-front {
+    font-size: clamp(24px, 7vw, 30px);
+    line-height: 1.15;
+    padding-top: 34px;
+  }
+  .card-stage .pronunciation {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .card-stage .divider {
+    margin: 14px 0 6px;
+  }
+  .card-stage .card-back {
+    font-size: clamp(17px, 5vw, 20px);
+    line-height: 1.35;
+  }
+  .card-stage .card-example {
+    font-size: 13px;
+    line-height: 1.45;
+    margin-top: 10px;
+  }
+  .card-stage .card-meta {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+  .study-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .study-filter-panel { gap: 7px; }
+  .study-filter-heading { font-size: 12px; }
+  .stat-chip {
+    justify-content: center;
+    padding: 6px 2px;
+    min-width: 0;
+    min-height: 42px;
+    gap: 5px;
+    background: transparent;
+    border: 0;
+  }
+  .stat-chip:hover { background: transparent; border: 0; }
+  .filter-state-mark { width: 15px; height: 15px; font-size: 13px; }
+  .filter-category { min-width: 0; font-size: 12px; white-space: nowrap; }
+  .stat-chip b { font-size: 12px; }
+  .card-actions {
+    gap: 8px;
+  }
+  .grade-btn {
+    min-height: 54px;
+    padding: 10px 8px;
+  }
+  .grade-btn .grade-label {
+    font-size: 13px;
+  }
+  .grade-btn .grade-interval {
+    font-size: 10.5px;
+  }
+  .reveal-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 14px;
+    font-size: 13px;
+  }
+  .topbar {
+    padding: 10px 12px 8px;
+  }
+  .page-title {
+    font-size: 17px;
+  }
+  .topbar-right {
+    gap: 6px;
+  }
+  .deck-selector {
+    gap: 4px;
+  }
+  .deck-selector select {
+    padding: 9px 10px;
+  }
+  .lang-switcher {
+    display: none;
+  }
+  .toolbar {
+    gap: 6px;
+  }
+  .toolbar > .btn,
+  .toolbar > .search,
+  .toolbar > .filter {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+  /* Browse toolbar: search full-width, two filters side by side,
+     primary + bulk actions share the last row. */
+  .browse-toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch; }
+  .browse-toolbar .search { grid-column: 1 / -1; grid-row: 1; flex: none; width: 100%; padding: 11px 12px; }
+  .browse-toolbar #filterDeck  { grid-column: 1; grid-row: 2; width: 100%; padding: 11px 12px; }
+  .browse-toolbar #filterState { grid-column: 2; grid-row: 2; width: 100%; padding: 11px 12px; }
+  .browse-toolbar #addCardBtn2 {
+    grid-column: 1; grid-row: 3; justify-content: center; padding: 8px 4px;
+    border: none; background: transparent; box-shadow: none; color: var(--accent); font-weight: 600;
+  }
+  .browse-toolbar #addCardBtn2:hover, .browse-toolbar #addCardBtn2:active { background: transparent; border: none; color: var(--accent-hover); }
+  .browse-toolbar #bulkBrowseBtn {
+    grid-column: 2; grid-row: 3; justify-content: center; padding: 8px 4px;
+    border: none; background: transparent; box-shadow: none; color: var(--ink-muted); font-weight: 500;
+  }
+  .browse-toolbar #bulkBrowseBtn:hover, .browse-toolbar #bulkBrowseBtn:active { background: transparent; border: none; color: var(--ink); }
+  .decks-toolbar { flex-wrap: nowrap; gap: 8px; }
+  .decks-toolbar > .deck-tool {
+    flex: 0 0 auto;
+    max-width: none;
+  }
+  .decks-toolbar > .deck-tool-primary {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    padding: 6px 2px;
+    font-size: 14.5px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--accent);
+  }
+  .decks-toolbar > .deck-tool-primary:hover,
+  .decks-toolbar > .deck-tool-primary:active {
+    background: transparent;
+    border: none;
+    color: var(--accent-hover);
+  }
+  .decks-toolbar > .btn.deck-tool:not(.deck-tool-primary) {
+    width: auto;
+    height: auto;
+    padding: 4px;
+    justify-content: center;
+    border: none;
+    background: transparent;
+  }
+  .decks-toolbar > .btn.deck-tool:not(.deck-tool-primary):hover {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+  }
+  .decks-toolbar .deck-tool:not(.deck-tool-primary) .deck-tool-label { display: none; }
+  .decks-toolbar .deck-tool svg { width: 18px; height: 18px; }
+  .deck-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px;
+  }
+  .deck-row .deck-counts-wrap {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .deck-count {
+    text-align: left;
+    min-width: 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+  .deck-count b {
+    font-size: 14px;
+  }
+  .deck-count span {
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .deck-row .deck-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+  .deck-row .deck-actions .deck-study-btn {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    padding: 6px 2px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--accent);
+  }
+  .deck-row .deck-actions .deck-study-btn:hover,
+  .deck-row .deck-actions .deck-study-btn:active {
+    background: transparent;
+    border: none;
+    color: var(--accent-hover);
+  }
+  .deck-row .deck-actions .deck-icon-btn {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+  }
+  .deck-row .deck-actions .deck-icon-btn:hover {
+    background: transparent;
+    border: none;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-block,
+  .settings-block {
+    padding: 14px;
+  }
+  .mobile-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+  }
+  .mobile-tabs .nav-item {
+    padding: 7px 2px 8px;
+    gap: 3px;
+    font-size: 12px;
+  }
+  .mobile-tabs .nav-item svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-title-row { align-items: flex-start; }
+  .app-build-meta {
+    font-size: 8px;
+    white-space: normal;
+    text-align: right;
+  }
+  .app-build-meta time { font-size: 8px; }
+  .topbar {
+    flex-direction: row;
+  }
+  .topbar-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .topbar-add-actions {
+    order: 4;
+    margin-left: auto;
+  }
+  .topbar-right .deck-selector {
+    order: -1;
+    flex: 1 1 100%;
+  }
+  body[data-view="study"] .topbar-tools {
+    order: 3;
+    flex: 0 0 auto;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  .topbar-right .btn.topbar-study.bare-icon-btn,
+  .topbar-right .icon-btn.topbar-tool.bare-icon-btn,
+  .topbar-right .bare-icon-btn,
+  .deck-row .deck-actions .deck-icon-btn,
+  .deck-row .deck-actions .deck-study-btn,
+  .decks-toolbar > .btn.bare-icon-btn,
+  #deckBrowse .browse-toolbar #addCardBtn2 {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 10px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .deck-row .deck-actions .deck-study-btn {
+    flex: 0 0 auto;
+  }
+  .topbar-right .btn.topbar-study.bare-icon-btn:hover,
+  .topbar-right .btn.topbar-study.bare-icon-btn:active,
+  .topbar-right .icon-btn.topbar-tool.bare-icon-btn:hover,
+  .topbar-right .icon-btn.topbar-tool.bare-icon-btn:active {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .update-notice {
+    right: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    max-width: calc(100vw - 24px);
+  }
+}
+
+/* Selection */
+::selection { background: var(--accent-soft); color: var(--accent); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+

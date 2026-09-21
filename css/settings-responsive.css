@@ -1,0 +1,293 @@
+/* Lingo Cards — P51–P54 responsive Settings and accessibility polish */
+
+.view-settings {
+  overscroll-behavior-x: auto;
+  scroll-padding-top: calc(16px + var(--settings-vv-offset-top, 0px));
+}
+
+.settings-route-btn.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: var(--accent-soft);
+}
+
+.settings-route-btn.is-selected .route-chevron {
+  color: var(--accent);
+}
+
+@media (min-width: 900px) {
+  body[data-view="settings"] .view-settings.active {
+    display: grid;
+    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: start;
+    max-width: none;
+    padding-right: 28px;
+  }
+
+  .view-settings .settings-title-row,
+  .view-settings #settingsRouteAnnouncement {
+    grid-column: 1 / -1;
+  }
+
+  .view-settings #settings-home {
+    grid-column: 1;
+    grid-row: 2;
+    position: sticky;
+    top: 16px;
+    min-width: 0;
+  }
+
+  .view-settings .settings-route-panel.is-settings-detail {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+  }
+
+  .view-settings:not(.settings-desktop-detail) #settings-home {
+    grid-column: 1 / -1;
+    width: min(680px, 100%);
+    position: static;
+  }
+
+  .view-settings .settings-route-list,
+  .view-settings .settings-grid,
+  .view-settings .settings-block {
+    max-width: none;
+  }
+
+  .view-settings .settings-back-row {
+    min-height: 44px;
+  }
+
+  .view-settings .settings-back-btn {
+    display: none;
+  }
+
+  .view-settings .settings-top-back-btn {
+    display: none;
+  }
+
+  .view-settings .settings-panel-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 899px) {
+  @keyframes settings-back-enter {
+    from { opacity: .72; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  body[data-view="settings"] .view-settings.active {
+    min-height: min(var(--settings-vvh, 100vh), 100%);
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+
+  .view-settings .settings-route-btn,
+  .view-settings .settings-action-row,
+  .view-settings .settings-back-btn,
+  .view-settings .stepper-btn {
+    min-height: 44px;
+  }
+
+  .view-settings .settings-route-btn {
+    min-height: 56px;
+  }
+
+  .view-settings .settings-route-panel .settings-back-row > .settings-back-btn {
+    display: none;
+  }
+
+  .view-settings .settings-title-row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .view-settings .settings-top-back-btn:not([hidden]) {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .view-settings .app-build-meta {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .view-settings .settings-block {
+    width: 100%;
+    max-width: none;
+  }
+
+  .view-settings.settings-back-transition > .settings-route-panel:not([hidden]) {
+    animation: settings-back-enter 180ms cubic-bezier(.22, .61, .36, 1) both;
+    will-change: transform, opacity;
+  }
+
+  body.kb-open[data-view="settings"] .view-settings.active {
+    height: var(--settings-vvh, 100vh);
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 430px) {
+  .settings-route-list { gap: 14px; }
+  .settings-route-btn {
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    gap: 10px;
+    padding: 9px 11px;
+  }
+  .route-icon { width: 34px; height: 34px; }
+  .route-copy,
+  .stepper-label-wrap,
+  .settings-row > *,
+  .settings-action-row span:first-child {
+    min-width: 0;
+  }
+  .route-label,
+  .route-summary,
+  .stepper-label,
+  .stepper-hint,
+  .settings-row label,
+  .settings-row .row-hint,
+  .settings-action-row b,
+  .settings-action-row small {
+    overflow-wrap: anywhere;
+  }
+  .route-summary { white-space: normal; }
+  .settings-block {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 13px;
+    overflow: hidden;
+  }
+  .settings-block.card-front-mode-block { overflow: visible; }
+  .settings-row,
+  .settings-row.toggle {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .settings-row > input,
+  .settings-row > select,
+  .settings-row > button,
+  .settings-row > .settings-segmented,
+  .settings-row > .new-step-control {
+    width: 100%;
+    max-width: 100%;
+  }
+  .settings-row.toggle > input,
+  .settings-row.toggle > .switch {
+    width: auto;
+    justify-self: end;
+  }
+  .tts-rate-control,
+  .tts-preview-btn {
+    width: 100%;
+  }
+  .tts-preview-btn {
+    justify-content: center;
+  }
+  .stepper-row {
+    align-items: center;
+    gap: 8px;
+  }
+  .stepper-label-wrap { flex: 1 1 auto; }
+  .stepper-control { flex: 0 0 auto; }
+  .stepper-btn { width: 36px; }
+  .stepper-input { width: 44px; }
+  .retention-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .retention-slider {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+  }
+  .retention-value {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .expert-link-row {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .expert-link-row > .stepper-label { min-width: 0; }
+  .expert-link-btn { flex: 0 0 auto; }
+  .settings-back-row {
+    align-items: flex-start;
+    min-width: 0;
+  }
+  .settings-panel-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .settings-action-row {
+    gap: 10px;
+  }
+  .settings-action-row > span:last-child { flex: 0 0 auto; }
+}
+
+@media (max-width: 375px) {
+  .settings-home-title { margin-bottom: 16px; }
+  .route-label { font-size: 14px; }
+  .route-summary { font-size: 12px; }
+  .stepper-label { font-size: 13.5px; }
+  .stepper-btn { width: 34px; }
+  .stepper-input { width: 40px; }
+  .expert-link-row {
+    flex-direction: column;
+  }
+  .expert-link-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 320px) {
+  .view-settings .settings-route-btn {
+    grid-template-columns: 32px minmax(0, 1fr) 16px;
+    padding-inline: 8px;
+  }
+  .route-icon { width: 32px; height: 32px; }
+  .ai-mode-option { padding-inline: 5px; font-size: 12px; }
+  .stepper-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .stepper-control { align-self: stretch; }
+  .stepper-input { flex: 1 1 auto; width: auto; }
+}
+
+@media (prefers-contrast: more) {
+  .view-settings .settings-route-btn,
+  .view-settings .settings-block,
+  .view-settings input,
+  .view-settings select,
+  .view-settings .settings-segmented {
+    border-color: var(--ink-muted);
+  }
+  .view-settings .route-summary,
+  .view-settings .row-hint,
+  .view-settings .stepper-hint {
+    color: var(--ink-subtle);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-settings *,
+  .view-settings *::before,
+  .view-settings *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,349 @@
+/* Lingo Cards — unified motion system
+   Compositor-friendly feedback for the existing static PWA. */
+
+:root {
+  --motion-instant: 90ms;
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 320ms;
+  --motion-press: cubic-bezier(.2, .8, .2, 1);
+  --motion-enter: cubic-bezier(.22, 1, .36, 1);
+  --motion-exit: cubic-bezier(.4, 0, 1, 1);
+  --motion-spring: cubic-bezier(.2, 1.35, .4, 1);
+  /* Заранее вычисленное акцентное кольцо. В Safari 15 / iOS 15 (последняя
+     версия для iPhone 7) нет `color-mix()`, а неизвестный цвет отбрасывает не
+     оттенок, а весь `box-shadow`, то есть всю анимацию нажатия оценки. */
+  --motion-pulse-ring: rgba(201, 100, 66, .28);
+}
+
+@supports (background: color-mix(in srgb, #000 50%, transparent)) {
+  .grade-btn {
+    --motion-pulse-ring: color-mix(in srgb, currentColor 26%, transparent);
+  }
+}
+
+/* Every interactive control should feel tangible, without changing layout. */
+:where(
+  button, .btn, .nav-item, .deck-row, .card-row, .settings-route-btn,
+  .settings-action-row, .stat-chip, [role="button"], [role="menuitem"]
+) {
+  -webkit-tap-highlight-color: transparent;
+  transform: translateZ(0);
+  transition:
+    transform var(--motion-instant) var(--motion-press),
+    opacity var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+:where(
+  button, .btn, .nav-item, .deck-row, .card-row, .settings-route-btn,
+  .settings-action-row, .stat-chip, [role="button"], [role="menuitem"]
+):active:not(:disabled) {
+  transform: translate3d(0, 1px, 0) scale(.975);
+}
+
+:where(button, .btn, [role="button"]):disabled {
+  transform: none;
+}
+
+/* Main views — visible but short directional transitions. */
+.view.motion-view-enter {
+  animation: motion-view-enter 300ms var(--motion-enter) both;
+  will-change: transform, opacity;
+}
+
+.view.motion-view-enter.motion-from-left {
+  animation-name: motion-view-enter-left;
+}
+
+@keyframes motion-view-enter {
+  from { opacity: .25; transform: translate3d(18px, 0, 0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes motion-view-enter-left {
+  from { opacity: .25; transform: translate3d(-18px, 0, 0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* Navigation selection: tactile icon feedback without extra markers. */
+.nav-item {
+  position: relative;
+  isolation: isolate;
+}
+
+.nav-item svg {
+  transition:
+    transform 260ms var(--motion-spring),
+    color var(--motion-fast) ease;
+}
+
+.nav-item.active svg {
+  transform: translate3d(0, -2px, 0) scale(1.12);
+}
+
+.mobile-tabs .nav-item::after {
+  content: none !important;
+}
+
+.nav-item.motion-nav-select svg {
+  animation: motion-nav-select 320ms var(--motion-spring);
+}
+
+@keyframes motion-nav-select {
+  0% { transform: scale(.82); }
+  60% { transform: translate3d(0, -3px, 0) scale(1.18); }
+  100% { transform: translate3d(0, -2px, 0) scale(1.12); }
+}
+
+/* Study stage: answer reveal and next-card replacement. */
+.card-stage.motion-study-card-exit {
+  pointer-events: none;
+  animation: motion-study-card-exit 210ms cubic-bezier(.4, 0, 1, 1) both;
+  transform-origin: 50% 58%;
+  will-change: transform, opacity;
+}
+
+.card-stage.motion-study-card-enter {
+  animation: motion-study-card-enter 310ms cubic-bezier(.22, 1, .36, 1) both;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+/* На мобильной раскладке карточка сама является прокручиваемой областью с
+   `-webkit-overflow-scrolling: touch`. iOS выносит такие области на отдельный
+   слой асинхронной прокрутки и может проигнорировать анимацию трансформации,
+   поэтому на время перехода прокрутка возвращается в обычный режим. */
+.card-stage.motion-study-card-exit,
+.card-stage.motion-study-card-enter {
+  -webkit-overflow-scrolling: auto;
+}
+
+/* Без `filter`: на A10 анимация фильтра вместе с трансформацией заставляет
+   WebKit перерисовывать карточку на CPU, из-за чего переход пропадает. */
+@keyframes motion-study-card-exit {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  55% {
+    opacity: .72;
+    transform: translate3d(0, 3px, 0) scale(.982);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 11px, 0) scale(.935);
+  }
+}
+
+@keyframes motion-study-card-enter {
+  0% {
+    opacity: 0;
+    transform: translate3d(46px, 0, 0) scale(.97);
+  }
+  68% {
+    opacity: 1;
+    transform: translate3d(-2px, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Широким экранам нужен более длинный вылет. Значение дублируется вместо
+   `clamp()` внутри `translate3d()`: старый WebKit молча отбрасывает такую
+   трансформацию, и карточка появляется без движения. */
+@media (min-width: 900px) {
+  @keyframes motion-study-card-enter {
+    0% {
+      opacity: 0;
+      transform: translate3d(88px, 0, 0) scale(.97);
+    }
+    68% {
+      opacity: 1;
+      transform: translate3d(-2px, 0, 0) scale(1);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+}
+
+.card-stage.motion-card-enter > * {
+  animation: motion-card-content var(--motion-base) var(--motion-enter) both;
+}
+
+.card-stage.motion-card-enter > *:nth-child(2) { animation-delay: 24ms; }
+.card-stage.motion-card-enter > *:nth-child(3) { animation-delay: 46ms; }
+.card-stage.motion-card-enter > *:nth-child(4) { animation-delay: 68ms; }
+.card-stage.motion-card-enter > *:nth-child(n+5) { animation-delay: 86ms; }
+
+.card-stage.motion-answer-reveal .card-back,
+.card-stage.motion-answer-reveal .card-example,
+.card-stage.motion-answer-reveal .card-meta {
+  animation: motion-answer-reveal var(--motion-slow) var(--motion-enter) both;
+}
+
+@keyframes motion-card-content {
+  from { opacity: .12; transform: translate3d(0, 16px, 0) scale(.975); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes motion-answer-reveal {
+  from { opacity: 0; transform: translate3d(0, 18px, 0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+.grade-btn:active:not(:disabled) {
+  transform: translate3d(0, 1px, 0) scale(.965);
+}
+
+.grade-btn.motion-grade-pulse {
+  animation: motion-grade-pulse var(--motion-base) var(--motion-enter);
+}
+
+@keyframes motion-grade-pulse {
+  0% { box-shadow: 0 0 0 0 var(--motion-pulse-ring); }
+  100% { box-shadow: 0 0 0 12px transparent; }
+}
+
+/* Lists: animate only newly mounted rows; never animate scrolling rows again. */
+.motion-list-item-enter {
+  animation: motion-list-item var(--motion-base) var(--motion-enter) both;
+  animation-delay: min(calc(var(--motion-index, 0) * 22ms), 132ms);
+}
+
+@keyframes motion-list-item {
+  from { opacity: 0; transform: translate3d(0, 7px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Dialogs remain accessible immediately; visual entrance is delegated here. */
+.modal.motion-modal-enter .modal-backdrop {
+  animation: motion-backdrop-in var(--motion-base) ease both;
+}
+
+.modal.motion-modal-enter .modal-panel {
+  animation: motion-dialog-in var(--motion-slow) var(--motion-enter) both;
+  transform-origin: 50% 70%;
+  will-change: transform, opacity;
+}
+
+@keyframes motion-backdrop-in {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; }
+}
+
+@keyframes motion-dialog-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.975); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .modal.motion-modal-enter .modal-panel {
+    animation-name: motion-sheet-in;
+    transform-origin: 50% 100%;
+  }
+
+  @keyframes motion-sheet-in {
+    from { opacity: .72; transform: translate3d(0, 28px, 0) scale(.995); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+}
+
+/* Menus and transient surfaces. */
+:where(
+  .deck-action-menu, .add-card-menu, .study-mode-menu,
+  .selection-popover, .edge-mode-picker
+):not([hidden]) {
+  animation: motion-popover-in var(--motion-fast) var(--motion-enter) both;
+  transform-origin: top right;
+}
+
+@keyframes motion-popover-in {
+  from { opacity: 0; transform: translate3d(0, -4px, 0) scale(.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* Switches, disclosure indicators and progress elements. */
+input[type="checkbox"] {
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  transition:
+    transform var(--motion-instant) var(--motion-press),
+    box-shadow var(--motion-fast) ease;
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+
+.stat-card.motion-stat-enter,
+.chart-card.motion-stat-enter,
+.heat-cell.motion-stat-enter {
+  animation: motion-stat-in var(--motion-slow) var(--motion-enter) both;
+  animation-delay: min(calc(var(--motion-index, 0) * 18ms), 180ms);
+}
+
+@keyframes motion-stat-in {
+  from { opacity: 0; transform: translate3d(0, 9px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Toast uses the existing entry animation and gains a smoother lifetime. */
+.toast,
+#toast {
+  transition:
+    opacity var(--motion-base) ease,
+    transform var(--motion-base) var(--motion-enter);
+}
+
+/* Do not leave will-change active after animations. */
+.motion-view-enter,
+.motion-card-enter,
+.motion-study-card-exit,
+.motion-study-card-enter,
+.motion-answer-reveal,
+.motion-modal-enter,
+.motion-list-item-enter,
+.motion-stat-enter {
+  backface-visibility: hidden;
+}
+
+/* Accessibility: retain state changes, remove displacement and staging. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-instant: 1ms;
+    --motion-fast: 1ms;
+    --motion-base: 1ms;
+    --motion-slow: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  :where(
+    button, .btn, .nav-item, .deck-row, .card-row, .settings-route-btn,
+    .settings-action-row, .stat-chip, [role="button"], [role="menuitem"]
+  ):active:not(:disabled) {
+    transform: none;
+    opacity: .78;
+  }
+}

@@ -1,0 +1,293 @@
+/* Lingo Cards — tokens, reset, layout and navigation */
+
+/* Lingo Cards — claude.ai-inspired styling */
+
+:root {
+  --bg: #F5F4EE;
+  --bg-elev: #FAF9F5;
+  --panel: #FFFFFF;
+  --ink: #1F1E1D;
+  --ink-muted: #6B6A65;
+  --ink-subtle: #5F5D58;
+  --ink-faint: #706E68;
+  --ink-decorative: #9B9A93;
+  --border: #E6E4D9;
+  --border-strong: #D6D3C4;
+  --accent: #C96442;
+  --accent-hover: #B5573A;
+  --accent-soft: #F4E5DD;
+  --good: #2F7D5B;
+  --good-soft: #DCEDE2;
+  --warn: #B07C2E;
+  --warn-soft: #F2E6CC;
+  --bad: #B14B3F;
+  --bad-soft: #F3DCD7;
+  --new: #3E6A99;
+  --new-soft: #DDE6F1;
+  --shadow-sm: 0 1px 2px rgba(30, 27, 22, 0.04);
+  --shadow-md: 0 4px 14px rgba(30, 27, 22, 0.06);
+  --shadow-lg: 0 18px 40px -12px rgba(30, 27, 22, 0.18);
+  --radius-sm: 7px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --control-h: 40px;
+  --control-h-sm: 34px;
+  --control-h-xs: 30px;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Tiempos Text", "Charter", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+[data-theme="dark"] {
+  --bg: #1E1D1B;
+  --bg-elev: #262522;
+  --panel: #2B2A26;
+  --ink: #E8E6DF;
+  --ink-muted: #AAA69C;
+  --ink-subtle: #B5B1A6;
+  --ink-faint: #9C988F;
+  --ink-decorative: #807D74;
+  --border: #3A3833;
+  --border-strong: #494640;
+  --accent: #E48160;
+  --accent-hover: #F0916F;
+  --accent-soft: #4A2F23;
+  --good-soft: #2B4536;
+  --warn-soft: #4A3C20;
+  --bad-soft: #4A2D27;
+  --new-soft: #2B3A4E;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
+}
+
+* { box-sizing: border-box; }
+
+:where(button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+:where(.icon-btn, .bare-icon-btn, .deck-icon-btn, .speaker-btn, .row-actions button, .dc-actions button, .practice-history-del) {
+  position: relative;
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+
+html, body { margin: 0; padding: 0; height: 100%; overflow-x: hidden; touch-action: manipulation; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+@media (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); }
+  .modal { padding-top: env(safe-area-inset-top); }
+}
+
+button { font-family: inherit; font-size: inherit; color: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+input, select, textarea, button { -webkit-text-size-adjust: 100%; }
+
+/* Disable the iOS/Safari double-tap-to-zoom gesture. `touch-action: manipulation`
+   is applied page-wide on the root (above); this per-element rule is a
+   belt-and-suspenders fallback for browsers that don't inherit it reliably.
+   `manipulation` keeps panning/scrolling and text selection but removes the
+   300ms double-tap zoom. */
+button, a, .nav-item, .grade-btn, .reveal-btn, .btn, .icon-btn,
+label, select, .info-tip, .stat-chip, .table-row { touch-action: manipulation; }
+
+[hidden] { display: none !important; }
+
+/* Layout */
+#app {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.sidebar {
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 6px 8px 4px;
+}
+.brand-mark {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.brand-name { font-weight: 600; letter-spacing: -0.01em; }
+.brand-sub { font-size: 12px; color: var(--ink-muted); }
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  text-align: left;
+  transition: background .12s, color .12s;
+}
+.nav-item svg { width: 18px; height: 18px; flex: none; }
+.nav-item:hover { background: var(--bg-elev); color: var(--ink); }
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.sidebar-footer { margin-top: auto; }
+.streak-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.streak-pill b { color: var(--ink); }
+
+.mobile-tabs { display: none; }
+
+/* Main */
+.main { display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky; top: 0; z-index: 5;
+  gap: 12px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.status-indicators {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 6px);
+  right: 8px;
+  z-index: 80;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 9px;
+  pointer-events: none;
+}
+.save-status,
+.pwa-status {
+  width: 8px;
+  height: 8px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 8px;
+  font-size: 0;
+  line-height: 1;
+}
+.save-status::before {
+  content: "✓";
+  color: var(--good);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 800;
+  transform: scale(.75);
+}
+.save-status[data-status="saving"]::before {
+  content: "!";
+  color: var(--warn);
+  animation: save-status-pulse .9s ease-in-out infinite alternate;
+}
+.save-status[data-status="error"]::before {
+  content: "×";
+  color: var(--bad);
+}
+@keyframes save-status-pulse { to { opacity: .28; } }
+.pwa-status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--good);
+}
+.pwa-status[data-status="offline"]::before { background: var(--bad); }
+.pwa-status[data-status="update"]::before { background: var(--warn); }
+.topbar-right { display: flex; align-items: center; gap: 12px; min-width: 0; flex-wrap: wrap; justify-content: flex-end; }
+.topbar-tools { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+
+.page-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.deck-selector { display: flex; align-items: center; gap: 8px; }
+.deck-selector label { color: var(--ink-muted); font-size: 13px; }
+.deck-selector select {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  min-width: 200px;
+}
+
+.topbar-add { padding: 8px 14px; }
+.topbar-add svg { width: 14px; height: 14px; }
+
+.lang-switcher {
+  display: inline-flex;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+.lang-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--ink-faint);
+  border-radius: 4px;
+  transition: background .12s, color .12s;
+  font-family: var(--font-mono);
+}
+.lang-btn:hover { color: var(--ink); }
+.lang-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+

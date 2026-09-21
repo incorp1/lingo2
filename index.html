@@ -1,0 +1,1389 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.openai.com https://openrouter.ai https://api.groq.com https://api.cerebras.ai https://api.x.ai https://generativelanguage.googleapis.com https://translate.googleapis.com https://api.dictionaryapi.dev https://api.mymemory.translated.net; media-src 'self' blob:; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Lingo Cards — Spaced Repetition</title>
+<meta name="theme-color" content="#C96442" />
+<meta name="description" content="Spaced repetition for language learning" />
+<script src="theme-init.js?v=3.19.16"></script>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="stylesheet" href="css/base.css?v=3.19.16" />
+<link rel="stylesheet" href="css/study.css?v=3.19.16" />
+<link rel="stylesheet" href="css/decks.css?v=3.19.16" />
+<link rel="stylesheet" href="css/stats-settings.css?v=3.19.16" />
+<link rel="stylesheet" href="css/mobile.css?v=3.19.16" />
+<link rel="stylesheet" href="css/features.css?v=3.19.16" />
+<link rel="stylesheet" href="css/polish.css?v=3.19.16" />
+<link rel="stylesheet" href="css/edge-menu.css?v=3.19.16" />
+<link rel="stylesheet" href="css/settings-responsive.css?v=3.19.16" />
+<link rel="stylesheet" href="css/settings-polish.css?v=3.19.16" />
+<link rel="stylesheet" href="css/deck-browser-vA.css?v=3.19.16" />
+<link rel="stylesheet" href="css/card-editor.css?v=3.19.16" />
+<link rel="stylesheet" href="css/motion.css?v=3.19.16" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">L</div>
+        <div class="brand-text">
+          <div class="brand-name">Lingo Cards</div>
+          <div class="brand-sub" data-i18n="brand.subtitle">Spaced repetition</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-item active" data-view="study" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 4v6h6"/></svg>
+          <span data-i18n="nav.study">Study</span>
+        </button>
+        <button class="nav-item" data-view="decks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="14" height="14" rx="2"/><path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/></svg>
+          <span data-i18n="nav.decks">Decks</span>
+        </button>
+        <button class="nav-item" data-view="stats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>
+          <span data-i18n="nav.stats">Statistics</span>
+        </button>
+        <button class="nav-item" data-view="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          <span data-i18n="nav.settings">Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="streak-pill" id="streakPill">
+          <span class="streak-icon">🔥</span>
+          <span><b id="streakDays">0</b> <span data-i18n="streak.suffix">day streak</span></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="status-indicators" aria-label="Application status">
+          <div class="save-status" id="saveStatus" data-status="saved" role="status" aria-live="polite" aria-label="Saved" title="Saved"></div>
+          <div class="pwa-status" id="pwaStatus" data-status="online" role="status" aria-live="polite" aria-label="Online" title="Online"></div>
+        </div>
+        <div class="topbar-right">
+          <div class="deck-selector">
+            <label data-i18n="topbar.deck">Deck</label>
+            <select id="deckSelect"></select>
+          </div>
+          <div class="lang-switcher lang-switcher-desktop" title="Language">
+            <button class="lang-btn" data-lang="uk">UA</button>
+            <button class="lang-btn" data-lang="ru">RU</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+          </div>
+          <div class="topbar-add-actions add-card-actions">
+            <button class="btn primary add-card-trigger bare-icon-btn" id="topbarAddBtn" type="button" aria-haspopup="menu" aria-controls="addCardMenu" aria-expanded="false" data-i18n-title="topbar.addCard" data-i18n-aria-label="topbar.addCard" title="Add card" aria-label="Add card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <nav class="desktop-study-nav" aria-label="Study actions">
+        <button class="desktop-study-action" id="desktopPracticeBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5A1.5 1.5 0 0 1 18.5 20H7a3 3 0 0 0-3 3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          <span data-i18n="practice.open">Reading practice</span>
+        </button>
+        <button class="desktop-study-action" id="desktopRefreshBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M20 9a8 8 0 0 0-13.7-3L4 10"/><path d="M4 15a8 8 0 0 0 13.7 3L20 14"/></svg>
+          <span data-i18n="edge.refresh">Refresh examples</span>
+        </button>
+        <button class="desktop-study-action" id="desktopSwapBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 3L4 7l4 4"/><path d="M4 7h16"/><path d="M16 21l4-4-4-4"/><path d="M20 17H4"/></svg>
+          <span data-i18n="edge.swap">Swap direction</span>
+        </button>
+        <button class="desktop-study-action" id="desktopSettingsBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1-.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          <span data-i18n="edge.settings">Study settings</span>
+        </button>
+      </nav>
+
+      <!-- STUDY VIEW -->
+      <section class="view view-study active" id="view-study">
+        <div class="study-filter-panel" aria-labelledby="studyFilterHeading">
+          <h2 class="study-filter-heading" id="studyFilterHeading" data-i18n="study.filters.heading">What we're studying now</h2>
+          <div class="study-stats" aria-label="Study card filters" data-i18n-aria-label="study.filters.ariaLabel">
+            <button type="button" class="stat-chip new" id="studyFilterNew" aria-pressed="true">
+              <span class="filter-state-mark" aria-hidden="true">✓</span>
+              <span class="filter-category"><span data-i18n="study.cards.new">New</span> <b id="cntNew">0</b></span>
+            </button>
+            <button type="button" class="stat-chip learn" id="studyFilterLearning" aria-pressed="true">
+              <span class="filter-state-mark" aria-hidden="true">✓</span>
+              <span class="filter-category"><span data-i18n="study.cards.learning">Learning</span> <b id="cntLearn">0</b></span>
+            </button>
+            <button type="button" class="stat-chip review" id="studyFilterReview" aria-pressed="true">
+              <span class="filter-state-mark" aria-hidden="true">✓</span>
+              <span class="filter-category"><span data-i18n="study.cards.review">Review</span> <b id="cntReview">0</b></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-stage" id="cardStage">
+          <!-- Card or empty state injected here -->
+        </div>
+
+        <div class="card-actions" id="cardActions" hidden>
+          <button class="grade-btn again" data-grade="0">
+            <span class="grade-label" data-i18n="study.again">Again</span>
+            <span class="grade-interval" id="ivAgain">&lt;1m</span>
+          </button>
+          <button class="grade-btn hard" data-grade="1">
+            <span class="grade-label" data-i18n="study.hard">Hard</span>
+            <span class="grade-interval" id="ivHard">&lt;6m</span>
+          </button>
+          <button class="grade-btn good" data-grade="2">
+            <span class="grade-label" data-i18n="study.good">Good</span>
+            <span class="grade-interval" id="ivGood">10m</span>
+          </button>
+          <button class="grade-btn easy" data-grade="3">
+            <span class="grade-label" data-i18n="study.easy">Easy</span>
+            <span class="grade-interval" id="ivEasy">4d</span>
+          </button>
+        </div>
+
+        <div class="reveal-bar" id="revealBar">
+          <button class="reveal-btn" id="revealBtn"><span data-i18n="study.reveal">Show answer</span> <kbd>Space</kbd></button>
+        </div>
+      </section>
+
+      <!-- DECKS VIEW -->
+      <section class="view view-decks" id="view-decks">
+        <div id="decksOverview">
+          <div class="section-head decks-section-actions">
+            <button class="btn primary deck-tool bare-icon-btn" id="newDeckBtn" data-i18n-title="decks.newDeck" data-i18n-aria-label="decks.newDeck" title="New deck" aria-label="New deck">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3" y="7" width="14" height="14" rx="2"/><path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/><path d="M10 14h6M13 11v6"/></svg>
+            </button>
+          </div>
+          <div class="deck-list" id="deckList"></div>
+        </div>
+
+        <div id="deckBrowse" hidden>
+          <div class="deck-browse-header">
+            <button class="btn ghost deck-browse-back" id="deckBrowseBack" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+              <span data-i18n="practice.back">Back</span>
+            </button>
+            <div class="deck-browse-heading">
+              <h2 id="deckBrowseTitle"></h2>
+              <span class="deck-browse-subtitle" id="deckBrowseSubtitle"></span>
+            </div>
+            <button class="btn primary add-card-trigger bare-icon-btn deck-browse-add" id="deckBrowseAddBtn" type="button" aria-haspopup="menu" aria-controls="addCardMenu" aria-expanded="false" data-i18n-title="topbar.addCard" data-i18n-aria-label="topbar.addCard" title="Add card" aria-label="Add card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+
+          <div class="toolbar browse-toolbar">
+            <div class="browse-search-row">
+              <label class="browse-search" for="browseSearch">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                <input id="browseSearch" type="search" autocomplete="off" data-i18n-ph="browse.search" placeholder="Search cards…" />
+                <button class="browse-search-clear" id="browseSearchClear" type="button" data-i18n-title="browse.clearSearch" data-i18n-aria-label="browse.clearSearch" title="Clear search" aria-label="Clear search" hidden>×</button>
+              </label>
+              <button class="btn ghost browse-filter-toggle" id="browseFilterToggle" type="button" aria-expanded="false" aria-controls="browseAdvancedFilters">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+                <span data-i18n="browse.filters">Filters</span>
+                <span class="browse-filter-badge" id="browseFilterBadge" hidden></span>
+              </button>
+            </div>
+            <div class="browse-result-row">
+              <span class="browse-result-count" id="browseResultCount"></span>
+              <div class="browse-actions add-card-actions">
+                <button class="btn primary add-card-trigger bare-icon-btn" id="addCardBtn2" type="button" aria-haspopup="menu" aria-controls="addCardMenu" aria-expanded="false" data-i18n-title="topbar.addCard" data-i18n-aria-label="topbar.addCard" title="Add card" aria-label="Add card">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="browse-advanced-filters" id="browseAdvancedFilters" hidden>
+              <select id="filterDeck" class="filter" hidden></select>
+              <label class="browse-filter-field">
+                <span data-i18n="browse.stateLabel">State</span>
+                <select id="filterState" class="filter">
+                  <option value="" data-i18n="browse.allStates">All states</option>
+                  <option value="new" data-i18n="browse.state.new">New</option>
+                  <option value="learning" data-i18n="browse.state.learning">Learning</option>
+                  <option value="review" data-i18n="browse.state.review">Review</option>
+                  <option value="suspended" data-i18n="browse.state.suspended">Suspended</option>
+                </select>
+              </label>
+              <label class="browse-filter-field">
+                <span data-i18n="browse.sortLabel">Sort</span>
+                <select id="browseSort" class="filter">
+                  <option value="due" data-i18n="browse.sort.due">Due date</option>
+                  <option value="created-desc" data-i18n="browse.sort.createdDesc">Newest first</option>
+                  <option value="created-asc" data-i18n="browse.sort.createdAsc">Oldest first</option>
+                  <option value="lapses" data-i18n="browse.sort.lapses">Most errors</option>
+                  <option value="difficulty" data-i18n="browse.sort.difficulty">Most difficult</option>
+                  <option value="alphabetical" data-i18n="browse.sort.alphabetical">Alphabetical</option>
+                </select>
+              </label>
+              <button class="btn ghost browse-reset-filters" id="browseResetFilters" type="button" data-i18n="browse.resetFilters">Reset</button>
+            </div>
+          </div>
+
+          <div class="bulk-bar" id="bulkBar" hidden>
+            <span class="bulk-count" id="bulkCount">0 selected</span>
+            <div class="bulk-actions">
+              <button class="btn small ghost bare-icon-btn" id="bulkRefreshExamplesBtn" data-i18n-title="examples.selected.action" data-i18n-aria-label="examples.selected.action" title="Оновити приклади" aria-label="Оновити приклади">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M20 9a8 8 0 0 0-13.7-3L4 10"/><path d="M4 15a8 8 0 0 0 13.7 3L20 14"/></svg>
+              </button>
+              <button class="btn small ghost" id="bulkMoveBtn" data-i18n="browse.bulk.move">Move…</button>
+              <button class="btn small ghost" id="bulkSuspendBtn" data-i18n="browse.bulk.suspend">Suspend</button>
+              <button class="btn small ghost" id="bulkUnsuspendBtn" data-i18n="browse.bulk.unsuspend">Unsuspend</button>
+              <button class="btn small danger" id="bulkDeleteBtn" data-i18n="browse.bulk.delete">Delete</button>
+              <button class="btn small ghost" id="bulkCancelBtn" data-i18n="browse.bulk.cancel">Cancel</button>
+            </div>
+          </div>
+
+          <div class="card-table">
+            <div class="table-head">
+              <div class="cb-cell"><input type="checkbox" id="selectAllCb" /></div>
+              <div data-i18n="browse.table.front">Front</div>
+              <div data-i18n="browse.table.back">Back</div>
+              <div data-i18n="browse.table.deck">Deck</div>
+              <div data-i18n="browse.table.state">State</div>
+              <div data-i18n="browse.table.due">Due</div>
+              <div></div>
+            </div>
+            <div class="table-body" id="tableBody"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATS VIEW -->
+      <section class="view view-stats" id="view-stats">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label" data-i18n="stats.total">Total cards</div><div class="stat-value" id="sTotal">0</div></div>
+          <div class="stat-card"><div class="stat-label" data-i18n="stats.mature">Mature</div><div class="stat-value" id="sMature">0</div><div class="stat-sub" data-i18n="stats.mature.sub">interval ≥ 21d</div></div>
+          <div class="stat-card"><div class="stat-label" data-i18n="stats.young">Young</div><div class="stat-value" id="sYoung">0</div><div class="stat-sub" data-i18n="stats.young.sub">learning &amp; short</div></div>
+          <div class="stat-card"><div class="stat-label" data-i18n="stats.due">Due today</div><div class="stat-value" id="sDue">0</div></div>
+          <div class="stat-card"><div class="stat-label" data-i18n="stats.reviewed">Reviewed today</div><div class="stat-value" id="sReviewed">0</div></div>
+          <div class="stat-card"><div class="stat-label" data-i18n="stats.retention">Retention (30d)</div><div class="stat-value" id="sRetention">—</div><div class="stat-sub" data-i18n="stats.retention.sub">% remembered</div></div>
+        </div>
+
+        <div class="stats-block">
+          <h3 data-i18n="stats.heatmap.title">Activity over the past year</h3>
+          <div class="heatmap-wrap">
+            <div class="heatmap" id="heatmapContainer"></div>
+            <div class="heatmap-legend">
+              <span data-i18n="stats.heatmap.legend.less">less</span>
+              <span class="heat-cell h-0"></span>
+              <span class="heat-cell h-1"></span>
+              <span class="heat-cell h-2"></span>
+              <span class="heat-cell h-3"></span>
+              <span class="heat-cell h-4"></span>
+              <span data-i18n="stats.heatmap.legend.more">more</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-block">
+          <h3 data-i18n="stats.reviews.title">Reviews (last 30 days)</h3>
+          <div class="bar-chart" id="reviewChart"></div>
+        </div>
+        <div class="stats-block">
+          <h3 data-i18n="stats.forecast.title">Forecast (next 14 days)</h3>
+          <div class="bar-chart" id="forecastChart"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section class="view view-settings" id="view-settings">
+        <div class="view-title-row settings-title-row">
+          <button type="button" class="settings-back-btn settings-top-back-btn" id="settingsTopBackBtn" data-settings-route-open="home" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 19l-7-7 7-7"/></svg>
+            <span data-i18n="settings.back">Назад</span>
+          </button>
+          <div class="app-build-meta" id="appBuildMeta" aria-label="Application version">
+            <span class="app-build-version">v3.19.16</span>
+            <time datetime="2026-07-19T17:00:00+03:00">19.07.2026 17:00</time>
+          </div>
+        </div>
+        <p class="visually-hidden" id="settingsRouteAnnouncement" role="status" aria-live="polite" aria-atomic="true"></p>
+        <div class="settings-route-panel settings-home-panel" id="settings-home" data-settings-route="home">
+          <h2 class="settings-home-title" data-i18n="nav.settings">Настройки</h2>
+          <nav class="settings-route-list" aria-label="Settings sections">
+            <div class="settings-group">
+              <span class="settings-group-label" data-i18n="settings.group.learning">ОБУЧЕНИЕ</span>
+              <button type="button" class="settings-route-btn" data-settings-route-open="learning">
+                <span class="route-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg></span>
+                <span class="route-label-wrap">
+                  <span class="route-label" data-i18n="settings.route.learning">Обучение</span>
+                  <span class="route-summary" id="summaryLearning"></span>
+                </span>
+                <span class="route-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+              </button>
+              <button type="button" class="settings-route-btn" data-settings-route-open="generation">
+                <span class="route-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/></svg></span>
+                <span class="route-label-wrap">
+                  <span class="route-label" data-i18n="settings.route.generation">Генерация карточек</span>
+                  <span class="route-summary" id="summaryGeneration"></span>
+                </span>
+                <span class="route-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+              </button>
+            </div>
+            <div class="settings-group">
+              <span class="settings-group-label" data-i18n="settings.group.app">ПРИЛОЖЕНИЕ</span>
+              <button type="button" class="settings-route-btn" data-settings-route-open="card-sound">
+                <span class="route-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h4v6H7z"/><path d="M14 9l3 3-3 3"/></svg></span>
+                <span class="route-label-wrap">
+                  <span class="route-label" data-i18n="settings.route.cardSound">Карточка и звук</span>
+                  <span class="route-summary" id="summaryCardSound"></span>
+                </span>
+                <span class="route-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+              </button>
+              <button type="button" class="settings-route-btn" data-settings-route-open="appearance">
+                <span class="route-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
+                <span class="route-label-wrap">
+                  <span class="route-label" data-i18n="settings.route.appearance">Язык и оформление</span>
+                  <span class="route-summary" id="summaryAppearance"></span>
+                </span>
+                <span class="route-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+              </button>
+            </div>
+            <div class="settings-group">
+              <span class="settings-group-label" data-i18n="settings.group.data">ДАННЫЕ</span>
+              <button type="button" class="settings-route-btn" data-settings-route-open="data">
+                <span class="route-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg></span>
+                <span class="route-label-wrap">
+                  <span class="route-label" data-i18n="settings.route.data">Данные и резервные копии</span>
+                  <span class="route-summary" id="summaryData"></span>
+                </span>
+                <span class="route-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+              </button>
+              <button type="button" class="settings-route-btn" id="quickBackupBtn">
+                <span class="route-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg></span>
+                <span class="route-label-wrap">
+                  <span class="route-label" data-i18n="settings.backup.create">Создать резервную копию</span>
+                </span>
+              </button>
+            </div>
+          </nav>
+          <footer class="settings-home-footer">
+            <span class="settings-footer-version" id="settingsFooterVersion"></span>
+            <span class="settings-footer-storage" id="settingsFooterStorage"></span>
+          </footer>
+        </div>
+        <section class="settings-route-panel" id="settings-learning" data-settings-route="learning" hidden aria-hidden="true">
+          <div class="settings-back-row">
+            <button type="button" class="settings-back-btn" data-settings-route-open="home">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+              <span data-i18n="settings.back">Назад</span>
+            </button>
+            <h2 class="settings-panel-title" data-i18n="settings.route.learning" tabindex="-1">Обучение</h2>
+          </div>
+          <!-- P23: Algorithm selector -->
+          <div class="settings-block">
+            <div class="block-heading">
+              <h3 data-i18n="settings.learning.algorithmTitle">Расписание</h3>
+              <p class="block-desc js-tooltip" data-i18n="settings.learning.algorithmHelp">Это «мозг» приложения: он рассчитывает, когда снова показать слово — прямо перед тем, как ты его забудешь.
+
+SM-2 — простой, проверенный временем способ, как в Anki: паузы понятные и предсказуемые; если сомневаешься, выбирай его.
+
+FSRS — современный умный режим: он подстраивается под твою память и в среднем даёт на 20–30% меньше повторений при том же результате; он чуть менее прозрачный, но более эффективный.</p>
+            </div>
+            <div class="algo-selector" role="radiogroup" aria-label="Algorithm">
+              <button type="button" class="algo-option" data-algo-value="sm2" role="radio" aria-checked="false">SM-2</button>
+              <button type="button" class="algo-option" data-algo-value="fsrs" role="radio" aria-checked="false">FSRS</button>
+            </div>
+            <!-- P23: FSRS retention (visible only when FSRS) -->
+            <div class="retention-row" id="learningFsrsRetentionRow" hidden>
+              <div class="stepper-label-wrap">
+                <span class="stepper-label" data-i18n="settings.fsrsRetention">Желаемое запоминание</span>
+                <span class="row-hint js-tooltip" data-i18n="settings.learning.retentionHelp">Чем выше процент, тем чаще повторения. 90% — сбалансированный вариант.</span>
+              </div>
+              <input type="range" class="retention-slider" id="setFsrsRetentionSlider" min="70" max="98" step="1" aria-label="Desired retention" />
+              <span class="retention-value" id="fsrsRetentionDisplay">90%</span>
+            </div>
+            <!-- P23: Leech threshold -->
+            <div class="stepper-row">
+              <div class="stepper-label-wrap">
+                <span class="stepper-label" data-i18n="settings.leechThreshold">Проблемные карточки</span>
+                <span class="row-hint js-tooltip" data-i18n="settings.learning.leechHelp">После указанного числа ответов «Снова» карточка автоматически приостанавливается. Значение 0 отключает эту функцию.</span>
+              </div>
+              <div class="stepper-control">
+                <button type="button" class="stepper-btn" data-stepper-target="setLeechThreshold" data-stepper-dir="-1" aria-label="Decrease">−</button>
+                <input id="setLeechThreshold" class="stepper-input" type="number" min="0" max="50" aria-label="Leech threshold" />
+                <button type="button" class="stepper-btn" data-stepper-target="setLeechThreshold" data-stepper-dir="1" aria-label="Increase">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-block card-front-mode-block">
+            <div class="settings-row">
+              <label id="setStudyCardModeLabel" data-i18n="settings.cardMode">Mode</label>
+              <div class="study-mode-picker">
+                <button id="setStudyCardMode" class="study-mode-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="studyModeMenu" aria-labelledby="setStudyCardModeLabel studyModeSummary">
+                  <span id="studyModeSummary"></span>
+                  <span class="study-mode-chevron" aria-hidden="true">⌄</span>
+                </button>
+                <div id="studyModeMenu" class="study-mode-menu" role="menu" hidden>
+                  <label role="menuitemcheckbox" aria-checked="false">
+                    <input type="checkbox" value="word" />
+                    <span data-i18n="settings.cardMode.word">Word</span>
+                  </label>
+                  <label role="menuitemcheckbox" aria-checked="false">
+                    <input type="checkbox" value="sentence" />
+                    <span data-i18n="settings.cardMode.sentenceShort">Sentence</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <label id="setStudyCardFrontLabel" data-i18n="settings.cardFrontLanguage">Card front</label>
+              <div class="study-mode-picker">
+                <button id="setStudyCardFront" class="study-mode-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="studyFrontMenu" aria-labelledby="setStudyCardFrontLabel studyFrontSummary">
+                  <span id="studyFrontSummary"></span>
+                  <span class="study-mode-chevron" aria-hidden="true">⌄</span>
+                </button>
+                <div id="studyFrontMenu" class="study-mode-menu study-front-menu" role="menu" hidden>
+                  <label role="menuitemcheckbox" aria-checked="false">
+                    <input type="checkbox" value="english" />
+                    <span data-i18n="settings.cardFrontLanguage.english">English</span>
+                  </label>
+                  <label role="menuitemcheckbox" aria-checked="false">
+                    <input type="checkbox" value="local" />
+                    <span data-i18n="settings.cardFrontLanguage.local">Ukrainian</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+        <section class="settings-route-panel" id="settings-generation" data-settings-route="generation" hidden aria-hidden="true">
+          <div class="settings-back-row">
+            <button type="button" class="settings-back-btn" data-settings-route-open="home">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+              <span data-i18n="settings.back">Назад</span>
+            </button>
+            <h2 class="settings-panel-title" data-i18n="settings.route.generation" tabindex="-1">Генерация</h2>
+          </div>
+        </section>
+        <section class="settings-route-panel" id="settings-card-sound" data-settings-route="card-sound" hidden aria-hidden="true">
+          <div class="settings-back-row">
+            <button type="button" class="settings-back-btn" data-settings-route-open="home">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+              <span data-i18n="settings.back">Назад</span>
+            </button>
+            <h2 class="settings-panel-title" data-i18n="settings.route.cardSound" tabindex="-1">Карточка и звук</h2>
+          </div>
+        </section>
+        <section class="settings-route-panel" id="settings-appearance" data-settings-route="appearance" hidden aria-hidden="true">
+          <div class="settings-back-row">
+            <button type="button" class="settings-back-btn" data-settings-route-open="home">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+              <span data-i18n="settings.back">Назад</span>
+            </button>
+            <h2 class="settings-panel-title" data-i18n="settings.route.appearance" tabindex="-1">Язык и оформление</h2>
+          </div>
+        </section>
+        <section class="settings-route-panel" id="settings-data" data-settings-route="data" hidden aria-hidden="true">
+          <div class="settings-back-row">
+            <button type="button" class="settings-back-btn" data-settings-route-open="home">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+              <span data-i18n="settings.back">Назад</span>
+            </button>
+            <h2 class="settings-panel-title" data-i18n="settings.route.data" tabindex="-1">Данные и резервные копии</h2>
+          </div>
+        </section>
+
+        <div id="settingsLegacyControls" hidden>
+        <div class="settings-block">
+          <div class="settings-row appearance-language-row">
+            <label id="settingsLanguageTitle" for="setLang" data-i18n="settings.language">Interface language</label>
+            <select id="setLang" aria-labelledby="settingsLanguageTitle">
+              <option value="uk">Українська</option>
+              <option value="ru">Русский</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+        </div>
+
+
+
+        <div class="review-advanced" id="reviewAdvanced" hidden>
+        <div class="settings-block button-block learning-block">
+          <div class="block-header">
+            <span class="block-icon">🎓</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.learning.title">Learning new words</h3>
+              <p class="block-desc" data-i18n="settings.learning.desc">How you first meet a new word. Set the initial wait for each button (Again / Hard / Good / Easy) in their own sections below.</p>
+            </div>
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setLearnSteps" data-i18n="settings.learnSteps">Learning steps (minutes)</label>
+              <div class="row-hint" data-i18n="settings.learnSteps.hint">Ordered delays separated by spaces, for example: 1 10.</div>
+            </div>
+            <input id="setLearnSteps" type="text" inputmode="decimal" autocomplete="off" />
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setGraduatingInterval" data-i18n="settings.graduatingInterval">Graduating interval (days)</label>
+              <div class="row-hint" data-i18n="settings.graduatingInterval.hint">After completing all learning steps, the card is "learned" and you'll see it again after this many days.</div>
+            </div>
+            <input id="setGraduatingInterval" type="number" min="1" max="365" />
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setEasyInterval" data-i18n="settings.easyInterval">Easy interval (days)</label>
+              <div class="row-hint" data-i18n="settings.easyInterval.hint">Easy skips all learning steps and graduates the card immediately.</div>
+            </div>
+            <input id="setEasyInterval" type="number" min="1" max="365" />
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setEaseStart" data-i18n="settings.startingEase">Starting "ease" (%)</label>
+              <div class="row-hint" data-i18n="settings.startingEase.hint">A card's personal "easiness". When you press "Good" on a review, the next interval = previous × ease. Default 250 (= 2.5×).</div>
+            </div>
+            <input id="setEaseStart" type="number" min="130" max="350" />
+          </div>
+        </div>
+
+        <div class="settings-block button-block again-block sm2-only">
+          <div class="block-header">
+            <span class="button-preview grade-again" data-i18n="study.again">Again</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.again.title">"Again" — I forgot</h3>
+              <p class="block-desc" data-i18n="settings.again.desc">Press when you couldn't remember the word at all. The card comes back very soon and becomes a bit harder.</p>
+            </div>
+          </div>
+
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setLapseNewInterval" data-i18n="settings.again.keepInterval">Keep this % of the old interval</label>
+              <div class="row-hint" data-i18n="settings.again.keepInterval.hint">When you forget a learned word: 0% means start over from scratch, 25% keeps a quarter of the old interval as the new one.</div>
+            </div>
+            <input id="setLapseNewInterval" type="number" min="0" max="80" />
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setLapseEasePenalty" data-i18n="settings.again.easePenalty">Reduce ease by % points</label>
+              <div class="row-hint" data-i18n="settings.again.easePenalty.hint">How much harder the card becomes. Default 20 — if ease was 250%, it drops to 230%.</div>
+            </div>
+            <input id="setLapseEasePenalty" type="number" min="0" max="50" />
+          </div>
+          <div class="example-row" id="againPreviewRow">
+            <span class="example-label" data-i18n="settings.exampleLabel">Example:</span>
+            <span class="example-text" id="setAgainPreview"></span>
+          </div>
+        </div>
+
+        <div class="settings-block button-block hard-block sm2-only">
+          <div class="block-header">
+            <span class="button-preview grade-hard" data-i18n="study.hard">Hard</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.hard.title">"Hard" — I struggled</h3>
+              <p class="block-desc" data-i18n="settings.hard.desc">Press when you remembered, but with effort. The card comes back only slightly later than before, and becomes a bit harder.</p>
+            </div>
+          </div>
+
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setHardFactor" data-i18n="settings.hard.multiplier">Multiply interval by %</label>
+              <div class="row-hint" data-i18n="settings.hard.multiplier.hint">How much the wait grows. Default 120 — if you saw the card 10 days ago, you'll see it again in 12 days.</div>
+            </div>
+            <input id="setHardFactor" type="number" min="100" max="200" />
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setHardEasePenalty" data-i18n="settings.hard.easePenalty">Reduce ease by % points</label>
+              <div class="row-hint" data-i18n="settings.hard.easePenalty.hint">The card gets a bit harder over time. Default 15.</div>
+            </div>
+            <input id="setHardEasePenalty" type="number" min="0" max="30" />
+          </div>
+          <div class="example-row" id="hardPreviewRow">
+            <span class="example-label" data-i18n="settings.exampleLabel">Example:</span>
+            <span class="example-text" id="setHardPreview"></span>
+          </div>
+        </div>
+
+        <div class="settings-block button-block good-block sm2-only">
+          <div class="block-header">
+            <span class="button-preview grade-good" data-i18n="study.good">Good</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.good.title">"Good" — I remembered</h3>
+              <p class="block-desc" data-i18n="settings.good.desc">The normal, standard answer. You remembered without much effort. The next wait grows by the card's "ease" — set in the Learning block above.</p>
+            </div>
+          </div>
+
+          <div class="example-row" id="goodPreviewRow">
+            <span class="example-label" data-i18n="settings.exampleLabel">Example:</span>
+            <span class="example-text" id="setGoodPreview"></span>
+          </div>
+        </div>
+
+        <div class="settings-block button-block easy-block sm2-only">
+          <div class="block-header">
+            <span class="button-preview grade-easy" data-i18n="study.easy">Easy</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.easy.title">"Easy" — trivial</h3>
+              <p class="block-desc" data-i18n="settings.easy.desc">Press when you knew it instantly, no effort at all. You'll see the card much later, and it becomes easier over time.</p>
+            </div>
+          </div>
+
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setEasyBonus" data-i18n="settings.easy.bonus">Extra multiplier for "Easy" (%)</label>
+              <div class="row-hint" data-i18n="settings.easy.bonus.hint">On top of "Good". Default 130 — so "Easy" waits about 30% longer than "Good".</div>
+            </div>
+            <input id="setEasyBonus" type="number" min="100" max="250" />
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setEasyEaseBoost" data-i18n="settings.easy.easeBoost">Increase ease by % points</label>
+              <div class="row-hint" data-i18n="settings.easy.easeBoost.hint">The card gradually becomes easier. Default 15.</div>
+            </div>
+            <input id="setEasyEaseBoost" type="number" min="0" max="30" />
+          </div>
+          <div class="example-row" id="easyPreviewRow">
+            <span class="example-label" data-i18n="settings.exampleLabel">Example:</span>
+            <span class="example-text" id="setEasyPreview"></span>
+          </div>
+        </div>
+
+        <div class="settings-block sm2-only">
+          <h3 data-i18n="settings.global.title">Global</h3>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setIntervalMod" data-i18n="settings.intervalModifier">Interval modifier (%)</label>
+              <div class="row-hint" data-i18n="settings.intervalModifier.hint">Multiplies ALL new intervals. Set lower than 100 if you want to see cards more often; higher if the schedule feels too aggressive. Default 100.</div>
+            </div>
+            <input id="setIntervalMod" type="number" min="50" max="300" />
+          </div>
+        </div>
+        </div>
+
+        <div class="review-advanced" id="reviewAdvanced2" hidden>
+        <div class="settings-block ai-block">
+          <div class="block-header">
+            <span class="block-icon">✨</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.ai.title">AI card generation</h3>
+              <p class="block-desc" data-i18n="settings.ai.desc">Type a word, get translation, IPA, examples and synonyms — automatically.</p>
+            </div>
+          </div>
+
+          <div class="settings-row ai-mode-row">
+            <label id="aiModeLabel" for="setAiMode" data-i18n="settings.ai.mode">Mode</label>
+            <select id="setAiMode" class="visually-hidden" aria-labelledby="aiModeLabel">
+              <option value="off" data-i18n="settings.ai.mode.off">Off</option>
+              <option value="dictionary" data-i18n="settings.ai.mode.dict">Free dictionary only (English)</option>
+              <option value="ai" data-i18n="settings.ai.mode.ai">Dictionary + my AI key</option>
+            </select>
+            <div class="ai-mode-segmented" role="radiogroup" aria-labelledby="aiModeLabel">
+              <button type="button" class="ai-mode-option" role="radio" data-ai-mode="off" data-i18n="settings.ai.mode.off">Off</button>
+              <button type="button" class="ai-mode-option" role="radio" data-ai-mode="dictionary" data-i18n="settings.ai.mode.dictShort">Dictionary</button>
+              <button type="button" class="ai-mode-option" role="radio" data-ai-mode="ai" data-i18n="settings.ai.mode.aiShort">Dictionary + AI</button>
+            </div>
+          </div>
+
+          <div id="aiExtra">
+            <div class="settings-row">
+              <label for="setAiProvider" data-i18n="settings.ai.provider">Provider</label>
+              <select id="setAiProvider">
+                <option value="openai">OpenAI · GPT</option>
+                <option value="google">Google · Gemini</option>
+                <option value="xai">xAI · Grok</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <label for="setAiKey" data-i18n="settings.ai.key">API key</label>
+              <div class="ai-key-row">
+                <input id="setAiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-..." />
+                <button class="btn ghost small" id="aiTestBtn" type="button" data-i18n="settings.ai.test">Test</button>
+              </div>
+            </div>
+            <div class="settings-row with-hint ai-model-row">
+              <div>
+                <label for="setAiModel" data-i18n="settings.ai.model">Model</label>
+                <div class="row-hint" id="aiModelHint" data-i18n="settings.ai.modelHint">Choose from the provider's available models.</div>
+              </div>
+              <div class="ai-model-controls">
+                <select id="setAiModel"></select>
+                <button class="btn ghost small" id="refreshAiModelsBtn" type="button" data-i18n="settings.ai.refreshModels">Refresh list</button>
+              </div>
+            </div>
+            <div class="settings-row with-hint ai-prompt-list-row">
+              <div>
+                <label for="setExampleTopics" data-i18n="settings.ai.exampleTopics">Example topics</label>
+                <div class="row-hint" data-i18n="settings.ai.listHint">Separate items with a semicolon (;).</div>
+              </div>
+              <textarea id="setExampleTopics" rows="2" spellcheck="false" aria-describedby="exampleTopicsHint"></textarea>
+              <span class="visually-hidden" id="exampleTopicsHint" data-i18n="settings.ai.listHint">Separate items with a semicolon (;).</span>
+            </div>
+            <div class="settings-row with-hint ai-prompt-list-row">
+              <div>
+                <label for="setExampleSituations" data-i18n="settings.ai.exampleSituations">Example situations</label>
+                <div class="row-hint" data-i18n="settings.ai.listHint">Separate items with a semicolon (;).</div>
+              </div>
+              <textarea id="setExampleSituations" rows="2" spellcheck="false" aria-describedby="exampleSituationsHint"></textarea>
+              <span class="visually-hidden" id="exampleSituationsHint" data-i18n="settings.ai.listHint">Separate items with a semicolon (;).</span>
+            </div>
+            <div class="settings-row with-hint ai-prompt-list-row">
+              <div>
+                <label for="setExampleStyles" data-i18n="settings.ai.exampleStyles">Example styles</label>
+                <div class="row-hint" data-i18n="settings.ai.listHint">Separate items with a semicolon (;).</div>
+              </div>
+              <textarea id="setExampleStyles" rows="2" spellcheck="false" aria-describedby="exampleStylesHint"></textarea>
+              <span class="visually-hidden" id="exampleStylesHint" data-i18n="settings.ai.listHint">Separate items with a semicolon (;).</span>
+            </div>
+            <div class="settings-row with-hint ai-temperature-row">
+              <div>
+                <label for="setExampleTemperature" data-i18n="settings.ai.temperature">Model temperature</label>
+                <div class="row-hint" data-i18n="settings.ai.temperatureHint">From 0 to 2. Higher values make examples more varied.</div>
+              </div>
+              <input id="setExampleTemperature" type="number" min="0" max="2" step="0.1" inputmode="decimal" />
+            </div>
+            <div class="ai-test-status" id="aiTestStatus" hidden></div>
+          </div>
+        </div>
+
+        <div class="settings-block button-block algo-block">
+          <div class="block-header">
+            <span class="block-icon">🧠</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.algorithm.title">Review algorithm</h3>
+              <p class="block-desc" data-i18n="settings.algorithm.desc">How the app decides when to show you a card.</p>
+            </div>
+          </div>
+
+          <div class="algo-options">
+            <label class="algo-option">
+              <input type="radio" name="setAlgorithm" value="sm2" />
+              <div class="algo-card">
+                <div class="algo-name" data-i18n="settings.algorithm.sm2">SM-2 (classic Anki)</div>
+                <div class="algo-desc" data-i18n="settings.algorithm.sm2.desc">Simple and proven.</div>
+              </div>
+            </label>
+            <label class="algo-option">
+              <input type="radio" name="setAlgorithm" value="fsrs" />
+              <div class="algo-card">
+                <div class="algo-name" data-i18n="settings.algorithm.fsrs">FSRS (modern)</div>
+                <div class="algo-desc" data-i18n="settings.algorithm.fsrs.desc">Models memory as stability + difficulty.</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="fsrs-extra" id="fsrsExtra" hidden>
+            <div class="settings-row with-hint">
+              <div>
+                <label for="setFsrsRetention" data-i18n="settings.fsrs.retention">Desired recall quality (%)</label>
+                <div class="row-hint" data-i18n="settings.fsrs.retention.hint">What fraction of cards you want to recall on sight.</div>
+              </div>
+              <input id="setFsrsRetention" type="number" min="70" max="98" step="1" />
+            </div>
+            <div class="settings-row with-hint">
+              <div>
+                <label for="setFsrsMaxInterval" data-i18n="settings.fsrs.maxInterval">Maximum interval (days)</label>
+                <div class="row-hint" data-i18n="settings.fsrs.maxInterval.hint">Cards will never be shown later than this.</div>
+              </div>
+              <input id="setFsrsMaxInterval" type="number" min="30" max="36500" />
+            </div>
+            <div class="settings-preview fsrs-preview" id="fsrsPreview" aria-live="polite">
+              <div class="preview-label" data-i18n="settings.fsrs.preview">Review preview · card due after 10 days</div>
+              <div class="fsrs-preview-grid">
+                <span><b data-i18n="study.again">Again</b><output id="fsrsPreviewAgain">—</output></span>
+                <span><b data-i18n="study.hard">Hard</b><output id="fsrsPreviewHard">—</output></span>
+                <span><b data-i18n="study.good">Good</b><output id="fsrsPreviewGood">—</output></span>
+                <span><b data-i18n="study.easy">Easy</b><output id="fsrsPreviewEasy">—</output></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-block button-block leech-block">
+          <div class="block-header">
+            <span class="block-icon">🪱</span>
+            <div class="block-heading">
+              <h3 data-i18n="settings.leech.title">Leeches</h3>
+              <p class="block-desc" data-i18n="settings.leech.desc">Cards you keep failing — better to suspend than to grind.</p>
+            </div>
+          </div>
+          <div class="settings-row with-hint">
+            <div>
+              <label for="setLeechThresholdExpert" data-i18n="settings.leech.threshold">Lapses before auto-suspend</label>
+              <div class="row-hint" data-i18n="settings.leech.threshold.hint">If you press Again this many times, the card is suspended automatically.</div>
+            </div>
+            <input id="setLeechThresholdExpert" type="number" min="0" max="50" />
+          </div>
+        </div>
+        </div>
+
+        <div class="settings-block">
+          <div class="settings-row toggle with-hint">
+            <div>
+              <label for="setAutoTTS" data-i18n="settings.autoTTS">Pronounce automatically</label>
+              <div class="row-hint" data-i18n="settings.autoTTS.hint">Pronounces the original word after the answer is shown.</div>
+            </div>
+            <input id="setAutoTTS" type="checkbox" />
+          </div>
+          <div class="settings-row with-hint tts-rate-row">
+            <div>
+              <label for="setTtsRate" data-i18n="settings.ttsRate">Speech speed</label>
+              <div class="row-hint" data-i18n="settings.ttsRate.hint">Applies to words and full texts.</div>
+            </div>
+            <div class="tts-rate-control">
+              <div class="tts-rate-slider-line">
+                <input id="setTtsRate" type="range" min="0.3" max="1.5" step="0.05" value="0.95" />
+                <output id="ttsRateDisplay" for="setTtsRate" aria-live="polite">0.95×</output>
+              </div>
+              <button class="btn ghost small tts-preview-btn" id="ttsPreviewBtn" type="button">
+                <span aria-hidden="true">🔊</span>
+                <span data-i18n="settings.ttsRate.preview">Preview speed</span>
+              </button>
+            </div>
+          </div>
+          <div class="settings-row settings-control-stack">
+            <label for="setTheme" data-i18n="settings.theme">Theme</label>
+            <select id="setTheme">
+              <option value="light" data-i18n="settings.theme.light">Light</option>
+              <option value="dark" data-i18n="settings.theme.dark">Dark</option>
+              <option value="auto" data-i18n="settings.theme.autoSystem">Auto · follows system</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-block">
+          <div class="block-heading">
+            <h3 data-i18n="settings.backup.title">Backup &amp; transfer</h3>
+            <p class="block-desc js-tooltip" data-i18n="settings.backup.desc">The full backup includes decks, cards, study progress, review history, reading-practice data, settings, and the API key. Keep the backup file in a secure place.</p>
+          </div>
+          <div class="backup-metadata" aria-live="polite">
+            <span id="backupCounts">—</span>
+            <span id="backupSize">—</span>
+            <span id="backupLastSuccessful">—</span>
+          </div>
+          <div class="settings-row backup-actions">
+            <button class="btn primary" id="exportBtn" data-i18n="settings.backup.export">Export backup</button>
+            <button class="btn" id="shareExportBtn" data-i18n="settings.backup.share">Share backup</button>
+          </div>
+          <div class="settings-action-list">
+            <label class="settings-action-row" for="importFile">
+              <span><b data-i18n="settings.backup.restoreFull">Restore full backup</b><small class="row-hint js-tooltip" data-i18n="settings.backup.restoreFullHint">Replace cards, progress and settings</small></span>
+              <span aria-hidden="true">›</span>
+            </label>
+            <input type="file" id="importFile" accept="application/json,.json" hidden>
+          </div>
+        </div>
+
+        <div class="settings-block recovery-block" id="recoveryBlock" hidden aria-live="polite">
+          <h3 data-i18n="settings.recovery.title">Recent change</h3>
+          <p class="block-desc" id="recoveryDescription"></p>
+          <button class="btn" id="recoveryUndoBtn" data-i18n="settings.recovery.undo">Restore previous data</button>
+        </div>
+
+        <div class="settings-block danger">
+          <h3 data-i18n="settings.data">Data</h3>
+          <div class="settings-action-list">
+            <button class="settings-action-row settings-action-button" id="resetProgressBtn" type="button">
+              <span><b data-i18n="settings.resetProgress">Reset progress</b><small class="row-hint js-tooltip" data-i18n="settings.resetProgressHint">Cards and decks will remain</small></span>
+              <span aria-hidden="true">›</span>
+            </button>
+            <button class="settings-action-row settings-action-button danger-row" id="wipeBtn" type="button">
+              <span><b data-i18n="settings.deleteAll">Delete everything</b><small class="row-hint js-tooltip" data-i18n="settings.deleteAllHint">Cards, history and settings</small></span>
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
+        </div>
+        </div>
+      </section>
+    </main>
+
+    <button class="study-edge-tab" id="studyEdgeTab" type="button" aria-controls="studyEdgeMenu" aria-expanded="false" aria-label="Открыть меню"></button>
+    <div class="study-edge-scrim" id="studyEdgeScrim" hidden></div>
+    <div class="study-edge-menu" id="studyEdgeMenu" role="menu" aria-hidden="true" hidden>
+      <button class="study-edge-action" id="edgePracticeBtn" type="button" role="menuitem">
+        <span class="study-edge-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14.5A1.5 1.5 0 0 1 18.5 20H7a3 3 0 0 0-3 3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        </span>
+        <span class="study-edge-copy"><b data-i18n="practice.open">Reading practice</b><small data-i18n="edge.practice.hint">Text and questions</small></span>
+      </button>
+      <button class="study-edge-action" id="edgeRefreshBtn" type="button" role="menuitem">
+        <span class="study-edge-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M20 9a8 8 0 0 0-13.7-3L4 10"/><path d="M4 15a8 8 0 0 0 13.7 3L20 14"/></svg>
+        </span>
+        <span class="study-edge-copy"><b data-i18n="edge.refresh">Refresh examples</b><small data-i18n="edge.refresh.hint">Active categories</small></span>
+      </button>
+      <div class="study-edge-mode">
+        <button class="study-edge-action study-edge-mode-trigger" id="edgeModeBtn" type="button" role="menuitem" aria-expanded="false" aria-controls="edgeModePanel">
+          <span class="study-edge-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h10M4 17h16M14 4v6M10 14v6"/></svg>
+          </span>
+          <span class="study-edge-copy"><b data-i18n="settings.cardMode">Mode</b><small id="edgeModeSummary"></small></span>
+          <span class="study-edge-mode-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="study-edge-mode-panel" id="edgeModePanel" hidden>
+          <fieldset>
+            <legend data-i18n="settings.cardMode">Mode</legend>
+            <label><input type="checkbox" name="edgeStudyMode" value="word" /><span data-i18n="settings.cardMode.word">Word</span></label>
+            <label><input type="checkbox" name="edgeStudyMode" value="sentence" /><span data-i18n="settings.cardMode.sentenceShort">Sentence</span></label>
+          </fieldset>
+          <fieldset>
+            <legend data-i18n="settings.cardFrontLanguage">Card front</legend>
+            <label><input type="checkbox" name="edgeStudyFront" value="english" /><span data-i18n="settings.cardFrontLanguage.english">English</span></label>
+            <label><input type="checkbox" name="edgeStudyFront" value="local" /><span data-i18n="settings.cardFrontLanguage.local">Interface language</span></label>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+
+    <nav class="mobile-tabs" aria-label="Primary navigation">
+      <button class="nav-item active" data-view="study" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 4v6h6"/></svg>
+        <span data-i18n="nav.study">Study</span>
+      </button>
+      <button class="nav-item" data-view="decks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="14" height="14" rx="2"/><path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/></svg>
+        <span data-i18n="nav.decks">Decks</span>
+      </button>
+      <button class="nav-item" data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>
+        <span data-i18n="nav.stats">Stats</span>
+      </button>
+      <button class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span data-i18n="nav.settings">Settings</span>
+      </button>
+    </nav>
+
+    <!-- Modals -->
+    <div class="modal text-input-modal confirm-modal" id="textInputModal" hidden role="dialog" aria-modal="true" aria-labelledby="textInputTitle">
+      <form class="modal-card compact-modal-card" id="textInputForm">
+        <header class="modal-header">
+          <h2 id="textInputTitle"></h2>
+          <button class="icon-btn" id="textInputClose" type="button" data-close aria-label="Close">×</button>
+        </header>
+        <div class="modal-body">
+          <p class="confirm-message" id="textInputMessage" hidden></p>
+          <input id="textInputField" type="text" maxlength="120" autocomplete="off" />
+        </div>
+        <footer class="modal-footer">
+          <button class="btn ghost" id="textInputCancel" type="button" data-close data-i18n="modal.cancel">Cancel</button>
+          <button class="btn primary" id="textInputConfirm" type="submit"></button>
+        </footer>
+      </form>
+    </div>
+
+    <!-- Confirmation dialog -->
+    <div class="modal confirm-modal" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage confirmDetail" hidden>
+      <div class="modal-backdrop" data-confirm-cancel></div>
+      <div class="modal-panel confirm-panel">
+        <div class="modal-head">
+          <h2 id="confirmTitle">Confirm action</h2>
+          <button class="icon-btn" type="button" data-confirm-cancel aria-label="Close" title="Close">&times;</button>
+        </div>
+        <div class="modal-body confirm-body">
+          <p class="confirm-message" id="confirmMessage"></p>
+          <p class="confirm-detail" id="confirmDetail" hidden></p>
+        </div>
+        <div class="modal-foot confirm-actions">
+          <button class="btn" id="confirmCancelBtn" type="button">Cancel</button>
+          <button class="btn danger" id="confirmAcceptBtn" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duplicate cards dialog -->
+    <div class="modal duplicate-modal" id="duplicateModal" role="dialog" aria-modal="true" aria-labelledby="duplicateTitle" aria-describedby="duplicateMessage" hidden>
+      <div class="modal-backdrop" data-duplicate-close></div>
+      <div class="modal-panel small duplicate-panel">
+        <header class="modal-head">
+          <h2 id="duplicateTitle" data-i18n="duplicate.title">Duplicates found</h2>
+          <button class="icon-btn" id="duplicateCloseBtn" type="button" data-duplicate-close data-i18n-title="duplicate.close" data-i18n-aria-label="duplicate.close" title="Close" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+        <div class="modal-body">
+          <p class="duplicate-message" id="duplicateMessage">
+            <span id="duplicatePrefix"></span><span class="duplicate-words" id="duplicateWords"></span><span id="duplicateSuffix"></span>
+          </p>
+        </div>
+        <footer class="modal-foot">
+          <button class="btn primary" id="duplicateOkBtn" type="button" data-i18n="duplicate.ok">OK</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Card editor modal -->
+    <div class="modal" id="editorModal" role="dialog" aria-modal="true" aria-labelledby="editorTitle" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-panel editor-panel">
+        <div class="sheet-grabber" aria-hidden="true"><span></span></div>
+        <header class="modal-head editor-head">
+          <div class="editor-head-copy">
+            <h2 id="editorTitle" data-i18n="modal.newCard">New card</h2>
+            <p id="editorDeckName" aria-live="polite"></p>
+          </div>
+          <button class="icon-btn" data-close aria-label="Close" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+        <div class="modal-body editor-body">
+          <section class="editor-word-card" id="edFrontRow">
+            <label for="edFront" data-i18n="modal.front">Front</label>
+            <textarea id="edFront" rows="2" data-i18n-ph="modal.frontPh" placeholder="ubiquitous"></textarea>
+            <div class="editor-ai-row">
+              <button class="btn primary ai-gen-btn" id="aiGenBtn" type="button" title="Fill with AI">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/></svg>
+                <span data-i18n="ai.generate">Fill</span>
+              </button>
+              <button class="btn ghost editor-info-btn" id="editorInfoBtn" type="button" data-i18n-title="study.info.button" data-i18n-aria-label="study.info.button" title="Explain this word (AI)" aria-label="Explain this word (AI)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </button>
+            </div>
+            <div class="ai-status" id="aiStatus" hidden></div>
+          </section>
+          <section class="editor-word-card editor-translation" id="edBackRow">
+            <label for="edBack" data-i18n="modal.back">Back</label>
+            <textarea id="edBack" rows="2" data-i18n-ph="modal.backPh" placeholder="translation"></textarea>
+          </section>
+          <section class="editor-word-card editor-cloze" id="edClozeRow" hidden>
+            <label for="edCloze"><span data-i18n="modal.cloze">Cloze text</span> <span class="hint" data-i18n="modal.cloze.hint">wrap hidden parts in {{ }}</span></label>
+            <textarea id="edCloze" rows="3" data-i18n-ph="modal.clozePh" placeholder="The {{ubiquitous}} smartphone changed everything."></textarea>
+          </section>
+          <div class="editor-details">
+            <div class="editor-word-card editor-secondary-card">
+              <label for="edExample"><span data-i18n="modal.example">Example</span> <span class="hint" data-i18n="modal.example.hint">optional</span></label>
+              <textarea id="edExample" rows="2" data-i18n-ph="modal.examplePh" placeholder="Plastic is ubiquitous in modern life."></textarea>
+            </div>
+            <div class="editor-word-card editor-secondary-card">
+              <label for="edHint"><span data-i18n="modal.pron">Pronunciation</span></label>
+              <textarea id="edHint" rows="2" placeholder="/juːˈbɪkwɪtəs/"></textarea>
+            </div>
+            <div class="editor-selects">
+              <div class="form-row">
+                <label for="edType" data-i18n="modal.cardType">Card type</label>
+                <select id="edType">
+                  <option value="basic" data-i18n="modal.cardType.basic">Basic (front → back)</option>
+                  <option value="reverse" data-i18n="modal.cardType.reverse">Reverse (both directions)</option>
+                  <option value="cloze" data-i18n="modal.cardType.cloze">Cloze deletion</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="edDeck" data-i18n="modal.deck">Deck</label>
+                <select id="edDeck"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="modal-foot editor-actions">
+          <button class="btn ghost" data-close data-i18n="modal.cancel">Cancel</button>
+          <button class="btn ghost" id="saveAddAnotherBtn" data-i18n="modal.saveAnother">Save and add another</button>
+          <button class="btn primary" id="saveCardBtn" data-i18n="modal.save">Save</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Deck editor modal -->
+    <div class="modal" id="deckModal" role="dialog" aria-modal="true" aria-labelledby="deckModalTitle" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-panel small">
+        <div class="sheet-grabber" aria-hidden="true"><span></span></div>
+        <header class="modal-head">
+          <h2 id="deckModalTitle" data-i18n="modal.newDeck">New deck</h2>
+          <button class="icon-btn" data-close aria-label="Close" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+        <div class="modal-body">
+          <div class="form-row">
+            <label data-i18n="modal.deckName">Name</label>
+            <input id="deckName" type="text" data-i18n-ph="modal.deckNamePh" placeholder="English · Core 1000" />
+          </div>
+          <div class="form-row">
+            <label><span data-i18n="modal.deckDesc">Description</span> <span class="hint" data-i18n="modal.deckDesc.hint">optional</span></label>
+            <textarea id="deckDesc" rows="2" data-i18n-ph="modal.deckDescPh" placeholder="High-frequency vocabulary"></textarea>
+          </div>
+        </div>
+        <footer class="modal-foot">
+          <button class="btn ghost" data-close data-i18n="modal.cancel">Cancel</button>
+          <button class="btn primary" id="saveDeckBtn" data-i18n="modal.save">Save</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="modal" id="bulkModal" role="dialog" aria-modal="true" aria-labelledby="bulkModalTitle" hidden>
+      <div class="modal-panel">
+        <div class="sheet-grabber" aria-hidden="true"><span></span></div>
+        <header class="modal-head">
+          <div>
+            <div class="modal-title" id="bulkModalTitle" data-i18n="bulk.title">Add cards from a list</div>
+          </div>
+          <button class="icon-btn" data-close aria-label="Close" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+        <div class="modal-body">
+          <div class="form-row two">
+            <div>
+              <label data-i18n="bulk.deck">Deck</label>
+              <select id="bulkDeck"></select>
+            </div>
+            <div>
+              <label data-i18n="bulk.cardType">Card type</label>
+              <select id="bulkType">
+                <option value="basic" data-i18n="modal.cardType.basic">Basic (front → back)</option>
+                <option value="reverse" data-i18n="modal.cardType.reverse">Reverse (both directions)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <label data-i18n="bulk.input">Word list</label>
+            <textarea id="bulkText" rows="12" data-i18n-ph="bulk.placeholder" placeholder="One word per line…"></textarea>
+            <div class="row-hint" data-i18n="bulk.autoNote">Translation and transcription are filled in automatically for each word.</div>
+          </div>
+          <label class="bulk-check">
+            <input type="checkbox" id="bulkFillExample" />
+            <span class="bulk-check-text">
+              <span class="bulk-check-title" data-i18n="bulk.fillExample">Also fill an example for each word</span>
+              <span class="bulk-check-sub" data-i18n="bulk.fillExample.sub">Uses your AI key — a bit slower.</span>
+            </span>
+          </label>
+          <div class="bulk-preview-line">
+            <span id="bulkPreviewText" data-i18n="bulk.previewEmpty">Type your list to see a preview.</span>
+          </div>
+        </div>
+        <footer class="modal-foot">
+          <button class="btn ghost" data-close data-i18n="modal.cancel">Cancel</button>
+          <button class="btn primary" id="bulkAddBtn"><span data-i18n="bulk.add">Add cards</span></button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Word info modal -->
+    <div class="modal" id="wordInfoModal" role="dialog" aria-modal="true" aria-labelledby="wordInfoModalTitle" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-panel word-info-panel">
+        <div class="sheet-grabber" aria-hidden="true"><span></span></div>
+        <header class="modal-head">
+          <div>
+            <div class="modal-title" id="wordInfoModalTitle" data-i18n="study.info.title">Word info</div>
+            <div class="word-info-word" id="wordInfoWord"></div>
+          </div>
+          <div class="word-info-head-actions">
+            <button class="icon-btn" id="wordInfoRefreshBtn" type="button" data-i18n-title="study.info.regenerate" data-i18n-aria-label="study.info.regenerate" title="Refresh info" aria-label="Refresh info" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M20 9a8 8 0 0 0-13.7-3L4 10"/><path d="M4 15a8 8 0 0 0 13.7 3L20 14"/></svg>
+            </button>
+            <button class="icon-btn" data-close aria-label="Close" title="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+        </header>
+        <div class="modal-body word-info-body">
+          <div class="word-info-content" id="wordInfoContent"></div>
+          <button class="btn primary" id="wordInfoGenerateBtn" type="button" hidden><span data-i18n="study.info.generate">Generate info</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading practice modal -->
+    <div class="modal" id="practiceModal" role="dialog" aria-modal="true" aria-labelledby="practiceModalTitle" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-panel practice-panel">
+        <div class="sheet-grabber" aria-hidden="true"><span></span></div>
+        <header class="modal-head">
+          <div>
+            <div class="modal-title" id="practiceModalTitle" data-i18n="practice.title">Reading practice</div>
+            <div class="practice-sub" data-i18n="practice.subtitle">A short story built from your words — then answer a few questions.</div>
+          </div>
+          <button class="icon-btn" data-close aria-label="Close" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+
+        <div class="modal-body practice-body">
+          <!-- STEP 1: setup -->
+          <div class="practice-step" id="practiceSetup">
+            <div class="form-row">
+              <label data-i18n="practice.period">Which words to practice</label>
+              <div class="practice-period" id="practicePeriod">
+                <button class="period-opt active" data-period="last" type="button">
+                  <span class="period-name" data-i18n="practice.period.last">Last session</span>
+                  <span class="period-count" data-period-count="last">0</span>
+                </button>
+                <button class="period-opt" data-period="all" type="button">
+                  <span class="period-name" data-i18n="practice.period.all">All learned</span>
+                  <span class="period-count" data-period-count="all">0</span>
+                </button>
+              </div>
+              <div class="practice-days-row">
+                <label class="practice-days" for="practiceDays">
+                  <span class="practice-days-text"><span data-i18n="practice.period.daysPre">Last</span> <b id="practiceDaysValue">7</b> <span data-i18n="practice.period.daysPost">days</span></span>
+                  <span class="practice-days-count" data-period-count="days">0</span>
+                </label>
+                <input id="practiceDays" type="range" min="1" max="180" step="1" value="7" />
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div>
+                <label for="practiceDeck" data-i18n="practice.deck">Deck</label>
+                <select id="practiceDeck"></select>
+              </div>
+              <div>
+                <label for="practiceCount" data-i18n="practice.count">Words to weave in</label>
+                <select id="practiceCount">
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8" selected>8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="12">12</option>
+                  <option value="14">14</option>
+                  <option value="16">16</option>
+                  <option value="18">18</option>
+                  <option value="20">20</option>
+                  <option value="25">25</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div>
+                <label for="practiceLevel" data-i18n="practice.level">Difficulty</label>
+                <select id="practiceLevel">
+                  <option value="auto" data-i18n="practice.level.auto">Auto (match my words)</option>
+                  <option value="A1">A1 — beginner</option>
+                  <option value="A2">A2 — elementary</option>
+                  <option value="B1">B1 — intermediate</option>
+                  <option value="B2">B2 — upper-intermediate</option>
+                  <option value="C1">C1 — advanced</option>
+                </select>
+              </div>
+              <div>
+                <label for="practiceFormat" data-i18n="practice.format">Text format</label>
+                <select id="practiceFormat">
+                  <option value="story" data-i18n="practice.format.story">Short story</option>
+                  <option value="dialogue" data-i18n="practice.format.dialogue">Dialogue</option>
+                  <option value="article" data-i18n="practice.format.article">Mini-article</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="practice-wordpreview-wrap">
+              <div class="practice-wordpreview-head">
+                <span class="practice-wordpreview-title" data-i18n="practice.words.title">Words in play</span>
+                <button class="btn ghost small" id="practiceClearSelectionBtn" type="button" data-i18n="practice.words.useAll">Use all</button>
+              </div>
+              <div class="practice-selection-note" id="practiceSelectionNote" data-i18n="practice.words.hint">All words are used. Tap any to use only those.</div>
+              <div class="practice-wordpreview" id="practiceWordPreview"></div>
+            </div>
+
+            <div class="practice-history-block">
+              <button class="btn ghost small practice-history-toggle" id="practiceHistoryBtn" type="button">
+                <span data-i18n="practice.history.toggle">Practice history</span>
+                <span class="practice-history-count" id="practiceHistoryCount">0</span>
+              </button>
+              <div class="practice-history-list" id="practiceHistoryList" hidden></div>
+            </div>
+
+            <div class="ai-status" id="practiceSetupStatus" hidden></div>
+          </div>
+
+          <!-- STEP 2: reading + questions -->
+          <div class="practice-step" id="practiceRun" hidden>
+            <div class="practice-loading" id="practiceLoading" hidden>
+              <div class="practice-spinner"></div>
+              <div id="practiceLoadingText" data-i18n="practice.generating">Writing your story…</div>
+            </div>
+
+            <article class="practice-story" id="practiceStory" hidden></article>
+
+            <div class="practice-questions" id="practiceQuestions" hidden></div>
+          </div>
+
+          <!-- STEP 3: feedback -->
+          <div class="practice-step" id="practiceResult" hidden>
+            <div class="practice-checking" id="practiceChecking" hidden>
+              <div class="practice-spinner"></div>
+              <div data-i18n="practice.checking">Checking your answers…</div>
+            </div>
+            <div id="practiceFeedback" hidden></div>
+          </div>
+
+          <footer class="modal-foot practice-foot">
+            <button class="btn ghost" id="practiceBackBtn" type="button" hidden data-i18n="practice.back">Back</button>
+            <button class="btn primary" id="practiceStartBtn" type="button" data-i18n="practice.start">Generate text</button>
+            <button class="btn primary" id="practiceCheckBtn" type="button" hidden data-i18n="practice.check">Check answers</button>
+            <button class="btn primary" id="practiceAgainBtn" type="button" hidden data-i18n="practice.again">New text</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <div class="add-card-menu deck-action-menu" id="deckActionMenu" role="menu" aria-hidden="true" hidden></div>
+
+    <div class="add-card-menu" id="addCardMenu" role="menu" hidden>
+      <button type="button" role="menuitem" data-add-mode="single">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+        <span data-i18n="addMenu.single">One card</span>
+      </button>
+      <button type="button" role="menuitem" data-add-mode="bulk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <span data-i18n="addMenu.bulk">Several words as a list</span>
+      </button>
+    </div>
+
+    <div class="selection-popover" id="selectionPopover" hidden>
+      <div class="selection-pop-heading">
+        <div class="selection-pop-word" id="selectionPopoverWord"></div>
+        <button class="selection-speak-btn" id="selectionSpeakBtn" type="button" data-i18n-title="selection.pronounce" data-i18n-aria-label="selection.pronounce" title="Pronounce selection" aria-label="Pronounce selection">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/>
+            <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+            <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+          </svg>
+        </button>
+      </div>
+      <div class="selection-pop-actions">
+        <button class="btn ghost small" id="selectionTranslateBtn" type="button" data-i18n="selection.translate">Translate</button>
+        <button class="btn primary small" id="selectionAddBtn" type="button" data-i18n="selection.add">Add card</button>
+      </div>
+      <div class="selection-pop-translation" id="selectionPopoverTranslation" hidden></div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+    <aside class="update-notice" id="updateNotice" hidden role="status" aria-live="polite">
+      <span data-i18n="pwa.updateAvailable">Update available</span>
+      <button class="btn small primary" id="applyUpdateBtn" type="button" data-i18n="pwa.restart">Restart</button>
+    </aside>
+
+    <script src="storage.js?v=3.19.16"></script>
+    <script src="fsrs.js?v=3.19.16"></script>
+    <script src="ai.js?v=3.19.16"></script>
+    <script src="seed.js?v=3.19.16"></script>
+    <script src="i18n/uk.js?v=3.19.16"></script>
+    <script src="i18n/ru.js?v=3.19.16"></script>
+    <script src="i18n/en.js?v=3.19.16"></script>
+    <script src="i18n/runtime.js?v=3.19.16"></script>
+    <script src="tooltips.js?v=3.19.16"></script>
+    <script src="backup.js?v=3.19.16"></script>
+    <script src="js/state.js?v=3.19.16"></script>
+    <script src="js/scheduler.js?v=3.19.16"></script>
+    <script src="js/ui.js?v=3.19.16"></script>
+    <script src="js/study.js?v=3.19.16"></script>
+    <script src="js/decks.js?v=3.19.16"></script>
+    <script src="js/stats.js?v=3.19.16"></script>
+    <script src="js/settings.js?v=3.19.16"></script>
+    <script src="js/ai-practice.js?v=3.19.16"></script>
+    <script src="js/cards.js?v=3.19.16"></script>
+    <script src="js/import-export.js?v=3.19.16"></script>
+    <script src="js/selection.js?v=3.19.16"></script>
+    <script src="js/edge-menu.js?v=3.19.16"></script>
+    <script src="js/motion.js?v=3.19.16"></script>
+    <script src="js/app-shell.js?v=3.19.16"></script>
+</body>
+</html>
