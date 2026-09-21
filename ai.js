@@ -25,8 +25,18 @@
   }
 
   function translatorCodeFor(code, fallback = "en") {
-    const lang = learningLanguage(code);
-    return lang?.translatorCode || (code ? String(code).toLowerCase() : fallback);
+    const normalized = String(code || "").trim().toLowerCase();
+    if (!normalized) return fallback;
+    // ВАЖНО: реестр LCLanguages описывает только языки ОБУЧЕНИЯ (en, nb).
+    // Его `getLanguage()` для неизвестного кода молча возвращает язык по
+    // умолчанию (English). Из-за этого код интерфейса "ru" превращался в
+    // translatorCode "en", и перевод норвежского приходил на английском.
+    // Поэтому подменяем код только для кодов, реально описанных в реестре.
+    const registry = (typeof window !== "undefined" ? window : globalThis).LCLanguages;
+    const known = registry?.isLanguageCode ? registry.isLanguageCode(normalized) : false;
+    if (!known) return normalized;
+    const lang = learningLanguage(normalized);
+    return lang?.translatorCode || normalized;
   }
   const DEFAULT_TIMEOUT_MS = 30000;
 
