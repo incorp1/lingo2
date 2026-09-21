@@ -108,7 +108,7 @@ function renderStudy() {
   renderStudyQueueControls(deckId);
 
   if (!session || session.deckId !== deckId) {
-    startSession(deckId);
+    startSession(deckId, { resume: true });
     return;
   }
 
@@ -553,7 +553,7 @@ function reveal() {
 let gradeSaving = false;
 
 async function grade(g) {
-  if (gradeSaving || !session?.currentId || !session.revealed) return;
+  if (gradeSaving || (typeof isLearningLanguageSwitchBusy === "function" && isLearningLanguageSwitchBusy()) || !session?.currentId || !session.revealed) return;
   const card = getCardById(session.currentId);
   if (!card) return;
 
@@ -565,7 +565,7 @@ async function grade(g) {
     const variantResult = advanceStudyCardVariant(g);
     session._spoken = false;
     if (!variantResult.complete) {
-      saveCurrentStudyCycle();
+      saveCurrentStudyResume();
       await saveAndFlush();
       await window.LCMotion?.transitionStudyCardOut();
       deferCurrentStudyCardVariant();
@@ -575,6 +575,8 @@ async function grade(g) {
     }
 
     clearStudyCycle(card.id);
+    state.studyResume = { deckId: session.deckId ?? null, currentId: null };
+    markMetaDirty();
     if (!Array.isArray(state.sessionReviewedIds)) state.sessionReviewedIds = [];
     if (!state.sessionReviewedIds.includes(card.id)) state.sessionReviewedIds.push(card.id);
     scheduleAnswer(card, variantResult.grade);

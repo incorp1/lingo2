@@ -299,7 +299,7 @@
       const grades = Array.isArray(cycle.grades)
         ? cycle.grades.slice(0, 4).map(grade => finiteNumber(grade, -1, 0, 3, true)).filter(grade => grade >= 0)
         : [];
-      if (variants.length < 2 || index <= 0 || index >= variants.length || grades.length !== index) continue;
+      if (variants.length < 1 || index < 0 || index >= variants.length || grades.length !== index) continue;
       out[cardId] = {
         variants,
         index,

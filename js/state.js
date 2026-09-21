@@ -705,7 +705,7 @@ function normalizeStudyCycles(raw, cards) {
     const grades = Array.isArray(cycle.grades)
       ? cycle.grades.filter(grade => Number.isInteger(grade) && grade >= 0 && grade <= 3)
       : [];
-    if (variants.length < 2 || !Number.isInteger(index) || index <= 0 || index >= variants.length) continue;
+    if (variants.length < 1 || !Number.isInteger(index) || index < 0 || index >= variants.length) continue;
     if (grades.length !== index) continue;
     normalized[cardId] = {
       variants,

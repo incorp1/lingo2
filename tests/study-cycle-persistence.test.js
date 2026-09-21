@@ -62,6 +62,38 @@ function createSession(cardId = "card-1") {
   };
 }
 
+test("AUD-003: возобновление сохраняет последнюю сессию и точный вариант после перезапуска", () => {
+  const runtime = loadScheduler();
+  const card = { id: "card-1", deckId: "deck-en", state: "new" };
+  runtime.state.cards = [card];
+  runtime.getCardById = id => runtime.state.cards.find(item => item.id === id);
+  runtime.getDeckCards = () => runtime.state.cards;
+  runtime.session = { ...createSession(), deckId: "deck-en" };
+  runtime.state.sessionReviewedIds = ["completed-en"];
+  runtime.advanceStudyCardVariant(2);
+  runtime.saveCurrentStudyResume();
+  const saved = structuredClone(runtime.state);
+  runtime.session = null;
+  runtime.state = saved;
+  runtime.startSession("deck-en", { resume: true });
+  assert.equal(runtime.session.currentId, "card-1");
+  assert.equal(runtime.session.currentCardVariantIndex, 1);
+  assert.deepEqual(Array.from(runtime.session.currentCardGrades), [2]);
+  assert.deepEqual(Array.from(runtime.state.sessionReviewedIds), ["completed-en"]);
+  assert.equal(runtime.session.revealed, false);
+  runtime.startSession("deck-en", { preserveCurrent: true });
+  assert.equal(runtime.session.currentCardVariants.length, 4);
+  assert.equal(runtime.session.currentCardVariantIndex, 1);
+});
+
+test("AUD-003: цикл первого варианта сохраняется до первого ответа", () => {
+  const runtime = loadScheduler();
+  runtime.session = { ...createSession(), deckId: "deck-en" };
+  runtime.saveCurrentStudyResume();
+  assert.equal(runtime.state.studyCycles["card-1"].index, 0);
+  assert.equal(runtime.state.studyResume.currentId, "card-1");
+});
+
 test("незавершённый цикл сохраняется после каждого из первых трёх ответов", () => {
   const runtime = loadScheduler();
   runtime.session = createSession();

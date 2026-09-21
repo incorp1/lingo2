@@ -72,7 +72,7 @@ async function switchLearningLanguage(rawCode) {
   const previous = normalizeLearningLanguage(state?.activeLearningLanguage);
   if (next === previous) return true;
   // Re-entry guard: a second tap while the first switch is in flight is a no-op.
-  if (learningLanguageSwitchBusy) return false;
+  if (learningLanguageSwitchBusy || (typeof gradeSaving !== "undefined" && gradeSaving)) return false;
 
   learningLanguageSwitchBusy = true;
   try {
@@ -89,6 +89,7 @@ async function switchLearningLanguage(rawCode) {
     if (typeof cancelSelectionGesture === "function") cancelSelectionGesture();
 
     // Wait for the in-flight commit, then flush the source profile.
+    if (typeof saveCurrentStudyResume === "function") saveCurrentStudyResume();
     syncActiveLanguageProfile(state);
     markMetaDirty();
     await saveAndFlush();

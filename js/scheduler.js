@@ -441,8 +441,16 @@ function beginStudyCardVariants() {
   session.currentCardFront = variants[0]?.front || "english";
 }
 
+function saveCurrentStudyResume() {
+  if (!session) return;
+  state.studyResume = { deckId: session.deckId ?? null, currentId: session.currentId ?? null };
+  saveCurrentStudyCycle();
+  markMetaDirty();
+}
+
 function saveCurrentStudyCycle() {
-  if (!session?.currentId || session.currentCardVariantIndex <= 0) return false;
+  if (!session?.currentId || !session.currentCardVariants?.length ||
+      session.currentCardGrades?.length !== session.currentCardVariantIndex) return false;
   if (!state.studyCycles || typeof state.studyCycles !== "object") state.studyCycles = {};
   state.studyCycles[session.currentId] = {
     variants: session.currentCardVariants.map(variant => ({ ...variant })),
@@ -534,40 +542,41 @@ function restoreStudyCardVariant(entry) {
 }
 
 function startSession(deckId, options = {}) {
-  const preservedCurrent = options.preserveCurrent === true && session?.deckId === deckId
-    ? {
-        id: session.currentId,
-        revealed: session.revealed === true,
-        startedAt: session.startedAt,
-        cardMode: session.currentCardMode,
-        cardFront: session.currentCardFront,
-      }
-    : null;
-  const preservedCurrentId = preservedCurrent?.id && getCardById(preservedCurrent.id)
-    ? preservedCurrent.id
-    : null;
-
+  const preserve = options.preserveCurrent === true && session?.deckId === deckId;
+  if (preserve) saveCurrentStudyCycle();
+  const resume = options.resume === true && state.studyResume?.deckId === deckId
+    ? state.studyResume : null;
+  const currentId = preserve ? session.currentId : resume?.currentId;
+  const card = currentId ? getCardById(currentId) : null;
+  const include = state.settings.studyQueue || { new: true, learning: true, review: true };
+  const source = typeof activeCards === "function" ? activeCards(deckId) : getDeckCards(deckId);
+  const available = card && source.some(item => item.id === card.id) && card.state !== "suspended" &&
+    (preserve || (include[card.state] && (card.state === "new" || card.due <= Date.now())));
+  const revealed = preserve && session.revealed === true;
+  const startedAt = preserve ? session.startedAt : Date.now();
   session = {
     deckId,
     queue: [],
     queueHead: 0,
     queuedIds: new Set(),
-    currentId: preservedCurrentId,
-    currentCardMode: preservedCurrentId ? (preservedCurrent.cardMode || chooseStudyCardMode()) : null,
-    currentCardFront: preservedCurrentId ? (preservedCurrent.cardFront || chooseStudyCardFront()) : null,
-    currentCardVariants: preservedCurrentId
-      ? [{ mode: preservedCurrent.cardMode || "word", front: preservedCurrent.cardFront || "english" }]
-      : [],
+    currentId: available ? card.id : null,
+    currentCardMode: null,
+    currentCardFront: null,
+    currentCardVariants: [],
     currentCardVariantIndex: 0,
     currentCardGrades: [],
-    revealed: preservedCurrentId ? preservedCurrent.revealed : false,
-    startedAt: preservedCurrentId ? preservedCurrent.startedAt : Date.now(),
+    revealed,
+    startedAt,
   };
-  if (!preservedCurrentId) state.sessionReviewedIds = [];
+  if (!preserve && options.resume !== true) state.sessionReviewedIds = [];
+  if (session.currentId) restoreStudyCardVariant({ id: session.currentId });
   markMetaDirty();
   refillStudyQueue(Date.now());
-  if (preservedCurrentId) renderStudy();
-  else next();
+  if (session.currentId) {
+    saveCurrentStudyResume();
+    if (typeof save === "function") save();
+    renderStudy();
+  } else next();
 }
 
 function insertQueuedCard(card) {
@@ -675,6 +684,8 @@ function next({ refreshDue = false } = {}) {
     session.currentCardVariantIndex = 0;
     session.currentCardGrades = [];
     session.revealed = false;
+    saveCurrentStudyResume();
+    if (typeof save === "function") save();
     renderStudy();
     updateStreak();
     if (typeof scheduleNextDueRefresh === "function") scheduleNextDueRefresh();
@@ -688,6 +699,8 @@ function next({ refreshDue = false } = {}) {
   restoreStudyCardVariant(current);
   session.revealed = false;
   refillStudyQueue(now);
+  saveCurrentStudyResume();
+  if (typeof save === "function") save();
   renderStudy();
   if (typeof scheduleNextDueRefresh === "function") scheduleNextDueRefresh();
 }
