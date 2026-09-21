@@ -878,6 +878,13 @@ function isDeckInActiveLanguage(deckOrId) {
   return deckLearningLanguage(deck) === normalizeLearningLanguage(state?.activeLearningLanguage);
 }
 
+// Normalized code of the active learning language (shared helper).
+function activeLearningLanguageCode() {
+  return window.LCLanguages?.normalizeLanguageCode
+    ? window.LCLanguages.normalizeLanguageCode(state.activeLearningLanguage)
+    : (state.activeLearningLanguage || "en");
+}
+
 // Cards of the active language, or of one deck when an id is given.
 function activeCards(deckId = null) {
   if (deckId) return isDeckInActiveLanguage(deckId) ? (cardsByDeck.get(deckId) || []) : [];

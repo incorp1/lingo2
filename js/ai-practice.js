@@ -14,12 +14,7 @@ function aiTargetLangName() {
 
 /* The learning language is independent from the interface/translation
    language: it decides the source language of prompts, the dictionary
-   endpoint and the translator source code. */
-function activeLearningLanguageCode() {
-  return window.LCLanguages?.normalizeLanguageCode
-    ? window.LCLanguages.normalizeLanguageCode(state.activeLearningLanguage)
-    : (state.activeLearningLanguage || "en");
-}
+   endpoint and the translator source code. Defined in js/state.js. */
 
 function learningLangName() {
   return window.LCLanguages?.getLanguage

@@ -42,8 +42,10 @@ test("пакетные примеры и Word Info получают назван
 });
 
 test("вызывающие модули передают активный язык обучения", () => {
+  const state = read("js/state.js");
+  assert.match(state, /function activeLearningLanguageCode\(\)/);
   const practice = read("js/ai-practice.js");
-  assert.match(practice, /function activeLearningLanguageCode\(\)/);
+  assert.doesNotMatch(practice, /function activeLearningLanguageCode\(\)/);
   assert.match(practice, /function learningLangName\(\)/);
   assert.match(practice, /sourceLang: learningLangName\(\),/);
   assert.doesNotMatch(practice, /sourceLang: "English",/);
