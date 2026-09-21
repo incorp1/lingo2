@@ -774,10 +774,33 @@ function cardsForStudyExampleRefresh() {
   );
 }
 
+// Снимок фиксируется до первого await: смена языка или редактирование
+// карточки не должны превращать старый ответ в актуальную запись.
+function captureStudyAiContext(cards) {
+  const language = activeLearningLanguageCode();
+  const languageName = learningLangName();
+  const generation = currentLanguageGeneration();
+  const identities = new Map((cards || []).filter(Boolean).map(card => [card.id, card]));
+  const snapshots = [...identities.values()].map(card => JSON.parse(JSON.stringify(card)));
+  const current = () => isLanguageGenerationCurrent(generation)
+    && activeLearningLanguageCode() === language
+    && !isLearningLanguageSwitchBusy();
+  const matches = original => {
+    const card = getCardById(original.id);
+    const deck = card && getDeckById(card.deckId);
+    return current() && card === identities.get(original.id) && !!deck && normalizeLearningLanguage(deck.learningLanguage) === language
+      && card.deckId === original.deckId
+      && ["front", "back", "type", "info", "example", "exampleSentence", "exampleTranslation", "exampleTargetTerm"]
+        .every(key => JSON.stringify(card[key]) === JSON.stringify(original[key]));
+  };
+  return { language, languageName, snapshots, current, matches };
+}
+
 async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
-  if (!await prepareAiJob("example-refresh")) return;
-  const unique = [...new Map((cards || [])
-    .filter(card => card && card.type !== "cloze" && String(card.front || "").trim())
+  const context = captureStudyAiContext(cards);
+  if (!await prepareAiJob("example-refresh") || !context.current()) return;
+  const unique = [...new Map(context.snapshots
+    .filter(card => context.matches(card) && card.type !== "cloze" && String(card.front || "").trim())
     .map(card => [card.id, card])).values()];
   if (!unique.length) {
     toast(t("examples.none"));
@@ -795,7 +818,7 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
     message: t("examples.confirm", { n: unique.length, batches: Math.ceil(unique.length / EXAMPLE_BATCH_SIZE) }),
     confirmLabel: t("confirm.refreshExamples.action"),
   });
-  if (!confirmed) {
+  if (!confirmed || !context.current() || !isCurrentAiJob(job)) {
     finishAiJob(job);
     return;
   }
@@ -820,12 +843,17 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
   try {
     await waitForExampleRefreshPaint();
     while (pending.length) {
-      if (!isCurrentAiJob(job)) throw new DOMException("stale", "AbortError");
-      const batchEntries = pending.splice(0, EXAMPLE_BATCH_SIZE);
-      const batch = batchEntries.map(entry => entry.card);
+      if (!isCurrentAiJob(job) || !context.current()) throw new DOMException("stale", "AbortError");
       const waitMs = Math.max(0, nextRequestAt - Date.now());
       await waitForExampleRefreshDelay(waitMs, job.controller.signal);
-      if (!isCurrentAiJob(job)) throw new DOMException("stale", "AbortError");
+      if (!isCurrentAiJob(job) || !context.current()) throw new DOMException("stale", "AbortError");
+      const batchEntries = pending.splice(0, EXAMPLE_BATCH_SIZE).filter(entry => {
+        if (context.matches(entry.card)) return true;
+        resolved += 1;
+        return false;
+      });
+      if (!batchEntries.length) continue;
+      const batch = batchEntries.map(entry => entry.card);
 
       batchEntries.forEach(entry => { entry.attempts += 1; });
       nextRequestAt = Date.now() + (state.settings.aiProvider === "google" ? EXAMPLE_GEMINI_REQUEST_INTERVAL_MS : 0);
@@ -837,8 +865,8 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
           key: state.settings.aiKey,
           model: state.settings.aiModel || undefined,
           targetLang: aiTargetLangName(),
-          learningLanguage: activeLearningLanguageCode(),
-          learningLangName: learningLangName(),
+          learningLanguage: context.language,
+          learningLangName: context.languageName,
           topics: state.settings.exampleTopics,
           situations: state.settings.exampleSituations,
           styles: state.settings.exampleStyles,
@@ -848,6 +876,7 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
           retryAttempts: 1,
         });
       } catch (error) {
+        if (!context.current() || !isCurrentAiJob(job)) throw new DOMException("stale", "AbortError");
         if (isAbortError(error)) throw error;
         if (error?.storageError) throw error;
         if (exampleRefreshErrorStatus(error) === 429) {
@@ -865,13 +894,14 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
         continue;
       }
 
-      if (!isCurrentAiJob(job)) throw new DOMException("stale", "AbortError");
+      if (!isCurrentAiJob(job) || !context.current()) throw new DOMException("stale", "AbortError");
       const byId = new Map(result.map(item => [String(item.id), item]));
       const updates = [];
       const retryEntries = [];
 
       for (const entry of batchEntries) {
         const original = entry.card;
+        if (!context.matches(original)) { resolved += 1; continue; }
         const current = getCardById(original.id);
         const item = byId.get(String(original.id));
         const unchanged = current && String(current.front || "").trim() === String(original.front || "").trim();
@@ -904,7 +934,9 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
       if (updates.length) {
         const savedIds = new Set();
         const ok = await mutateAndFlush(() => {
+          if (!context.current() || !isCurrentAiJob(job)) throw new DOMException("stale", "AbortError");
           for (const update of updates) {
+            if (!context.matches(update.entry.card)) continue;
             const card = getCardById(update.id);
             const storedExamples = card ? normalizedExampleFields(card) : null;
             const stillMatchesOriginal = storedExamples
@@ -921,6 +953,7 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
             }
           }
         });
+        if (!context.current() || !isCurrentAiJob(job)) throw new DOMException("stale", "AbortError");
         if (!ok) {
           const storageError = new Error("Failed to save refreshed examples");
           storageError.storageError = true;
@@ -1100,38 +1133,43 @@ async function requestWordInfo() {
     toast(t("examples.aiRequired"), { error: true });
     return;
   }
-  if (!await prepareAiJob()) return;
+  const context = captureStudyAiContext([card]);
+  const original = context.snapshots[0];
+  if (!await prepareAiJob() || !context.matches(original)) return;
   const job = await startAiJob("word-info", `word-info:${card.id}`);
   if (!job) return;
+  if (!context.matches(original)) { finishAiJob(job); return; }
   modal.dataset.busy = "1";
   renderWordInfoModal();
   try {
-    const info = await window.LCAi.generateWordInfo(card, {
+    const info = await window.LCAi.generateWordInfo(original, {
       provider: state.settings.aiProvider,
       key: state.settings.aiKey,
       model: state.settings.aiModel || undefined,
       temperature: state.settings.exampleTemperature,
-      learningLanguage: activeLearningLanguageCode(),
-      learningLangName: learningLangName(),
+      learningLanguage: context.language,
+      learningLangName: context.languageName,
       signal: job.controller.signal,
       timeoutMs: AI_TIMEOUT_MS,
       retryAttempts: 1,
     });
-    if (!isCurrentAiJob(job)) return;
+    if (!isCurrentAiJob(job) || !context.matches(original)) return;
     const ok = await mutateAndFlush(() => {
-      const stored = getCardById(card.id);
+      if (!isCurrentAiJob(job) || !context.matches(original)) throw new DOMException("stale", "AbortError");
+      const stored = getCardById(original.id);
       if (!stored) throw new Error("Card not found");
       stored.info = info;
       stored.updatedAt = Date.now();
       markCardDirty(stored);
     });
+    if (!isCurrentAiJob(job) || !context.current()) return;
     if (!ok) throw new Error("storage");
     updateEditorInfoBtn();
     if (wordInfoCardId !== card.id || modal.hidden) return;
     delete modal.dataset.busy;
     renderWordInfoModal();
   } catch (error) {
-    if (!isAbortError(error) && !modal.hidden) {
+    if (isCurrentAiJob(job) && context.current() && !isAbortError(error) && !modal.hidden) {
       delete modal.dataset.busy;
       const content = $("#wordInfoContent");
       const card2 = wordInfoModalCard();
@@ -1143,6 +1181,10 @@ async function requestWordInfo() {
       $("#wordInfoRefreshBtn").hidden = !hasInfo;
     }
   } finally {
+    if (ownsAiJob(job) && wordInfoCardId === original.id && !modal.hidden && modal.dataset.busy === "1") {
+      delete modal.dataset.busy;
+      renderWordInfoModal();
+    }
     finishAiJob(job);
   }
 }

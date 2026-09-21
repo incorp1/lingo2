@@ -124,8 +124,108 @@ function loadSwitchHarness({ failWrite = false, commitDrafts = true } = {}) {
       Object.assign(__api, { startAiJob, isCurrentAiJob, runAbortableWorkerPool });
     `, context);
   };
+  context.__api.loadStudyConsumers = () => {
+    context.__api.loadAiManager();
+    const source = fs.readFileSync(path.join(root, "js/study.js"), "utf8");
+    vm.runInContext(`
+      state.settings = { aiKey: "test-only", aiProvider: "openai" };
+      state.cards = Array.from({ length: 41 }, (_, i) => ({ id: "en-" + i, deckId: "deck-en", front: "word" + i }));
+      const elements = new Map();
+      document.querySelector = selector => {
+        if (!elements.has(selector)) elements.set(selector, { hidden: false, dataset: {},
+          classList: { add() {}, remove() {} }, setAttribute() {}, removeAttribute() {} });
+        return elements.get(selector);
+      };
+      function getCardById(id) { return state.cards.find(card => card.id === id); }
+      getDeckById = id => ({ id, learningLanguage: id === "deck-en" ? "en" : "nb" });
+      function activeLearningLanguageCode() { return state.activeLearningLanguage; }
+      function learningLangName() { return state.activeLearningLanguage === "en" ? "English" : "Norwegian Bokmål"; }
+      function aiTargetLangName() { return "Russian"; }
+      let wordInfoCardId = "en-0";
+      function wordInfoModalCard() { return getCardById(wordInfoCardId); }
+      function renderWordInfoModal() {}
+      function updateEditorInfoBtn() {}
+      function markCardDirty(card) { log.push("saved:" + card.id); }
+      function reportSaveError(error) { throw error; }
+      const EXAMPLE_BATCH_SIZE = 20, EXAMPLE_MAX_ATTEMPTS = 3, EXAMPLE_GEMINI_REQUEST_INTERVAL_MS = 10000;
+      let exampleRefreshRunning = false;
+      function exampleRefreshAiReady() { return true; }
+      confirmDialog = async () => true;
+      function createExampleRefreshBar() { return {}; }
+      function cancelExampleRefreshRing() {}
+      async function waitForExampleRefreshPaint() {}
+      async function waitForExampleRefreshDelay() {}
+      function setExampleRefreshBar() {}
+      function tweenExampleRefreshRing() {}
+      async function removeExampleRefreshBar() {}
+      function renderBrowse() {}
+      function renderDecks() {}
+      function refreshDeckCardsModal() {}
+      function normalizedExampleFields(card) { return { sentence: card.exampleSentence || "", translation: card.exampleTranslation || "" }; }
+      function normalizeExampleLine(value) { return String(value || "").trim(); }
+    `, context);
+    vm.runInContext(source.slice(source.indexOf("function captureStudyAiContext"), source.indexOf("function refreshDeckExamples")), context);
+    vm.runInContext(source.slice(source.indexOf("async function requestWordInfo"), source.indexOf('$("#wordInfoGenerateBtn").onclick')), context);
+    vm.runInContext(`Object.assign(__api, { requestWordInfo, refreshExamplesForCards });`, context);
+    context.__api.ai = context.window.LCAi = {};
+  };
   return context.__api;
 }
+
+for (const change of ["switch", "edit", "replace", "move", "delete"]) {
+  test(`AUD-002: информация о слове отклоняет поздний ответ после ${change}`, async () => {
+    const api = loadSwitchHarness();
+    api.loadStudyConsumers();
+    let release;
+    let started;
+    const ready = new Promise(resolve => { started = resolve; });
+    api.ai.generateWordInfo = (card, options) => {
+      assert.equal(options.learningLanguage, "en");
+      assert.equal(card.front, "word0");
+      started();
+      return new Promise(resolve => { release = resolve; });
+    };
+    const pending = api.requestWordInfo();
+    await ready;
+    if (change === "switch") {
+      await api.switchLearningLanguage("nb");
+      await api.switchLearningLanguage("en");
+    } else if (change === "edit") api.getState().cards[0].front = "edited";
+    else if (change === "replace") api.getState().cards[0] = { ...api.getState().cards[0] };
+    else if (change === "move") api.getState().cards[0].deckId = "deck-nb";
+    else api.getState().cards.shift();
+    release("устаревшее объяснение");
+    await pending;
+    assert.equal(api.getLog().filter(item => item.startsWith("saved:")).length, 0);
+    assert.equal(api.getState().cards.some(card => card.info), false);
+  });
+}
+
+test("AUD-002: подтверждённый пакет сохраняется, поздний пакет и следующие запросы отменяются", async () => {
+  const api = loadSwitchHarness();
+  api.loadStudyConsumers();
+  let release;
+  let started;
+  let calls = 0;
+  const ready = new Promise(resolve => { started = resolve; });
+  const results = batch => batch.map(card => ({ id: card.id, example: "new " + card.front, exampleTranslation: "перевод" }));
+  api.ai.generateExamplesBatch = (batch, options) => {
+    calls += 1;
+    assert.equal(options.learningLanguage, "en");
+    if (calls === 1) return Promise.resolve(results(batch));
+    started();
+    return new Promise(resolve => { release = () => resolve(results(batch)); });
+  };
+  const pending = api.refreshExamplesForCards(api.getState().cards, null);
+  await ready;
+  assert.equal(api.getLog().filter(item => item.startsWith("saved:")).length, 20);
+  await api.switchLearningLanguage("nb");
+  await api.switchLearningLanguage("en");
+  release();
+  await pending;
+  assert.equal(calls, 2);
+  assert.equal(api.getLog().filter(item => item.startsWith("saved:")).length, 20);
+});
 
 test("AUD-001: переключение отменяет настоящий AI-пул и не запускает оставшиеся элементы", async () => {
   const api = loadSwitchHarness();
