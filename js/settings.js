@@ -274,7 +274,7 @@ function renderSettingsSummaries() {
   }
   // Footer version/storage
   const footerVersion = $("#settingsFooterVersion");
-  if (footerVersion) footerVersion.textContent = "v3.20.4";
+  if (footerVersion) footerVersion.textContent = "v3.20.5";
   const footerStorage = $("#settingsFooterStorage");
   if (footerStorage && navigator.storage && navigator.storage.estimate) {
     navigator.storage.estimate().then(est => {

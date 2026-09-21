@@ -173,10 +173,11 @@ function closeDialog(modal) {
 
 function settleConfirmDialog(confirmed) {
   if (!pendingConfirmation) return;
-  const { resolve } = pendingConfirmation;
+  const { resolve, choice } = pendingConfirmation;
+  const result = confirmed && choice ? $("#confirmChoice").value : confirmed;
   pendingConfirmation = null;
   closeDialog($("#confirmModal"));
-  resolve(confirmed);
+  resolve(result);
 }
 
 function cancelConfirmDialog() {
@@ -300,7 +301,7 @@ function requestTextInput({ title, message = "", value = "", placeholder = "", c
   });
 }
 
-function confirmDialog({ title, message, detail = "", confirmLabel, cancelLabel, danger = false } = {}) {
+function confirmDialog({ title, message, detail = "", confirmLabel, cancelLabel, danger = false, choice = null } = {}) {
   if (pendingConfirmation) settleConfirmDialog(false);
   const modal = $("#confirmModal");
   const confirmButton = $("#confirmAcceptBtn");
@@ -316,8 +317,20 @@ function confirmDialog({ title, message, detail = "", confirmLabel, cancelLabel,
   confirmButton.classList.toggle("danger", danger);
   confirmButton.classList.toggle("primary", !danger);
 
+  const select = $("#confirmChoice");
+  if (select) {
+    select.hidden = !choice;
+    select.replaceChildren();
+    for (const item of choice?.options || []) {
+      const option = document.createElement("option");
+      option.value = item.value;
+      option.textContent = item.label;
+      select.append(option);
+    }
+    if (choice) select.value = choice.value;
+  } else if (choice) return Promise.resolve(false);
   return new Promise(resolve => {
-    pendingConfirmation = { resolve };
+    pendingConfirmation = { resolve, choice };
     openDialog(modal, $("#confirmCancelBtn"));
   });
 }

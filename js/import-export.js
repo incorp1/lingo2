@@ -59,14 +59,14 @@ async function resolveDeckImportLanguage(deckLanguage) {
   const languageLabel = code => t(`language.name.${code}`);
   // An unlabeled legacy deck must be assigned explicitly; default is English.
   if (!deckLanguage) {
-    const useActive = await confirmDialog({
+    const selected = await confirmDialog({
       title: t("confirm.deckImport.title"),
-      message: t("confirm.deckImport.unlabeled", { lang: languageLabel(activeLanguage) }),
+      message: t("confirm.deckImport.chooseLanguage"),
       detail: t("confirm.deckImport.detail"),
       confirmLabel: t("confirm.deckImport.action"),
+      choice: { value: "en", options: languageCodes().map(code => ({ value: code, label: languageLabel(code) })) },
     });
-    if (useActive === null) return null;
-    return useActive ? activeLanguage : "en";
+    return languageCodes().includes(selected) ? selected : null;
   }
   if (deckLanguage === activeLanguage) return deckLanguage;
   const keepDeckLanguage = await confirmDialog({
@@ -425,13 +425,13 @@ async function importDeckBackup(text) {
     );
     return;
   }
+  const importLanguage = await resolveDeckImportLanguage(result.deck.learningLanguage);
+  if (!importLanguage) return;
   if (typeof commitSettingsDrafts === "function") {
     const committedDrafts = await commitSettingsDrafts("deck-import");
     if (committedDrafts === false) return;
   }
   await window.LCStorage.flush();
-  const importLanguage = await resolveDeckImportLanguage(result.deck.learningLanguage);
-  if (!importLanguage) return;
   const committed = await window.LCStorage.appendDeck({
     ...result.deck,
     learningLanguage: importLanguage,

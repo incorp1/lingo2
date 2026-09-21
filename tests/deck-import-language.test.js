@@ -119,6 +119,47 @@ test("global wipe warns about every language and keeps recovery", () => {
   assert.ok(source.includes('"wipe-all"'), "wipe keeps a recovery operation label");
 });
 
+test("AUD-005: отмена не пишет данные, подтверждение сохраняет выбранный язык", async () => {
+  const { Window } = await import("happy-dom");
+  for (const action of ["cancel", "close", "en", "nb"]) {
+    const window = new Window();
+    const html = read("index.html");
+    window.document.body.innerHTML = html.slice(html.indexOf('    <!-- Confirmation dialog -->'), html.indexOf('    <!-- Duplicate cards dialog -->'));
+    const calls = [];
+    const state = { activeLearningLanguage: "nb", revision: 0, decks: [], cards: [] };
+    const context = vm.createContext({
+      window, document: window.document, HTMLElement: window.HTMLElement,
+      requestAnimationFrame: callback => callback(), console, state,
+      t: key => key, normalizeLearningLanguage: code => code, languageCodes: () => ["en", "nb"],
+      commitSettingsDrafts: async () => { calls.push("settings"); },
+      rebuildEntityIndexes() {}, resetDirtyState() {}, renderDecks() {}, renderDeckSelector() {},
+    });
+    window.LCBackup = { parse: () => ({ kind: "deck", deck: { name: "Legacy", cards: [] } }) };
+    window.LCStorage = {
+      flush: async () => { calls.push("flush"); },
+      appendDeck: async deck => { calls.push(deck.learningLanguage); return { deck, cards: [], revision: 1, updatedAt: 1 }; },
+    };
+    vm.runInContext(read("js/ui.js") + '\n' + read("js/import-export.js") + '\ntoast = () => {};', context);
+    const pending = context.importDeckBackup("{}");
+    assert.equal(window.document.querySelector("#confirmChoice").value, "en");
+    assert.deepEqual(calls, []);
+    if (action === "cancel") context.cancelConfirmDialog();
+    else if (action === "close") context.settleConfirmDialog(false);
+    else {
+      window.document.querySelector("#confirmChoice").value = action;
+      context.settleConfirmDialog(true);
+    }
+    await pending;
+    assert.deepEqual(calls, ["cancel", "close"].includes(action) ? [] : ["settings", "flush", action]);
+    assert.equal(state.decks.length, ["cancel", "close"].includes(action) ? 0 : 1);
+    await window.happyDOM.close();
+  }
+  const shell = read("js/app-shell.js");
+  assert.ok(shell.includes('$("#confirmCancelBtn").onclick = cancelConfirmDialog'));
+  assert.ok(shell.includes('activeDialog.id === "confirmModal") cancelConfirmDialog()'));
+  assert.ok(shell.includes('e.target.closest("[data-confirm-cancel]")'));
+});
+
 test("destructive confirmation strings exist in every interface language", () => {
   const keys = [
     "confirm.resetProgress.languageDetail",

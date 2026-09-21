@@ -10,7 +10,7 @@ test("вариант A подключён к рабочему экрану ко�
   const html = read("index.html");
   assert.match(html, /id="deckBrowseSubtitle"/);
   assert.match(html, /id="deckBrowseAddBtn"/);
-  assert.match(html, /css\/deck-browser-vA\.css\?v=3\.20\.4/);
+  assert.match(html, /css\/deck-browser-vA\.css\?v=3\.20\.5/);
 });
 
 test("тап по строке открывает редактор, не перехватывая вложенные действия", () => {
@@ -42,6 +42,6 @@ test("фильтры оформлены компактным выпадающи�
 
 test("новый стиль входит в PWA app shell", () => {
   const sw = read("sw.js");
-  assert.match(sw, /lingo-cards-v3\.20\.4/);
-  assert.match(sw, /deck-browser-vA\.css\?v=3\.20\.4/);
+  assert.match(sw, /lingo-cards-v3\.20\.5/);
+  assert.match(sw, /deck-browser-vA\.css\?v=3\.20\.5/);
 });
