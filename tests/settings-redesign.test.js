@@ -107,7 +107,7 @@ test("P39/P41: canonical full v2 export preserves the API key and updatedAt", ()
     practiceDraft: null,
   });
   const payload = JSON.parse(text);
-  assert.equal(payload.format, 2);
+  assert.equal(payload.format, 3);
   assert.equal(payload.kind, "full");
   assert.equal(payload.metadata.secretsIncluded, true);
   assert.equal(payload.state.settings.aiKey, "TOP-SECRET-SENTINEL");
@@ -193,7 +193,7 @@ test("P45: deck v2 strips identity, scheduling, settings, secrets, and linkedCar
   const text = backup.buildDeckExport(source);
   const payload = JSON.parse(text);
   assert.equal(payload.kind, "deck");
-  assert.equal(payload.format, 2);
+  assert.equal(payload.format, 3);
   assert.equal(payload.deck.cards[0].type, "cloze");
   for (const forbidden of ["id", "deckId", "state", "due", "reps", "linkedCardId"]) {
     assert.ok(!(forbidden in payload.deck.cards[0]), forbidden);

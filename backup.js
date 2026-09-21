@@ -20,9 +20,15 @@
   // ---- Config (format constants live here, not scattered in logic) ----
   const CONFIG = {
     app: "lingo-cards",
-    format: 2,            // canonical full/deck backup envelope version
+    format: 3,            // canonical full/deck backup envelope version
     fileBase: "lingo-cards",
   };
+
+  // Every learning language must round-trip; unknown codes are rejected
+  // instead of being silently folded into the default language.
+  const LEARNING_LANGUAGES = new Set(["en", "nb"]);
+  const DEFAULT_LEARNING_LANGUAGE = "en";
+  const SUPPORTED_FORMATS = [1, 2, 3];
 
   const LIMITS = {
     decks: 10000,
@@ -76,6 +82,10 @@
     return id;
   }
 
+  function learningLanguage(value, fallback = DEFAULT_LEARNING_LANGUAGE) {
+    return enumValue(value, LEARNING_LANGUAGES, fallback);
+  }
+
   function sanitizeDeck(raw, usedIds) {
     if (!isRecord(raw)) return null;
     return {
@@ -83,6 +93,8 @@
       name: cleanString(raw.name, LIMITS.shortText) || "Imported",
       desc: cleanString(raw.desc),
       direction: enumValue(raw.direction, DIRECTIONS, "forward"),
+      // Legacy decks without a language belong to English by definition.
+      learningLanguage: learningLanguage(raw.learningLanguage),
       createdAt: finiteNumber(raw.createdAt, Date.now(), 0, Number.MAX_SAFE_INTEGER, true),
     };
   }
@@ -294,6 +306,45 @@
     return out;
   }
 
+  function sanitizeHistoryMap(raw) {
+    const history = {};
+    if (!isRecord(raw)) return history;
+    for (const [key, value] of Object.entries(raw).slice(0, LIMITS.historyDays)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !isRecord(value)) continue;
+      history[key] = {};
+      for (const field of ["reviewed", "again", "hard", "good", "easy"]) {
+        history[key][field] = finiteNumber(value[field], 0, 0, 10000000, true);
+      }
+    }
+    return history;
+  }
+
+  function sanitizeStreak(raw) {
+    const streak = isRecord(raw) ? raw : {};
+    return {
+      current: finiteNumber(streak.current, 0, 0, 1000000, true),
+      lastDay: typeof streak.lastDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(streak.lastDay) ? streak.lastDay : null,
+    };
+  }
+
+  // One profile per learning language. Dangling references are dropped, never
+  // repointed at the first deck, so a corrupt backup cannot silently move data.
+  function sanitizeLanguageProfile(raw, code, { deckIdsByLanguage, cardIds }) {
+    const profile = isRecord(raw) ? raw : {};
+    const languageDeckIds = deckIdsByLanguage.get(code) || new Set();
+    const activeDeckId = cleanId(profile.activeDeckId);
+    return {
+      activeDeckId: languageDeckIds.has(activeDeckId) ? activeDeckId : null,
+      history: sanitizeHistoryMap(profile.history),
+      streak: sanitizeStreak(profile.streak),
+      sessionReviewedIds: Array.isArray(profile.sessionReviewedIds)
+        ? profile.sessionReviewedIds.map(cleanId).filter(id => cardIds.has(id)).slice(0, LIMITS.cards)
+        : [],
+      practiceDraft: isRecord(profile.practiceDraft) ? profile.practiceDraft : null,
+      studyResume: isRecord(profile.studyResume) ? profile.studyResume : null,
+    };
+  }
+
   function sanitizeFullState(raw) {
     if (!isRecord(raw) || !Array.isArray(raw.decks) || !Array.isArray(raw.cards) || raw.decks.length > LIMITS.decks || raw.cards.length > LIMITS.cards) return null;
     const usedDeckIds = new Set();
@@ -310,24 +361,46 @@
         delete card.linkedCardId;
       }
     }
-    const activeDeckId = cleanId(raw.activeDeckId);
-    const history = {};
-    if (isRecord(raw.history)) {
-      for (const [key, value] of Object.entries(raw.history).slice(0, LIMITS.historyDays)) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !isRecord(value)) continue;
-        history[key] = {};
-        for (const field of ["reviewed", "again", "hard", "good", "easy"]) history[key][field] = finiteNumber(value[field], 0, 0, 10000000, true);
-      }
+    const deckIdsByLanguage = new Map();
+    for (const code of LEARNING_LANGUAGES) deckIdsByLanguage.set(code, new Set());
+    for (const deck of decks) deckIdsByLanguage.get(deck.learningLanguage).add(deck.id);
+
+    // Legacy backups carry a single flat profile; it always belongs to English.
+    const rawProfiles = isRecord(raw.languageProfiles) ? raw.languageProfiles : null;
+    const legacyProfile = {
+      activeDeckId: raw.activeDeckId,
+      history: raw.history,
+      streak: raw.streak,
+      sessionReviewedIds: raw.sessionReviewedIds,
+      practiceDraft: raw.practiceDraft,
+      studyResume: raw.studyResume,
+    };
+    const languageProfiles = {};
+    for (const code of LEARNING_LANGUAGES) {
+      const source = rawProfiles
+        ? rawProfiles[code]
+        : (code === DEFAULT_LEARNING_LANGUAGE ? legacyProfile : null);
+      languageProfiles[code] = sanitizeLanguageProfile(source, code, {
+        deckIdsByLanguage,
+        cardIds: usedCardIds,
+      });
     }
-    const streakRaw = isRecord(raw.streak) ? raw.streak : {};
+
+    const activeLearningLanguage = learningLanguage(raw.activeLearningLanguage);
+    const activeProfile = languageProfiles[activeLearningLanguage];
     return {
+      dataModelVersion: 2,
+      activeLearningLanguage,
+      languageProfiles,
       decks,
       cards,
-      activeDeckId: deckIds.has(raw.activeDeckId) ? raw.activeDeckId : (decks[0]?.id || null),
+      activeDeckId: activeProfile.activeDeckId,
       settings: sanitizeSettings(raw.settings),
-      history,
-      streak: { current: finiteNumber(streakRaw.current, 0, 0, 1000000, true), lastDay: typeof streakRaw.lastDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(streakRaw.lastDay) ? streakRaw.lastDay : null },
-      sessionReviewedIds: Array.isArray(raw.sessionReviewedIds) ? raw.sessionReviewedIds.map(cleanId).filter(id => usedCardIds.has(id)).slice(0, LIMITS.cards) : [],
+      history: activeProfile.history,
+      streak: activeProfile.streak,
+      sessionReviewedIds: activeProfile.sessionReviewedIds,
+      practiceDraft: activeProfile.practiceDraft,
+      studyResume: activeProfile.studyResume,
       studyCycles: sanitizeStudyCycles(raw.studyCycles, usedCardIds),
       revision: finiteNumber(raw.revision, 0, 0, Number.MAX_SAFE_INTEGER, true),
       updatedAt: finiteNumber(raw.updatedAt, 0, 0, Number.MAX_SAFE_INTEGER, true),
@@ -452,6 +525,19 @@
     const state = sanitizeFullState(snapshot.state);
     if (!state) throw new TypeError("Invalid application state");
     state.settings = sanitizeSettings(snapshot.state.settings, { includeSecrets });
+
+    // Format 3 keeps every draft inside its own language profile; the active
+    // language additionally mirrors it so an older reader still sees a draft.
+    const activeDraft = snapshot.practiceDraft ?? state.practiceDraft;
+    if (activeDraft && !state.languageProfiles[state.activeLearningLanguage].practiceDraft) {
+      state.languageProfiles[state.activeLearningLanguage].practiceDraft = activeDraft;
+    }
+    for (const code of LEARNING_LANGUAGES) {
+      const profile = state.languageProfiles[code];
+      profile.practiceDraft = sanitizePracticeDraft(profile.practiceDraft, state);
+    }
+    state.practiceDraft = state.languageProfiles[state.activeLearningLanguage].practiceDraft;
+
     const payload = {
       app: CONFIG.app,
       format: CONFIG.format,
@@ -460,7 +546,7 @@
       metadata: { secretsIncluded: includeSecrets === true },
       state,
       reviewEvents: sanitizeReviewEvents(snapshot.reviewEvents, state),
-      practiceDraft: sanitizePracticeDraft(snapshot.practiceDraft, state),
+      practiceDraft: state.practiceDraft,
     };
     const text = JSON.stringify(payload, null, 2);
     const secret = typeof snapshot.state.settings?.aiKey === "string" ? snapshot.state.settings.aiKey : "";
@@ -491,17 +577,17 @@
     catch (_) { return { kind: "error", reason: "invalid-data" }; }
 
     if (isRecord(data) && data.app === CONFIG.app) {
-      if (!Number.isInteger(data.format) || ![1, 2].includes(data.format)) return { kind: "error", reason: "unsupported-version" };
-      if (data.format === 2) {
+      if (!Number.isInteger(data.format) || !SUPPORTED_FORMATS.includes(data.format)) return { kind: "error", reason: "unsupported-version" };
+      if (data.format === 2 || data.format === 3) {
         if (data.kind !== "full" && data.kind !== "deck") return { kind: "error", reason: "wrong-kind" };
         if (data.kind === "deck") {
           const deck = sanitizeDeckContent(data.deck);
-          return deck ? { kind: "deck", deck, format: 2 } : { kind: "error", reason: "invalid-data" };
+          return deck ? { kind: "deck", deck, format: data.format } : { kind: "error", reason: "invalid-data" };
         }
         if (!isRecord(data.metadata) || typeof data.metadata.secretsIncluded !== "boolean") {
           return { kind: "error", reason: "invalid-data" };
         }
-        const result = fullResult(data.state, { reviewEvents: data.reviewEvents, practiceDraft: data.practiceDraft, format: 2 });
+        const result = fullResult(data.state, { reviewEvents: data.reviewEvents, practiceDraft: data.practiceDraft, format: data.format });
         if (result.kind !== "full") return result;
         result.reviewEvents = sanitizeReviewEvents(data.reviewEvents, result.state);
         result.practiceDraft = sanitizePracticeDraft(data.practiceDraft, result.state);
