@@ -922,6 +922,9 @@ function normalizeLoadedState(loaded) {
     normalizeCardSuspension(card);
     delete card.tags;
   });
+  // Audit fix #1: legacy snapshots must be migrated to the canonical language
+  // model on every real load path, not only inside tests. Idempotent.
+  normalizeLanguageModel(loaded);
   return loaded;
 }
 
