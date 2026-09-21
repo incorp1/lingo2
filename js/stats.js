@@ -191,12 +191,18 @@ async function applyServiceWorkerUpdate({ button = null, automatic = false } = {
 }
 
 function maybeApplyStandaloneUpdate(registration) {
-  if (!isStandalonePwa() || !navigator.serviceWorker.controller || !registration.waiting) return;
+  // Раньше автоприменение работало только в установленной PWA, а в остальных
+  // режимах пользователю оставалась только кнопка. Теперь обновление
+  // применяется само в любом режиме, если вкладка активна и worker ждёт.
+  if (!navigator.serviceWorker.controller || !registration.waiting) return;
+  // В установленной PWA применяем почти мгновенно, во вкладке браузера даём
+  // чуть больше времени, чтобы уведомление успело показаться.
+  const delay = isStandalonePwa() ? 200 : 600;
   setTimeout(() => {
     if (document.visibilityState === "visible" && registration.waiting) {
       applyServiceWorkerUpdate({ automatic: true });
     }
-  }, 200);
+  }, delay);
 }
 
 function showUpdateAvailable(registration) {

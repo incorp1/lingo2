@@ -55,7 +55,10 @@ self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await cache.addAll(APP_SHELL);
-    await self.skipWaiting();
+    // Намеренно без skipWaiting(): новый worker обязан остаться в состоянии
+    // `waiting`, иначе `registration.waiting` всегда null и кнопка
+    // «Перезагрузить» не может ничего применить. Активацию инициирует страница
+    // сообщением SKIP_WAITING — автоматически либо по клику.
   })());
 });
 
