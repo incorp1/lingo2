@@ -11,7 +11,7 @@
     {
       code: "en",
       aiName: "English",
-      i18nKey: "language.learning.en",
+      i18nKey: "language.name.en",
       locale: "en-US",
       dictionary: true,
       dictionaryCode: "en",
@@ -20,7 +20,7 @@
     {
       code: "nb",
       aiName: "Norwegian Bokmål",
-      i18nKey: "language.learning.nb",
+      i18nKey: "language.name.nb",
       locale: "nb-NO",
       dictionary: false,
       dictionaryCode: null,
