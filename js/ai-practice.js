@@ -371,6 +371,7 @@ function currentPracticeAnswerSnapshot() {
 function practiceCheckSnapshotIsCurrent(snapshot) {
   if (!snapshot || practiceState.revision !== snapshot.revision) return false;
   if (practiceContextId() !== snapshot.contextId || practiceState.step !== "run") return false;
+  if (snapshot.learningLanguage && activeLearningLanguageCode() !== snapshot.learningLanguage) return false;
   if ($("#practiceModal")?.hidden) return false;
   return JSON.stringify(currentPracticeAnswerSnapshot()) === snapshot.answersSignature;
 }
@@ -432,6 +433,7 @@ function practiceSnapshot() {
     count: practiceState.count || "8",
     level: practiceState.level || "auto",
     format: practiceState.format || "story",
+    learningLanguage: practiceState.learningLanguage || activeLearningLanguageCode(),
     words: Array.isArray(practiceState.words) ? practiceState.words.map(w => ({
       front: String(w.front || ""),
       back: String(w.back || ""),
@@ -465,6 +467,7 @@ function restorePracticeDraft() {
     count: String(draft.count || "8"),
     level: draft.level || "auto",
     format: draft.format || "story",
+    learningLanguage: activeLearningLanguageCode(),
     words: Array.isArray(draft.words) ? draft.words.map(w => ({
       front: String(w.front || ""),
       back: String(w.back || ""),
@@ -482,6 +485,29 @@ function clearPracticeDraft() {
   delete state.practiceDraft;
   markMetaDirty();
   save();
+}
+
+/* Drop the in-memory practice session when the learning language changes.
+   The draft of the previous language is already flushed into its profile. */
+function resetPracticeRuntime() {
+  bumpPracticeRevision();
+  practiceState = {
+    step: "setup",
+    period: "last",
+    selectedIds: null,
+    deckId: "",
+    count: "8",
+    level: "auto",
+    format: "story",
+    learningLanguage: null,
+    words: [],
+    payload: null,
+    answers: [],
+    feedback: null,
+    revision: practiceState.revision,
+  };
+  const modal = document.getElementById("practiceModal");
+  if (modal && !modal.hidden && typeof closeDialog === "function") closeDialog(modal);
 }
 
 function practiceDayWindow() {
@@ -539,7 +565,7 @@ function updatePracticeCounts() {
   renderPracticeWordPreview(deckId);
 
   // History toggle
-  const hist = Array.isArray(state.settings.practiceHistory) ? state.settings.practiceHistory : [];
+  const hist = activePracticeHistory();
   const histCount = $("#practiceHistoryCount");
   if (histCount) histCount.textContent = hist.length;
   const histBlock = document.querySelector(".practice-history-block");
@@ -755,6 +781,9 @@ async function practiceGenerate() {
 
   const chosen = sampleRandom(pool, Math.min(count, pool.length));
   const targetWords = chosen.map(c => ({ word: c.front, translation: c.back || "" }));
+  // The reading text follows the learning language, never the interface one.
+  const learnCode = activeLearningLanguageCode();
+  const learnedName = learningLangName();
   const contextId = `practice:draft:${uid()}`;
   practiceState.id = contextId.slice("practice:".length);
   const job = await startAiJob("practice-generate", contextId);
@@ -767,10 +796,11 @@ async function practiceGenerate() {
 
   const sys = `You create compact reading-comprehension exercises for language learners.
 Output ONLY valid JSON. No prose, markdown, or code fences.`;
-  const prompt = `Write one English reading-comprehension text using ALL target words below.
+  const prompt = `Write one ${learnedName} reading-comprehension text using ALL target words below.
+The whole text, title and questions must be written in ${learnedName}.
 ${generation.prompt}
 Bold each target word with **double asterisks** in the text.
-Then create exactly 3 comprehension questions in English about the text. Questions must test understanding of context (mix of meaning, inference, and usage). Questions should be open-ended (short answer), not multiple choice.
+Then create exactly 3 comprehension questions in ${learnedName} about the text. Questions must test understanding of context (mix of meaning, inference, and usage). Questions should be open-ended (short answer), not multiple choice.
 Also return a glossary: for each target word give its translation exactly as provided.
 
 Target words:
@@ -785,11 +815,14 @@ Return JSON with this exact shape:
       timeoutMs: AI_TIMEOUT_MS,
     });
     if (!isCurrentAiJob(job) || $("#practiceModal").hidden || practiceContextId() !== contextId) return;
+    // A late generation must never land in another language's profile.
+    if (activeLearningLanguageCode() !== learnCode) return;
     const payload = normalizePracticePayload(data);
     if (!payload?.text || payload.questions.length < 3) throw new Error("Invalid response");
     payload.questions = payload.questions.slice(0, 3);
     practiceState.period = period;
     practiceState.deckId = deckId;
+    practiceState.learningLanguage = learnCode;
     practiceState.words = chosen.map(c => ({ front: String(c.front || ""), back: String(c.back || "") }));
     practiceState.payload = payload;
     practiceState.answers = [];
@@ -895,6 +928,7 @@ async function practiceCheck() {
   const checkSnapshot = {
     contextId,
     revision,
+    learningLanguage: practiceState.learningLanguage || activeLearningLanguageCode(),
     answersSignature: JSON.stringify(answers.map(x => x.answer)),
   };
   persistPracticeDraft();
@@ -928,6 +962,7 @@ The items array must match the question order and length.`;
     showPracticeFeedback(result);
     addPracticeHistory({
       id: uid(), createdAt: Date.now(), period: practiceState.period, deckId: practiceState.deckId,
+      learningLanguage: practiceState.learningLanguage || activeLearningLanguageCode(),
       words: [...practiceState.words], payload: normalizePracticePayload(practiceState.payload),
       answers: [...practiceState.answers], results: result,
     });
@@ -984,6 +1019,43 @@ function showPracticeFeedback(result) {
   renderPracticeFeedback(result);
 }
 
+/* Practice history is shared storage, but every entry belongs to exactly one
+   learning language. Reads always go through this filter so one language never
+   shows or deletes another language's sessions. Legacy entries without the
+   field belong to the default learning language. */
+function practiceHistoryLanguageOf(entry) {
+  const raw = entry?.learningLanguage;
+  return window.LCLanguages?.isLanguageCode(raw)
+    ? window.LCLanguages.normalizeLanguageCode(raw)
+    : (window.LCLanguages?.DEFAULT_LANGUAGE || "en");
+}
+
+function allPracticeHistory() {
+  return Array.isArray(state.settings.practiceHistory) ? state.settings.practiceHistory : [];
+}
+
+function activePracticeHistory() {
+  const code = activeLearningLanguageCode();
+  return allPracticeHistory().filter(entry => practiceHistoryLanguageOf(entry) === code);
+}
+
+/* The per-language cap is independent: trimming one language must never drop
+   another language's sessions. */
+function trimPracticeHistory(code) {
+  const all = allPracticeHistory();
+  let seen = 0;
+  const removed = [];
+  for (let i = 0; i < all.length; i++) {
+    if (practiceHistoryLanguageOf(all[i]) !== code) continue;
+    seen += 1;
+    if (seen > PRACTICE_HISTORY_MAX) removed.push(all[i]);
+  }
+  if (removed.length === 0) return;
+  const drop = new Set(removed.map(entry => entry.id));
+  state.settings.practiceHistory = all.filter(entry => !drop.has(entry.id));
+  removed.forEach(entry => markPracticeHistoryDeleted(entry.id));
+}
+
 function addPracticeHistory(entry) {
   const payload = normalizePracticePayload(entry?.payload);
   if (!payload?.text) return;
@@ -991,25 +1063,28 @@ function addPracticeHistory(entry) {
   const words = Array.isArray(entry.words)
     ? entry.words.map(word => String(word?.front ?? word ?? "")).filter(Boolean)
     : [];
+  const code = window.LCLanguages?.isLanguageCode(entry?.learningLanguage)
+    ? window.LCLanguages.normalizeLanguageCode(entry.learningLanguage)
+    : activeLearningLanguageCode();
   state.settings.practiceHistory.unshift({
     id: String(entry.id || uid()),
     at: Number(entry.createdAt || Date.now()),
+    learningLanguage: code,
     title: payload.title,
     text: payload.text,
     glossary: payload.glossary,
     words,
   });
   markPracticeHistoryDirty(state.settings.practiceHistory[0]);
-  if (state.settings.practiceHistory.length > PRACTICE_HISTORY_MAX) {
-    const removed = state.settings.practiceHistory.splice(PRACTICE_HISTORY_MAX);
-    removed.forEach(entry => markPracticeHistoryDeleted(entry.id));
-  }
+  trimPracticeHistory(code);
   save();
 }
 
 function deletePracticeHistoryEntry(id) {
   if (!id || !Array.isArray(state.settings.practiceHistory)) return;
-  const index = state.settings.practiceHistory.findIndex(entry => entry.id === id);
+  const code = activeLearningLanguageCode();
+  const index = state.settings.practiceHistory.findIndex(entry =>
+    entry.id === id && practiceHistoryLanguageOf(entry) === code);
   if (index < 0) return;
   state.settings.practiceHistory.splice(index, 1);
   markPracticeHistoryDeleted(id);
@@ -1130,7 +1205,7 @@ function patchPracticeHistoryItem(item, h) {
 function drawPracticeHistoryWindow() {
   const list = $("#practiceHistoryList");
   if (!list || list.hidden) return;
-  const hist = Array.isArray(state.settings.practiceHistory) ? state.settings.practiceHistory : [];
+  const hist = activePracticeHistory();
   if (hist.length === 0) {
     list.replaceChildren();
     const empty = document.createElement("div");
@@ -1208,7 +1283,7 @@ function renderPracticeHistory() {
 }
 
 function openPracticeFromHistory(id) {
-  const hist = Array.isArray(state.settings.practiceHistory) ? state.settings.practiceHistory : [];
+  const hist = activePracticeHistory();
   const h = hist.find(entry => String(entry.id) === String(id));
   if (!h) return;
   const payload = clonePracticePayload({

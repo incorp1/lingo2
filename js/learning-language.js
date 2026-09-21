@@ -37,6 +37,9 @@ function learningLanguageLabel(code) {
 function clearVolatileLanguageContext() {
   session = null;
   undoStack = [];
+  // The practice draft is per-profile: the in-memory one belongs to the old
+  // language and must not be persisted into the new profile.
+  if (typeof resetPracticeRuntime === "function") resetPracticeRuntime();
   if (typeof clearAiSettingsBusyState === "function") clearAiSettingsBusyState();
   if (typeof cancelAiSettingsRequests === "function") cancelAiSettingsRequests();
   if (typeof clearBulkSelection === "function") clearBulkSelection();
