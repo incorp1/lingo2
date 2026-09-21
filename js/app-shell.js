@@ -1,15 +1,67 @@
 /* Lingo Cards — TTS, utilities, application wiring and mobile viewport */
 
 /* ----- TTS ----- */
-function speak(text, { rate } = {}) {
+const TTS_UI_LOCALES = { ru: "ru-RU", uk: "uk-UA", en: "en-US" };
+
+/* Locale of the language being learned: the front side of a card, a cloze
+   sentence, an example and a looked-up word are all spoken with it. */
+function learningSpeechLocale(code) {
+  const registry = window.LCLanguages;
+  const normalized = typeof normalizeLearningLanguage === "function"
+    ? normalizeLearningLanguage(code ?? state?.activeLearningLanguage)
+    : (code ?? state?.activeLearningLanguage);
+  return registry?.getLanguage(normalized)?.locale || "en-US";
+}
+
+/* Locale of the translation side: it follows the interface language. */
+function translationSpeechLocale() {
+  const lang = state?.settings?.language;
+  return TTS_UI_LOCALES[lang] || "en-US";
+}
+
+function baseLocaleCode(locale) {
+  return String(locale || "").toLowerCase().split(/[-_]/)[0];
+}
+
+/* Pick a voice for the requested locale. When the device has no Norwegian
+   voice we return null and let the platform decide: forcing an English voice
+   would read Norwegian words with an English pronunciation. */
+function pickSpeechVoice(locale) {
+  let voices = [];
+  try { voices = speechSynthesis.getVoices() || []; } catch (e) { return null; }
+  if (!voices.length) return null;
+  const wanted = String(locale || "").toLowerCase();
+  const base = baseLocaleCode(locale);
+  return voices.find(v => String(v.lang || "").toLowerCase().replace("_", "-") === wanted)
+    || voices.find(v => baseLocaleCode(v.lang) === base)
+    || null;
+}
+
+function speakUtterance(u) {
+  const voice = pickSpeechVoice(u.lang);
+  if (voice) u.voice = voice;
+  speechSynthesis.speak(u);
+}
+
+function speak(text, { rate, lang } = {}) {
   if (!text || !window.speechSynthesis) return;
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = detectLang(text);
+    u.lang = lang || detectLang(text);
     const configuredRate = Number(rate ?? state?.settings?.ttsRate ?? 0.95);
     u.rate = Math.min(1.5, Math.max(0.3, Number.isFinite(configuredRate) ? configuredRate : 0.95));
-    speechSynthesis.speak(u);
+    let voices = [];
+    try { voices = speechSynthesis.getVoices() || []; } catch (e) {}
+    // Safari fills the voice list asynchronously: wait for voiceschanged once
+    // instead of speaking with whatever default is active at this moment.
+    if (!voices.length && typeof speechSynthesis.addEventListener === "function") {
+      speechSynthesis.addEventListener("voiceschanged", () => {
+        try { speakUtterance(u); } catch (e) {}
+      }, { once: true });
+      return;
+    }
+    speakUtterance(u);
   } catch (e) {}
 }
 
@@ -17,7 +69,7 @@ function detectLang(text) {
   const s = String(text || "");
   if (/[іїєґІЇЄҐ]/.test(s)) return "uk-UA";
   if (/[\u0400-\u04FF]/.test(s)) return "ru-RU";
-  return "en-US";
+  return learningSpeechLocale();
 }
 
 /* ----- Utilities ----- */

@@ -9,6 +9,10 @@ const SELECTION_MOVE_TOLERANCE = 10;
 const SELECTION_TRANSLATE_TIMEOUT_MS = 12000;
 const SELECTION_WORD_CHARS = /[A-Za-zÀ-ÖØ-öø-ÿ'’\-]/;
 const SELECTION_WORD_SCAN = /[A-Za-zÀ-ÖØ-öø-ÿ'’\-]+/g;
+/* A word is "letter bearing" when it contains at least one Latin letter.
+   The old /[A-Za-z]/ probes rejected purely Norwegian words such as "å",
+   "øy" or "ål", so long-press lookup silently did nothing for them. */
+const SELECTION_HAS_LETTER = /[A-Za-zÀ-ÖØ-öø-ÿ]/;
 const SELECTION_HIT_PADDING = 8;
 const SELECTION_HIT_MAX_DX = 220;
 const SELECTION_TOUCH_ID = "touch";
@@ -95,7 +99,7 @@ function buildWordGeometry(zone) {
       SELECTION_WORD_SCAN.lastIndex = 0;
       let match = SELECTION_WORD_SCAN.exec(text);
       while (match) {
-        if (/[A-Za-z]/.test(match[0])) {
+        if (SELECTION_HAS_LETTER.test(match[0])) {
           const start = match.index;
           const end = start + match[0].length;
           const range = document.createRange();
@@ -169,7 +173,7 @@ function wordBoundaryByCaret(x, y, zone) {
   let end = offset;
   while (start > 0 && isWord(text[start - 1])) start--;
   while (end < text.length && isWord(text[end])) end++;
-  if (start === end || !/[A-Za-z]/.test(text.slice(start, end))) return null;
+  if (start === end || !SELECTION_HAS_LETTER.test(text.slice(start, end))) return null;
 
   const range = document.createRange();
   range.setStart(node, start);
@@ -295,7 +299,7 @@ function commitLookupSelection(showPopover = true) {
     return false;
   }
   const text = selectedText();
-  if (!text || !/[A-Za-z]/.test(text)) {
+  if (!text || !SELECTION_HAS_LETTER.test(text)) {
     clearLookupSelection();
     return false;
   }
@@ -471,7 +475,7 @@ function hideSelectionPopover() {
 function pronounceSelection() {
   const word = String(selectionData.word || $("#selectionPopoverWord")?.textContent || "").trim();
   if (!word || $("#selectionPopover")?.hidden) return;
-  speak(word);
+  speak(word, { lang: learningSpeechLocale() });
 }
 
 async function translateSelection() {

@@ -80,7 +80,7 @@ test("окно выделения озвучивает актуальное сл
   assert.match(html, /id="selectionSpeakBtn"[\s\S]*?data-i18n-aria-label="selection\.pronounce"/);
   assert.match(selection, /function pronounceSelection\(\)/);
   assert.match(selection, /String\(selectionData\.word/);
-  assert.match(selection, /speak\(word\)/);
+  assert.match(selection, /speak\(word, \{ lang: learningSpeechLocale\(\) \}\)/);
   assert.match(selection, /speakBtn\.onclick = pronounceSelection/);
 });
 

@@ -50,9 +50,12 @@ function commitStudyCardModes(nextModes) {
 }
 
 function studyFrontLabel(front) {
-  return t(front === "local"
-    ? "settings.cardFrontLanguage.local"
-    : "settings.cardFrontLanguage.english");
+  // The "term side" label must name the language actually being learned,
+  // otherwise Norwegian decks would still be labelled "English".
+  if (front === "local") return t("settings.cardFrontLanguage.local");
+  return typeof learningLanguageLabel === "function"
+    ? learningLanguageLabel(state?.activeLearningLanguage)
+    : t("settings.cardFrontLanguage.english");
 }
 
 function renderStudyFrontPicker() {

@@ -270,10 +270,14 @@ function renderStudy() {
     $("#wordInfoBtn").onclick = () => openWordInfo(card);
     $("#ttsBtn").onclick = () => {
       const visibleFrontSpeech = contextFront ? contextFront.sentence : frontText;
+      // The spoken locale follows the role of the text, not its characters:
+      // the term/cloze side is the learning language, the back side of a
+      // normal card is the translation and follows the interface language.
+      const speaksTranslation = session.revealed && !reversed;
       const toSpeak = session.revealed
         ? (reversed ? card.front : card.back)
         : (card.type === "cloze" ? stripCloze(card.cloze) : visibleFrontSpeech);
-      speak(toSpeak);
+      speak(toSpeak, { lang: speaksTranslation ? translationSpeechLocale() : learningSpeechLocale() });
     };
   }
 
@@ -438,7 +442,9 @@ function contextSentenceResult(lines, sentenceIndex, term) {
 
 function dominantContextScript(text) {
   const value = String(text || "");
-  const latin = (value.match(/[A-Za-z]/g) || []).length;
+  // Norwegian å/ø/æ and other diacritics are Latin script too: counting only
+  // ASCII letters made "blåbær" look less Latin than it is.
+  const latin = (value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || []).length;
   const cyrillic = (value.match(/[\u0400-\u052f]/g) || []).length;
   if (!latin && !cyrillic) return "";
   return cyrillic > latin ? "cyrillic" : "latin";
@@ -525,7 +531,7 @@ function autoSpeakRevealedCard(card) {
   if (!state.settings.autoTTS || session._spoken) return;
   const textToSpeak = cardEnglishTerm(card);
   if (!textToSpeak) return;
-  speak(textToSpeak);
+  speak(textToSpeak, { lang: learningSpeechLocale() });
   session._spoken = true;
 }
 
