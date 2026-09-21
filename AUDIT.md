@@ -29,7 +29,7 @@
 |---|--------|--------|
 | 1 | Миграция языковой модели не выполняется в рантайме | [x] исправлен |
 | 2 | `wipeAll()` создаёт состояние без языковой модели | [x] исправлен |
-| 3 | Обновления в `js/study.js` идут по глобальному `state.cards` | [ ] не исправлен |
+| 3 | Обновления в `js/study.js` идут по глобальному `state.cards` | [x] исправлен |
 | 4 | `activeLearningLanguageCode()` объявлена не в том слое | [ ] не исправлен |
 
 ---
@@ -90,9 +90,12 @@
 
 ---
 
-## - [ ] Дефект 3. Обновление карточек в `js/study.js` идёт по глобальному `state.cards`
+## - [x] Дефект 3. Обновление карточек в `js/study.js` идёт по глобальному `state.cards`
 
-**Статус:** не исправлен. Коммит: —
+**Статус:** исправлен. Коммит: см. `fix(audit-3)` в ветке `feat/multiple-learning-languages`
+
+**Примечания по исправлению**
+Три выборки в `js/study.js` переведены на языковые селекторы: `cardsForStudyExampleRefresh()` и `refreshSelectedExamples()` используют `activeCards()`, `refreshDeckExamples()` — `activeCards(deckId)` (он же проверяет `isDeckInActiveLanguage`). Проверка: `npm test` — 223/223 проходят.
 
 **Файл и участок**
 - `js/study.js:769` — `return state.cards.filter(card => ...)`

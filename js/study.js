@@ -766,7 +766,7 @@ function enabledStudyExampleCategories() {
 function cardsForStudyExampleRefresh() {
   const enabledCategories = enabledStudyExampleCategories();
   const deckId = state.activeDeckId;
-  return state.cards.filter(card =>
+  return activeCards().filter(card =>
     card.type !== "cloze" &&
     card.state !== "suspended" &&
     (!deckId || card.deckId === deckId) &&
@@ -978,12 +978,12 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
 }
 
 function refreshDeckExamples(deckId, button) {
-  const cards = state.cards.filter(card => card.deckId === deckId);
+  const cards = activeCards(deckId);
   return refreshExamplesForCards(cards, button, deckId);
 }
 
 function refreshSelectedExamples() {
-  const cards = state.cards.filter(card => bulkSelected.has(card.id));
+  const cards = activeCards().filter(card => bulkSelected.has(card.id));
   return refreshExamplesForCards(cards, $("#bulkRefreshExamplesBtn"));
 }
 
