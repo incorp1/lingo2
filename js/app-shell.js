@@ -3,6 +3,10 @@
 /* ----- TTS ----- */
 const TTS_UI_LOCALES = { ru: "ru-RU", uk: "uk-UA", en: "en-US" };
 
+// Становится true после первой попытки дождаться voiceschanged: не даём
+// бесконечно откладывать озвучку, если голоса языка в системе нет вообще.
+let speechSynthesisVoicesSettled = false;
+
 /* Locale of the language being learned: the front side of a card, a cloze
    sentence, an example and a looked-up word are all spoken with it. */
 function learningSpeechLocale(code) {
@@ -23,18 +27,39 @@ function baseLocaleCode(locale) {
   return String(locale || "").toLowerCase().split(/[-_]/)[0];
 }
 
-/* Pick a voice for the requested locale. When the device has no Norwegian
+/* Systems label Norwegian voices inconsistently: "nb-NO" (Android/Google),
+   "no-NO" (Windows/Chrome desktop) and "nn-NO" (Nynorsk). Our registry locale
+   is "nb-NO", so a plain base-code match ("nb" !== "no") found nothing and the
+   platform silently fell back to its default English voice — exactly the bug
+   where Norwegian words were read with an English pronunciation. */
+const SPEECH_LOCALE_ALIASES = { nb: ["nb", "no", "nn"], no: ["nb", "no", "nn"], nn: ["nb", "no", "nn"] };
+
+function localeAliasList(locale) {
+  const base = baseLocaleCode(locale);
+  return SPEECH_LOCALE_ALIASES[base] || [base];
+}
+
+function normalizeVoiceLang(lang) {
+  return String(lang || "").toLowerCase().replace(/_/g, "-");
+}
+
+/* Pick a voice for the requested locale. When the device truly has no matching
    voice we return null and let the platform decide: forcing an English voice
    would read Norwegian words with an English pronunciation. */
 function pickSpeechVoice(locale) {
   let voices = [];
   try { voices = speechSynthesis.getVoices() || []; } catch (e) { return null; }
   if (!voices.length) return null;
-  const wanted = String(locale || "").toLowerCase();
-  const base = baseLocaleCode(locale);
-  return voices.find(v => String(v.lang || "").toLowerCase().replace("_", "-") === wanted)
-    || voices.find(v => baseLocaleCode(v.lang) === base)
-    || null;
+  const wanted = normalizeVoiceLang(locale);
+  const aliases = localeAliasList(locale);
+  const matches = voices.filter(v => aliases.includes(baseLocaleCode(v.lang)));
+  if (!matches.length) return null;
+  return matches.find(v => normalizeVoiceLang(v.lang) === wanted)
+    // Prefer the exact base code (nb) over a related one (no/nn).
+    || matches.find(v => baseLocaleCode(v.lang) === baseLocaleCode(locale))
+    // Local voices sound better and work offline in the PWA.
+    || matches.find(v => v.localService)
+    || matches[0];
 }
 
 function speakUtterance(u) {
@@ -53,12 +78,22 @@ function speak(text, { rate, lang } = {}) {
     u.rate = Math.min(1.5, Math.max(0.3, Number.isFinite(configuredRate) ? configuredRate : 0.95));
     let voices = [];
     try { voices = speechSynthesis.getVoices() || []; } catch (e) {}
-    // Safari fills the voice list asynchronously: wait for voiceschanged once
-    // instead of speaking with whatever default is active at this moment.
-    if (!voices.length && typeof speechSynthesis.addEventListener === "function") {
-      speechSynthesis.addEventListener("voiceschanged", () => {
+    // Safari/Chrome fill the voice list asynchronously: wait for voiceschanged
+    // once instead of speaking with whatever default is active at this moment.
+    // We also wait when the list exists but holds no voice for the requested
+    // locale yet — otherwise the very first Norwegian card is read in English.
+    const needsVoiceWait = !voices.length || (!pickSpeechVoice(u.lang) && !speechSynthesisVoicesSettled);
+    if (needsVoiceWait && typeof speechSynthesis.addEventListener === "function") {
+      speechSynthesisVoicesSettled = true;
+      let spoken = false;
+      const fire = () => {
+        if (spoken) return;
+        spoken = true;
         try { speakUtterance(u); } catch (e) {}
-      }, { once: true });
+      };
+      speechSynthesis.addEventListener("voiceschanged", fire, { once: true });
+      // Never stay silent if the event never arrives on this platform.
+      setTimeout(fire, 250);
       return;
     }
     speakUtterance(u);

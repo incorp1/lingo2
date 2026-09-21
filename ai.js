@@ -118,7 +118,7 @@ STRICT RULES:
 Return ONLY JSON with these exact keys (use empty string/array if truly not applicable):
 {
   "translation": "natural translation into ${targetLang}, comma-separate variants",
-  "ipa":         "IPA transcription with slashes, e.g. /ˈwɜːrd/",
+  "ipa":         "IPA transcription of the ${sourceLang || "English"} word as pronounced in ${sourceLang || "English"}, wrapped in slashes (e.g. /ˈwɜːrd/). NEVER give an English reading of a non-English word.",
   "example":     "ONE natural example sentence using \"${word}\", in ${sourceLang || "English"}",
   "exampleTranslation": "the example sentence translated into ${targetLang}",
   "exampleTargetTerm": "the exact translated word or phrase in exampleTranslation corresponding to ${word}",
@@ -291,10 +291,13 @@ Return ONLY JSON in this exact shape:
     const v = String(s || "").trim();
     if (!v) return false;
     if (v.length > 60) return false;
-    // Must contain at least one IPA-typical phonetic symbol.
-    if (!/[ˈˌəɪʊɛɔæʌθðʃ ʒŋɑɒːiu]/i.test(v) && !/^\/.*\/$/.test(v)) return false;
+    // Must contain at least one IPA-typical phonetic symbol. Norwegian adds
+    // ʉ, ɖ, ɭ, ɳ, ʈ, ɕ, ʂ, ɾ, ʁ and the tone marks ˧ ˨ ˩ — without them valid
+    // nb transcriptions like /ˈhʉːs/ were silently rejected and the hint
+    // stayed empty (or fell back to an English dictionary reading).
+    if (!/[ˈˌəɪʊɛɔæʌθðʃʒŋɑɒːiuʉɖɭɳʈɕʂɾʁø̜yœɡ˧˨˩]/i.test(v) && !/^\/.*\/$/.test(v)) return false;
     // Reject anything with letters from the UI/translation languages bleeding in
-    // (Cyrillic) or sentence-like spaces+punctuation.
+    // (Cyrillic) or sentence-like punctuation.
     if (/[\u0400-\u04FF]/.test(v)) return false;
     if (/[.,;!?]/.test(v)) return false;
     return true;

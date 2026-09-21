@@ -38,10 +38,60 @@ test("скорость сохраняется, голос ищется по ло
   const shell = read("js/app-shell.js");
   assert.match(shell, /u\.rate\s*=\s*Math\.min\(1\.5,\s*Math\.max\(0\.3/);
   assert.match(shell, /function pickSpeechVoice/);
-  assert.match(shell, /baseLocaleCode\(v\.lang\) === base/);
   // Отсутствие голоса не заменяется принудительно английским.
   assert.doesNotMatch(shell, /voices\.find\(v => [^\n]*en-US/);
   assert.match(shell, /addEventListener\("voiceschanged"[\s\S]*?\{ once: true \}\)/);
+});
+
+test("норвежский голос находится по алиасам nb/no/nn, а не читается английским", () => {
+  const shell = read("js/app-shell.js");
+  assert.match(shell, /SPEECH_LOCALE_ALIASES/);
+  assert.match(shell, /nb: \["nb", "no", "nn"\]/);
+
+  // Воспроизводим логику подбора голоса для набора системных голосов.
+  const baseLocaleCode = l => String(l || "").toLowerCase().split(/[-_]/)[0];
+  const normalizeVoiceLang = l => String(l || "").toLowerCase().replace(/_/g, "-");
+  const ALIASES = { nb: ["nb", "no", "nn"], no: ["nb", "no", "nn"], nn: ["nb", "no", "nn"] };
+  const pick = (locale, voices) => {
+    const aliases = ALIASES[baseLocaleCode(locale)] || [baseLocaleCode(locale)];
+    const matches = voices.filter(v => aliases.includes(baseLocaleCode(v.lang)));
+    if (!matches.length) return null;
+    return matches.find(v => normalizeVoiceLang(v.lang) === normalizeVoiceLang(locale))
+      || matches.find(v => baseLocaleCode(v.lang) === baseLocaleCode(locale))
+      || matches.find(v => v.localService)
+      || matches[0];
+  };
+
+  const windowsVoices = [{ lang: "en-US" }, { lang: "no-NO", localService: true }];
+  assert.equal(pick("nb-NO", windowsVoices).lang, "no-NO");
+
+  const androidVoices = [{ lang: "en-US" }, { lang: "nn-NO" }, { lang: "nb-NO" }];
+  assert.equal(pick("nb-NO", androidVoices).lang, "nb-NO");
+
+  // Без норвежских голосов английский не навязывается.
+  assert.equal(pick("nb-NO", [{ lang: "en-US" }, { lang: "ru-RU" }]), null);
+  // Английская локаль не захватывает норвежские голоса.
+  assert.equal(pick("en-US", androidVoices).lang, "en-US");
+});
+
+test("норвежская транскрипция не отбраковывается валидатором IPA", () => {
+  const ai = read("ai.js");
+  assert.match(ai, /ʉ/);
+  assert.match(ai, /NEVER give an English reading of a non-English word/);
+
+  const looksLikeIPA = v => {
+    v = String(v || "").trim();
+    if (!v || v.length > 60) return false;
+    if (!/[ˈˌəɪʊɛɔæʌθðʃʒŋɑɒːiuʉɖɭɳʈɕʂɾʁø̜yœɡ˧˨˩]/i.test(v) && !/^\/.*\/$/.test(v)) return false;
+    if (/[\u0400-\u04FF]/.test(v)) return false;
+    if (/[.,;!?]/.test(v)) return false;
+    return true;
+  };
+  for (const ipa of ["/ˈhʉːs/", "/ˈbloːbær/", "/ˈɕœːrə/", "/ˈɡɑː/", "/ˈwɜːrd/"]) {
+    assert.ok(looksLikeIPA(ipa), ipa);
+  }
+  assert.equal(looksLikeIPA("дом"), false);
+  assert.equal(looksLikeIPA("это существительное, означающее дом."), false);
 });
 
 test("выделение распознаёт норвежские буквы без потери touch-fallback и экранирования", () => {
