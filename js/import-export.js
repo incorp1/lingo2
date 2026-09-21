@@ -164,6 +164,9 @@ async function wipeAll() {
   const emptyState = {
     decks: [],
     cards: [],
+    dataModelVersion: LANGUAGE_REGISTRY()?.DATA_MODEL_VERSION || 2,
+    activeLearningLanguage: defaultLearningLanguage(),
+    languageProfiles: Object.fromEntries(languageCodes().map(code => [code, emptyLanguageProfile()])),
     activeDeckId: null,
     settings: structuredClone(defaultSettings),
     history: {},
