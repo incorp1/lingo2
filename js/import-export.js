@@ -26,6 +26,12 @@ function applyCommittedSnapshot(committed) {
   stopVolatileWorkAfterReplacement();
   applyTheme();
   applyLanguage();
+  // Полная замена снимка (импорт резервной копии, сброс, восстановление)
+  // приносит собственный `activeLearningLanguage`. Контрол языка обучения и
+  // `data-learning-language` не входят в renderAll(), поэтому без явной
+  // синхронизации в настройках остаётся прежний выбор (например «Норвежский»),
+  // хотя учебная очередь уже работает с языком из резервной копии.
+  if (typeof syncLearningLanguageControl === "function") syncLearningLanguageControl();
   renderAll();
 }
 
