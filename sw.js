@@ -22,6 +22,7 @@ const APP_SHELL = [
   "./icon-512.png",
   "./select-arrow.png",
   "./fsrs.js?v=3.19.16",
+  "./languages.js?v=3.19.16",
   "./storage.js?v=3.19.16",
   "./seed.js?v=3.19.16",
   "./ai.js?v=3.19.16",

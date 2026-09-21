@@ -577,6 +577,7 @@ async function load() {
   return window.LCStorage.loadAppState(STORAGE_KEY);
 }
 function save() {
+  syncActiveLanguageProfile(state);
   if (fullStateDirty) {
     window.LCStorage.setAppState(state);
   } else {
@@ -708,6 +709,142 @@ function normalizeStudyCycles(raw, cards) {
     };
   }
   return normalized;
+}
+
+/* ----- Learning languages (canonical profiles) -----
+   state.decks/state.cards stay global; a deck carries learningLanguage and a
+   card inherits it through its deck. Per-language study context lives only in
+   state.languageProfiles[code]. */
+
+const LANGUAGE_REGISTRY = () => (typeof window !== "undefined" ? window.LCLanguages : globalThis.LCLanguages);
+
+function defaultLearningLanguage() {
+  return LANGUAGE_REGISTRY()?.DEFAULT_LANGUAGE || "en";
+}
+
+function normalizeLearningLanguage(value, fallback) {
+  const registry = LANGUAGE_REGISTRY();
+  if (registry) return registry.normalizeLanguageCode(value, fallback || registry.DEFAULT_LANGUAGE);
+  return value === "nb" ? "nb" : "en";
+}
+
+function emptyLanguageProfile() {
+  const registry = LANGUAGE_REGISTRY();
+  if (registry) return registry.emptyProfile();
+  return {
+    activeDeckId: null,
+    history: {},
+    streak: { current: 0, lastDay: null },
+    sessionReviewedIds: [],
+    practiceDraft: null,
+    studyResume: null,
+  };
+}
+
+function normalizeLanguageProfile(raw, legacy = null) {
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const fallback = legacy && typeof legacy === "object" ? legacy : {};
+  const profile = emptyLanguageProfile();
+  const history = source.history ?? fallback.history;
+  const streak = source.streak ?? fallback.streak;
+  const reviewed = source.sessionReviewedIds ?? fallback.sessionReviewedIds;
+  const draft = source.practiceDraft ?? fallback.practiceDraft;
+  const resume = source.studyResume ?? fallback.studyResume;
+  profile.activeDeckId = typeof (source.activeDeckId ?? fallback.activeDeckId) === "string"
+    ? (source.activeDeckId ?? fallback.activeDeckId)
+    : null;
+  if (history && typeof history === "object" && !Array.isArray(history)) profile.history = cloneSettingValue(history);
+  if (streak && typeof streak === "object" && !Array.isArray(streak)) {
+    profile.streak = {
+      current: Number.isFinite(Number(streak.current)) ? Number(streak.current) : 0,
+      lastDay: typeof streak.lastDay === "string" ? streak.lastDay : null,
+    };
+  }
+  if (Array.isArray(reviewed)) profile.sessionReviewedIds = reviewed.filter(id => typeof id === "string");
+  if (draft && typeof draft === "object" && !Array.isArray(draft)) profile.practiceDraft = cloneSettingValue(draft);
+  if (resume && typeof resume === "object" && !Array.isArray(resume)) profile.studyResume = cloneSettingValue(resume);
+  return profile;
+}
+
+function languageCodes() {
+  return LANGUAGE_REGISTRY()?.CODES || ["en", "nb"];
+}
+
+// Migrate legacy single-language data into the canonical profile layout.
+// Everything that existed before belongs to English; Norwegian starts empty.
+function normalizeLanguageModel(loaded) {
+  const codes = languageCodes();
+  const fallbackCode = defaultLearningLanguage();
+  const rawProfiles = loaded.languageProfiles && typeof loaded.languageProfiles === "object" && !Array.isArray(loaded.languageProfiles)
+    ? loaded.languageProfiles
+    : null;
+  const legacyProfile = {
+    activeDeckId: loaded.activeDeckId ?? null,
+    history: loaded.history,
+    streak: loaded.streak,
+    sessionReviewedIds: loaded.sessionReviewedIds,
+    practiceDraft: loaded.practiceDraft,
+    studyResume: loaded.studyResume,
+  };
+
+  for (const deck of loaded.decks) {
+    deck.learningLanguage = normalizeLearningLanguage(deck.learningLanguage, fallbackCode);
+  }
+
+  const profiles = {};
+  for (const code of codes) {
+    const legacy = !rawProfiles && code === fallbackCode ? legacyProfile : null;
+    profiles[code] = normalizeLanguageProfile(rawProfiles?.[code], legacy);
+  }
+  loaded.languageProfiles = profiles;
+  loaded.activeLearningLanguage = normalizeLearningLanguage(loaded.activeLearningLanguage, fallbackCode);
+  loaded.dataModelVersion = LANGUAGE_REGISTRY()?.DATA_MODEL_VERSION || 2;
+
+  // Drop dangling deck references instead of silently remapping them.
+  const deckIds = new Set(loaded.decks.map(deck => deck.id));
+  for (const code of codes) {
+    const profile = profiles[code];
+    if (profile.activeDeckId && !deckIds.has(profile.activeDeckId)) profile.activeDeckId = null;
+    if (!profile.activeDeckId) {
+      profile.activeDeckId = loaded.decks.find(deck => deck.learningLanguage === code)?.id || null;
+    }
+  }
+
+  const active = profiles[loaded.activeLearningLanguage];
+  loaded.activeDeckId = active.activeDeckId;
+  loaded.history = active.history;
+  loaded.streak = active.streak;
+  loaded.sessionReviewedIds = active.sessionReviewedIds;
+  loaded.practiceDraft = active.practiceDraft;
+  return loaded;
+}
+
+function activeLanguageProfile(target = state) {
+  const code = normalizeLearningLanguage(target?.activeLearningLanguage);
+  if (!target.languageProfiles) target.languageProfiles = {};
+  if (!target.languageProfiles[code]) target.languageProfiles[code] = emptyLanguageProfile();
+  return target.languageProfiles[code];
+}
+
+// Copy the live compatibility fields back into the canonical profile.
+function syncActiveLanguageProfile(target = state) {
+  if (!target) return null;
+  const profile = activeLanguageProfile(target);
+  profile.activeDeckId = target.activeDeckId ?? null;
+  profile.history = target.history || {};
+  profile.streak = target.streak || { current: 0, lastDay: null };
+  profile.sessionReviewedIds = Array.isArray(target.sessionReviewedIds) ? target.sessionReviewedIds : [];
+  profile.practiceDraft = target.practiceDraft ?? null;
+  return profile;
+}
+
+function deckLearningLanguage(deckOrId) {
+  const deck = typeof deckOrId === "string" ? deckById.get(deckOrId) : deckOrId;
+  return normalizeLearningLanguage(deck?.learningLanguage);
+}
+
+function cardLearningLanguage(card) {
+  return deckLearningLanguage(card?.deckId);
 }
 
 function normalizeLoadedState(loaded) {
@@ -865,6 +1002,9 @@ async function initState() {
   state = {
     decks: [],
     cards: [],
+    dataModelVersion: LANGUAGE_REGISTRY()?.DATA_MODEL_VERSION || 2,
+    activeLearningLanguage: defaultLearningLanguage(),
+    languageProfiles: Object.fromEntries(languageCodes().map(code => [code, emptyLanguageProfile()])),
     activeDeckId: null,
     settings: { ...defaultSettings },
     history: {},
@@ -948,8 +1088,12 @@ function unsuspendCard(card) {
   return true;
 }
 
-function createDeck(name, desc = "") {
-  const deck = { id: uid(), name, desc, direction: "forward", createdAt: Date.now() };
+function createDeck(name, desc = "", learningLanguage = null) {
+  const language = normalizeLearningLanguage(
+    learningLanguage || state?.activeLearningLanguage,
+    defaultLearningLanguage()
+  );
+  const deck = { id: uid(), name, desc, direction: "forward", learningLanguage: language, createdAt: Date.now() };
   state.decks.push(deck);
   deckById.set(deck.id, deck);
   cardsByDeck.set(deck.id, []);
