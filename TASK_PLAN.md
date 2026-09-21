@@ -117,12 +117,53 @@
   - Проверена цепочка en→nb→en с перезапуском и полным экспортом/восстановлением обоих языков; заглушки не использовались.
   - git diff --check пройден, app-original.html не изменялся (последний коммит файла — исходный 8947590), рабочая ветка чистая, публикационная структура корректна: index.html, sw.js, manifest.webmanifest, _headers и иконки в корне.
 
+### Трассировка 24 обязательных сценариев TASK.md (пункт 12)
+
+Таблица позволяет сверить покрытие автоматически: каждый сценарий сопоставлен с тест-файлом и
+именем теста. Тесты используют контролируемые ответы внешних сервисов; реальные AI-, словарные и
+переводческие API не вызывались.
+
+| № | Сценарий TASK.md | Тест-файл | Имя теста |
+|---|---|---|---|
+| 1 | Миграция старого состояния в en без потерь | `tests/language-model-migration.test.js` | «миграция старого состояния переносит весь прогресс в en и оставляет nb пустым» |
+| 2 | Повторная миграция идемпотентна | `tests/language-model-migration.test.js` | «повторная миграция уже мигрированного состояния ничего не меняет» |
+| 3 | Сбой записи миграции восстановим | `tests/language-model-migration.test.js`, `tests/legacy-language-fixture.test.js` | «отклонённая запись не повреждает сохранённые языковые профили»; «отклонённая запись оставляет исходный snapshot восстановимым» |
+| 4 | Оба языка есть после переоткрытия IndexedDB | `tests/language-model-migration.test.js`, `tests/legacy-language-fixture.test.js` | «языковая метаинформация переживает запись и переоткрытие IndexedDB»; «исходный snapshot сохраняет контент, прогресс, практику и события после переоткрытия IndexedDB» |
+| 5 | Независимый прогресс одноимённых колод двух языков | `tests/language-deck-isolation.test.js` | «идентификаторы карточек глобально уникальны между языками»; «новая колода наследует активный язык, а firstDeckIdForLanguage учитывает язык» |
+| 6 | «Все колоды», счётчики, поиск, выделение, практика и статистика не смешивают языки | `tests/language-study-isolation.test.js`, `tests/language-deck-isolation.test.js`, `tests/language-practice-isolation.test.js`, `tests/language-stats-history.test.js` | «режим «Все колоды» не выходит за пределы активного языка»; «поиск дубликатов ограничен колодой и не пересекает языки»; «показ, поиск и удаление истории фильтруются по активному языку»; «statsHistory() reads the canonical profile of the active language» |
+| 7 | Цикл вариантов переживает переключение без потерь и двойного учёта | `tests/language-study-isolation.test.js`, `tests/study-cycle-persistence.test.js` | «незавершённый учебный цикл сохраняется в профиле своего языка»; «итог цикла использует худшую оценку и очищается ровно один раз» |
+| 8 | Список слов сессии и незавершённые ответы практики переживают переключение и перезапуск | `tests/language-study-isolation.test.js`, `tests/language-practice-isolation.test.js`, `tests/language-switch.test.js` | «history, streak и sessionReviewedIds хранятся отдельно в профилях»; «черновик практики сбрасывается при смене языка»; «перезапуск восстанавливает язык обучения и синхронизирует переключатель» |
+| 9 | Ошибка сохранения оставляет язык; быстрые нажатия не создают гонку | `tests/language-switch.test.js` | «ошибка записи оставляет прежний язык и сообщает об этом»; «быстрые повторные нажатия не запускают второе переключение» |
+| 10 | Поздний AI-ответ/таймер не меняет неактуальный контекст | `tests/language-switch.test.js`, `tests/language-ai-dictionary.test.js`, `tests/language-practice-isolation.test.js` | «поздние async-ответы отклоняются даже при возврате en → nb → en»; «устаревшие async-ответы AI отбрасываются по generation token»; «поздний AI-ответ не пишет данные в чужой профиль» |
+| 11 | Undo после переключения не трогает другой язык | `tests/language-switch.test.js`, `tests/analysis-fixes.test.js` | «после переключения сессия, Undo и просмотр колоды очищаются, профиль восстанавливается»; «Undo восстанавливает снимок карточки, историю и удаляет записанное событие» |
+| 12 | Сброс nb не меняет английские данные | `tests/deck-import-language.test.js`, `tests/language-review-events.test.js` | «progress reset touches only the active language and keeps content»; «resetProgress keeps other-language events and clears legacy ones by deck» |
+| 13 | Полный экспорт при активном nb содержит оба языка | `tests/backup-format-3.test.js` | «format 3 round-trip keeps every language profile while nb is active»; «format 3 stores a practice draft inside each language profile» |
+| 14 | Импорт копии в пустую БД восстанавливает оба языка и активный выбор | `tests/backup-format-3.test.js` | «format 3 round-trip keeps every language profile while nb is active» |
+| 15 | Импорт старой копии как полная замена; recovery возвращает данные | `tests/backup-format-3.test.js`, `tests/p46-p60-regression.test.js` | «legacy format 1 and raw legacy data migrate into the English profile»; «format 2 backups stay importable and gain language profiles»; «P47: settings expose only repeatable full restore while legacy deck parsing remains compatible» |
+| 16 | Экспорт/импорт nb-колоды сохраняет язык и контент без прогресса | `tests/deck-import-language.test.js` | «deck export keeps the learning language and drops study progress»; «deck round-trip through parse preserves language and content» |
+| 17 | Старая колода без языка требует явного выбора | `tests/deck-import-language.test.js` | «unlabeled and unknown deck languages stay null for an explicit choice»; «legacy deck array import produces decks without a language label» |
+| 18 | Неизвестный язык/формат, битые связи и отмена не меняют БД | `tests/backup-format-3.test.js` | «unsupported and malformed payloads are rejected without data loss»; «broken references are dropped instead of repointed at the first deck»; «an unknown language code never creates an extra profile» |
+| 19 | Обычный экспорт, быстрая копия и Share Sheet | `tests/quick-backup.test.js`, `tests/backup-format-3.test.js` | «быстрая кнопка вызывает тот же Share Sheet, что и исходная»; «quick backup and share use the same format 3 payload» |
+| 20 | Промпты требуют Bokmål/английский; язык перевода не перепутан | `tests/language-ai-dictionary.test.js` | «промпты генерации карточки строятся на языке обучения»; «переводчик использует код языка обучения как исходный» |
+| 21 | Норвежское слово не идёт в английский словарный endpoint | `tests/language-ai-dictionary.test.js` | «словарь не вызывается для неподдерживаемого языка и не падает на английский» |
+| 22 | `hus` озвучивается с nb-NO; перевод — своей локалью | `tests/language-tts-selection.test.js`, `tests/language-practice-tts-locale.test.js` | «hus озвучивается как nb-NO, когда активен норвежский»; «перевод озвучивается по языку интерфейса, а термин — по языку обучения»; «кнопка озвучивания практики передаёт локаль языка обучения» |
+| 23 | Норвежские символы в выделении, поиске, редакторе и копии | `tests/language-tts-selection.test.js`, `tests/selection-unicode-letters.test.js` | «выделение распознаёт норвежские буквы без потери touch-fallback и экранирования»; «буквоносными считаются норвежские, кириллические и другие алфавиты» |
+| 24 | `english/local` совместим, подписи соответствуют языку | `tests/language-tts-selection.test.js`, `tests/language-label-i18n.test.js` | «подпись стороны карточки следует языку обучения во всех локалях»; «метки языков переведены в ru и uk, а не остаются aiName» |
+
+Проверено только вручную/статически, без автотеста: визуальная компоновка экрана выбора языка в
+Настройках и формулировки подтверждений на реальном экране.
+
+Не проверено на реальном устройстве (нет доступа к iPhone/Safari): обновление установленной PWA,
+офлайн-запуск на устройстве, системный голос nb-NO, реальное touch-выделение по удержанию.
+Сценарии 4, 8 (часть «перезапуск») и 19 (Share Sheet) на устройстве не подтверждались — их
+покрытие ограничено эмуляцией IndexedDB через `fake-indexeddb` и статической проверкой кода.
+
 ## Итоговый отчёт
 
 1. Реализовано: независимое изучение английского и норвежского с переключением в Настройках, языковые профили, изоляция колод/карточек/статистики/практики, атомарное переключение, Bokmål-промпты и словарь, nb-NO TTS, формат полной копии 3, импорт колод с выбором языка, языковой сброс и безопасное удаление с recovery, релиз PWA 3.20.0.
 2. Изменённые файлы: languages.js, storage.js, backup.js, index.html, sw.js, app-shell.js, ai.js, js/{state,decks,cards,selection,study,scheduler,stats,settings,import-export,ai-practice,learning-language}.js, i18n/{ru,uk,en}.js, package.json, package-lock.json, PROJECT_MAP.md, TASK_PLAN.md и тесты в tests/.
 3. Миграция: старое состояние получает learningLanguage "en", одиночные поля переносятся в languageProfiles.en, практика/история/review events остаются английскими, профиль nb создаётся безопасно, активный язык — en; запись идёт через защищённый механизм, повторная миграция идемпотентна.
-4. Фактические проверки: npm test 203/203, целевые наборы по языкам, копиям и импорту, проверка наличия всех 45 ресурсов APP_SHELL и совпадения URL с index.html, git diff --check.
+4. Фактические проверки: npm test 223/223, целевые наборы по языкам, копиям и импорту, проверка наличия всех 45 ресурсов APP_SHELL и совпадения URL с index.html, git diff --check. Пословная трассировка всех 24 обязательных сценариев на тест-файлы и имена тестов приведена в разделе «Трассировка 24 обязательных сценариев TASK.md (пункт 12)».
 5. Ограничения: не проверено на реальном iPhone/Safari (обновление установленной PWA, запуск без сети на устройстве, системный TTS-голос nb-NO и touch-выделение); внешние AI, переводческие и словарные API проверялись только контролируемыми ответами, реальные ключи не использовались и не фиксировались.
 
 ## Журнал выполнения
