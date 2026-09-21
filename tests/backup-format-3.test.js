@@ -175,6 +175,42 @@ test("an unknown language code never creates an extra profile", () => {
   assert.deepEqual(Object.keys(restored.state.languageProfiles).sort(), ["en", "nb"]);
 });
 
+test("AUD-004: поврежденный формат 3 отклоняется до записи snapshot", async () => {
+  const backup = loadBackup();
+  const corruptions = [
+    s => { s.decks[1].learningLanguage = "zz"; },
+    s => { delete s.decks[1].learningLanguage; },
+    s => { s.cards[1].deckId = "missing"; },
+    s => { s.cards[1].id = s.cards[0].id; },
+    s => { s.decks[1].id = s.decks[0].id; },
+    s => { s.cards[1].linkedCardId = "card-en"; },
+    s => { s.languageProfiles.nb.activeDeckId = "deck-en"; },
+    s => { s.languageProfiles.nb.sessionReviewedIds = ["card-en"]; },
+    s => { s.languageProfiles.nb.practiceDraft.selectedIds = ["card-en"]; },
+    s => { s.languageProfiles.nb.studyResume = { currentId: "card-en" }; },
+    s => { s.studyCycles = { missing: {} }; },
+    s => { s.languageProfiles.zz = {}; },
+    s => { s.languageProfiles.nb.streak.current = -1; },
+  ];
+  for (const corrupt of corruptions) {
+    const state = multiLanguageState();
+    corrupt(state);
+    const text = JSON.stringify({ app: "lingo-cards", format: 3, kind: "full",
+      metadata: { secretsIncluded: false }, state, reviewEvents: [] });
+    assert.equal(backup.parse(text).kind, "error");
+    const original = multiLanguageState();
+    const context = { window: { LCBackup: backup, LCStorage: {
+      flush() { assert.fail("flush при отклоненном импорте"); },
+      replaceAppSnapshot() { assert.fail("запись при отклоненном импорте"); },
+    } }, state: original, console: { warn() {} }, t: key => key, toast() {},
+      confirmDialog() { assert.fail("подтверждение поврежденных данных"); } };
+    vm.createContext(context);
+    vm.runInContext(read("js/import-export.js"), context);
+    await context.importFullBackup(text);
+    assert.deepEqual(original, multiLanguageState());
+  }
+});
+
 test("unsupported and malformed payloads are rejected without data loss", () => {
   const backup = loadBackup();
   assert.equal(backup.parse(JSON.stringify({ app: backup.CONFIG.app, format: 9, kind: "full", state: {} })).reason, "unsupported-version");

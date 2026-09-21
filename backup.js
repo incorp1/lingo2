@@ -581,6 +581,97 @@
     return { kind: "full", state, secretPresent, ...extra };
   }
 
+  // Format 3 is a contract, not a migration: reject broken relationships before
+  // any sanitizer can replace identifiers, languages, or destinations.
+  function validateFormat3(data) {
+    const state = data.state;
+    const fail = detail => ({ kind: "error", reason: "invalid-data", detail });
+    if (!isRecord(state) || !Array.isArray(state.decks) || !Array.isArray(state.cards)
+      || state.decks.length > LIMITS.decks || state.cards.length > LIMITS.cards
+      || !LEARNING_LANGUAGES.has(state.activeLearningLanguage)
+      || !isRecord(state.languageProfiles)) return fail("state");
+    const decks = new Map();
+    const cards = new Map();
+    for (const deck of state.decks) {
+      if (!isRecord(deck) || !cleanId(deck.id) || cleanId(deck.id) !== deck.id
+        || decks.has(deck.id) || !LEARNING_LANGUAGES.has(deck.learningLanguage)) return fail("decks");
+      decks.set(deck.id, deck);
+    }
+    for (const card of state.cards) {
+      if (!isRecord(card) || !cleanId(card.id) || cleanId(card.id) !== card.id
+        || cards.has(card.id) || !decks.has(card.deckId)) return fail("cards");
+      cards.set(card.id, card);
+    }
+    const deckIn = (id, code) => decks.get(id)?.learningLanguage === code;
+    const cardIn = (id, code) => cards.has(id) && deckIn(cards.get(id).deckId, code);
+    const idsIn = (ids, code) => Array.isArray(ids) && ids.length <= LIMITS.cards
+      && new Set(ids).size === ids.length && ids.every(id => cardIn(id, code));
+    const optionalDeck = (id, code) => id == null || id === "" || deckIn(id, code);
+    const referencesValid = (value, code) => {
+      if (!isRecord(value)) return false;
+      if (value.learningLanguage != null && value.learningLanguage !== code) return false;
+      if (!optionalDeck(value.deckId, code)) return false;
+      if (value.cardId != null && !cardIn(value.cardId, code)) return false;
+      if (value.currentId != null && (!cardIn(value.currentId, code)
+        || (value.deckId && cards.get(value.currentId).deckId !== value.deckId))) return false;
+      return value.selectedIds == null || idsIn(value.selectedIds, code);
+    };
+    for (const card of cards.values()) {
+      if (card.learningLanguage != null && card.learningLanguage !== decks.get(card.deckId).learningLanguage) return fail("cards.language");
+      if (card.linkedCardId != null && (!cards.has(card.linkedCardId)
+        || card.linkedCardId === card.id || cards.get(card.linkedCardId).deckId !== card.deckId)) return fail("cards.linkedCardId");
+    }
+    if (Object.keys(state.languageProfiles).some(code => !LEARNING_LANGUAGES.has(code))) return fail("languageProfiles.language");
+    for (const code of LEARNING_LANGUAGES) {
+      const profile = state.languageProfiles[code];
+      if (!isRecord(profile) || !optionalDeck(profile.activeDeckId, code)
+        || !idsIn(profile.sessionReviewedIds, code)) return fail(`languageProfiles.${code}`);
+      if (!isRecord(profile.history) || Object.entries(profile.history).some(([day, value]) =>
+        !/^\d{4}-\d{2}-\d{2}$/.test(day) || !isRecord(value)
+        || Object.values(value).some(n => !Number.isSafeInteger(n) || n < 0))) return fail(`languageProfiles.${code}.history`);
+      if (!isRecord(profile.streak) || !Number.isSafeInteger(profile.streak.current) || profile.streak.current < 0
+        || (profile.streak.lastDay != null && !/^\d{4}-\d{2}-\d{2}$/.test(profile.streak.lastDay))) return fail(`languageProfiles.${code}.streak`);
+      if (profile.studyResume != null && !referencesValid(profile.studyResume, code)) return fail(`languageProfiles.${code}.studyResume`);
+      const draft = profile.practiceDraft;
+      if (draft != null) {
+        if (!referencesValid(draft, code)
+          || !["setup", "run", "result"].includes(draft.step)
+          || !["last", "days", "all"].includes(draft.period)
+          || !idsIn(draft.selectedIds, code)
+          || (draft.payload != null && !isRecord(draft.payload))
+          || (draft.feedback != null && !isRecord(draft.feedback))
+          || (draft.answers != null && (!Array.isArray(draft.answers) || draft.answers.some(answer => typeof answer !== "string")))
+          || (draft.words != null && (!Array.isArray(draft.words) || draft.words.some(word => !isRecord(word))))) return fail(`languageProfiles.${code}.practiceDraft`);
+      }
+    }
+    if (state.studyCycles != null) {
+      if (!isRecord(state.studyCycles)) return fail("studyCycles");
+      for (const [id, cycle] of Object.entries(state.studyCycles)) {
+        if (!cards.has(id) || !isRecord(cycle) || !Array.isArray(cycle.variants)
+          || cycle.variants.length < 1 || cycle.variants.length > 4
+          || cycle.variants.some(v => !isRecord(v) || !["word", "sentence"].includes(v.mode) || !["english", "local"].includes(v.front))
+          || !Number.isInteger(cycle.index) || cycle.index < 0 || cycle.index >= cycle.variants.length
+          || !Array.isArray(cycle.grades) || cycle.grades.length !== cycle.index
+          || cycle.grades.some(g => !Number.isInteger(g) || g < 0 || g > 3)) return fail("studyCycles");
+      }
+    }
+    if (data.reviewEvents != null) {
+      if (!Array.isArray(data.reviewEvents) || data.reviewEvents.length > 200000) return fail("reviewEvents");
+      const used = new Set();
+      for (const event of data.reviewEvents) {
+        if (!isRecord(event) || !cleanId(event.id) || cleanId(event.id) !== event.id || used.has(event.id)
+          || !cards.has(event.cardId) || cards.get(event.cardId).deckId !== event.deckId
+          || (event.learningLanguage != null && !deckIn(event.deckId, event.learningLanguage))
+          || !Number.isInteger(event.grade) || event.grade < 0 || event.grade > 3) return fail("reviewEvents");
+        used.add(event.id);
+      }
+    }
+    const history = state.settings?.practiceHistory;
+    if (history != null && (!Array.isArray(history) || history.some(entry =>
+      !referencesValid(entry, entry?.learningLanguage || "en") || !LEARNING_LANGUAGES.has(entry?.learningLanguage || "en")))) return fail("practiceHistory");
+    return null;
+  }
+
   function parse(text, options = {}) {
     if (typeof text !== "string" || text.length > 100 * 1024 * 1024) return { kind: "error", reason: "invalid-data" };
     let data;
@@ -592,11 +683,17 @@
       if (data.format === 2 || data.format === 3) {
         if (data.kind !== "full" && data.kind !== "deck") return { kind: "error", reason: "wrong-kind" };
         if (data.kind === "deck") {
+          if (data.format === 3 && data.deck?.learningLanguage != null
+            && !LEARNING_LANGUAGES.has(data.deck.learningLanguage)) return { kind: "error", reason: "invalid-data" };
           const deck = sanitizeDeckContent(data.deck);
           return deck ? { kind: "deck", deck, format: data.format } : { kind: "error", reason: "invalid-data" };
         }
         if (!isRecord(data.metadata) || typeof data.metadata.secretsIncluded !== "boolean") {
           return { kind: "error", reason: "invalid-data" };
+        }
+        if (data.format === 3) {
+          const error = validateFormat3(data);
+          if (error) return error;
         }
         const result = fullResult(data.state, { reviewEvents: data.reviewEvents, practiceDraft: data.practiceDraft, format: data.format });
         if (result.kind !== "full") return result;
