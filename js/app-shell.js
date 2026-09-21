@@ -546,16 +546,29 @@ if (window.visualViewport) {
 }
 // Belt-and-suspenders: also flag focus/blur of text fields directly, so the
 // tab bar hides even on browsers that don't fire visualViewport resizes.
+/* Only text-entry fields open the on-screen keyboard. A <select> shows a
+   native picker instead, so flagging it would hide the bottom tab bar for no
+   reason (and the bar would flicker back when the list closes). Checkboxes,
+   radios, buttons and similar inputs never open a keyboard either. */
+const NON_TEXT_INPUT_TYPES = new Set([
+  "checkbox", "radio", "button", "submit", "reset", "range", "file", "color", "image",
+]);
+function opensKeyboard(el) {
+  if (!el || !el.matches) return false;
+  if (el.matches("textarea")) return true;
+  if (el.matches("input")) return !NON_TEXT_INPUT_TYPES.has((el.type || "text").toLowerCase());
+  return false;
+}
+window.__opensKeyboard = opensKeyboard;
 document.addEventListener("focusin", (e) => {
-  if (e.target.matches && e.target.matches("input, textarea, select")) {
+  if (opensKeyboard(e.target)) {
     document.body.classList.add("kb-open");
   }
 });
 document.addEventListener("focusout", (e) => {
-  if (e.target.matches && e.target.matches("input, textarea, select")) {
+  if (opensKeyboard(e.target)) {
     setTimeout(() => {
-      const a = document.activeElement;
-      if (!a || !a.matches || !a.matches("input, textarea, select")) {
+      if (!opensKeyboard(document.activeElement)) {
         document.body.classList.remove("kb-open");
       }
     }, 100);

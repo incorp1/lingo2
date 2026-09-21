@@ -770,12 +770,15 @@ function initializeAppNavigation() {
      the next frames (double pass wins the focusout race on old iOS). */
   function clearKeyboardFlag() {
     const sweep = () => {
+      /* Only text-entry fields keep the keyboard (and thus the flag) alive;
+         a <select> shows a native picker without a keyboard. */
+      const opensKeyboard = window.__opensKeyboard || ((el) =>
+        !!(el && el.matches && el.matches("input, textarea")));
       const a = document.activeElement;
-      if (a && a.matches && a.matches("input, textarea, select") && !a.closest(".modal:not([hidden])")) {
+      if (opensKeyboard(a) && !a.closest(".modal:not([hidden])")) {
         a.blur();
       }
-      const b = document.activeElement;
-      if (!b || !b.matches || !b.matches("input, textarea, select")) {
+      if (!opensKeyboard(document.activeElement)) {
         document.body.classList.remove("kb-open");
       }
     };
