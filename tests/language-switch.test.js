@@ -196,6 +196,26 @@ test("переключение на тот же язык ничего не пи�
   assert.ok(!api.getLog().includes("write-ok"));
 });
 
+test("после успешного переключения контрол снова доступен для нажатия", async () => {
+  const api = loadSwitchHarness();
+  assert.equal(await api.switchLearningLanguage("nb"), true);
+  assert.equal(api.isLearningLanguageSwitchBusy(), false);
+  assert.equal(api.select.disabled, false, "select не должен остаться заблокированным");
+  assert.equal(api.select.value, "nb");
+
+  // Повторное переключение обратно должно работать без перезагрузки.
+  assert.equal(await api.switchLearningLanguage("en"), true);
+  assert.equal(api.select.disabled, false);
+  assert.equal(api.select.value, "en");
+});
+
+test("после неудачной записи контрол также разблокируется", async () => {
+  const api = loadSwitchHarness({ failWrite: true });
+  assert.equal(await api.switchLearningLanguage("nb"), false);
+  assert.equal(api.isLearningLanguageSwitchBusy(), false);
+  assert.equal(api.select.disabled, false);
+});
+
 test("перезапуск восстанавливает язык обучения и синхронизирует переключатель", async () => {
   const api = loadSwitchHarness();
   await api.switchLearningLanguage("nb");

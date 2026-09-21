@@ -113,7 +113,11 @@ async function switchLearningLanguage(rawCode) {
     }
     return true;
   } finally {
+    // The busy flag must be cleared *before* the final control sync, otherwise
+    // syncLearningLanguageControl() would latch `select.disabled = true`
+    // permanently and the control could never be tapped again without a reload.
     learningLanguageSwitchBusy = false;
+    syncLearningLanguageControl();
   }
 }
 
