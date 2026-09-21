@@ -107,8 +107,8 @@ test("progress reset touches only the active language and keeps content", () => 
     "events of other languages are kept"
   );
   assert.ok(
-    source.includes("nextState.practiceHistory"),
-    "история практики обрабатывается явно"
+    source.includes("nextState.settings.practiceHistory"),
+    "AUD-010: история практики обрабатывается явно в settings.practiceHistory"
   );
   assert.ok(
     !source.includes('normalizeLearningLanguage(entry.learningLanguage) !== activeLanguage'),

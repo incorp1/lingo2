@@ -139,12 +139,14 @@ async function resetProgress() {
       if (event.deckId) return true;
       return normalizeLearningLanguage(event.learningLanguage) !== activeLanguage;
     });
-  // AUD-007: сброс прогресса касается только расписания повторений.
+  // AUD-007/AUD-010: сброс прогресса касается только расписания повторений.
   // История AI-практики — отдельный пользовательский контент, который нельзя
   // восстановить, поэтому она сохраняется для всех языков, включая активный.
-  nextState.practiceHistory = Array.isArray(nextState.practiceHistory)
-    ? nextState.practiceHistory
-    : [];
+  // Хранится она в `state.settings.practiceHistory`, поэтому нормализуем именно
+  // это поле и не создаём дублирующее поле на верхнем уровне состояния.
+  if (nextState.settings && !Array.isArray(nextState.settings.practiceHistory)) {
+    nextState.settings.practiceHistory = [];
+  }
   try {
     const committed = await commitDestructiveSnapshot({
       state: nextState,
