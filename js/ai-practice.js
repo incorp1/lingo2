@@ -876,7 +876,11 @@ function renderPracticeStory() {
     `<button class="btn ghost small practice-tts" id="practiceTtsBtn" type="button">🔊 ${escape(t("practice.listen"))}</button>`;
   storyEl.hidden = false;
 
-  $("#practiceTtsBtn").onclick = () => speak(p.text.replace(/\*\*/g, ""));
+  /* Practice text is always written in the active learning language, so the
+     locale must be explicit — detectLang() heuristics mistake accent-free
+     Norwegian for English and read it with an en voice. */
+  $("#practiceTtsBtn").onclick = () =>
+    speak(p.text.replace(/\*\*/g, ""), { lang: learningSpeechLocale() });
 
   // Questions
   const qWrap = $("#practiceQuestions");
