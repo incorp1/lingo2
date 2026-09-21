@@ -1,5 +1,16 @@
 /* Lingo Cards — Heatmap, PWA lifecycle and statistics */
 
+/* Canonical per-language history source. `state.history` is only a
+   compatibility mirror of the active language profile, so statistics must read
+   the profile to avoid showing another language's activity. */
+function statsHistory() {
+  if (typeof activeLanguageProfile === "function") {
+    const profile = activeLanguageProfile(state);
+    if (profile && profile.history) return profile.history;
+  }
+  return state.history || {};
+}
+
 /* ----- Heatmap (GitHub-style activity grid) ----- */
 function patchElementList(container, items, keyOf, createElement, updateElement) {
   const existing = new Map(Array.from(container.children).map(node => [node.dataset.renderKey, node]));
@@ -28,11 +39,12 @@ function renderHeatmap() {
   const dow = (startDay.getDay() + 6) % 7;        // 0..6, Mon=0
   startDay.setDate(startDay.getDate() - dow);
 
+  const history = statsHistory();
   const cells = [];
   for (let i = 0; i <= totalDays + dow; i++) {
     const d = new Date(startDay); d.setDate(startDay.getDate() + i);
     const k = todayKey(d);
-    const v = state.history[k]?.reviewed || 0;
+    const v = history[k]?.reviewed || 0;
     cells.push({ d, k, v, future: d > today });
   }
   const max = Math.max(1, ...cells.map(c => c.v));
@@ -335,11 +347,12 @@ function renderStats() {
     else if (dayDiff < 0) forecast[0] += 1;
   }
   const total = statsCards.length;
-  const reviewed = (state.history[todayKey()]?.reviewed) || 0;
+  const history = statsHistory();
+  const reviewed = (history[todayKey()]?.reviewed) || 0;
 
   let retNum = 0, retDen = 0;
   const cutoff = now - 30 * DAY_MS;
-  Object.entries(state.history).forEach(([k, v]) => {
+  Object.entries(history).forEach(([k, v]) => {
     const day = new Date(k).getTime();
     if (day >= cutoff) {
       retNum += (v.good || 0) + (v.easy || 0);
@@ -359,7 +372,7 @@ function renderStats() {
   for (let i = 29; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
     const k = todayKey(d);
-    const v = state.history[k]?.reviewed || 0;
+    const v = history[k]?.reviewed || 0;
     reviewBars.push({ key: k, label: d.getDate(), value: v });
   }
   renderBars($("#reviewChart"), reviewBars);
