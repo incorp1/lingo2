@@ -14,7 +14,13 @@ function stopVolatileWorkAfterReplacement() {
 
 function applyCommittedSnapshot(committed) {
   state = normalizeLoadedState(committed.state);
-  state.practiceDraft = committed.practiceDraft || null;
+  // The active language profile is the single source of truth for the draft;
+  // the flat field is only a compatibility mirror of that profile.
+  const activeProfile = activeLanguageProfile(state);
+  if (committed.practiceDraft && !activeProfile.practiceDraft) {
+    activeProfile.practiceDraft = committed.practiceDraft;
+  }
+  state.practiceDraft = activeProfile.practiceDraft || null;
   rebuildEntityIndexes();
   resetDirtyState();
   stopVolatileWorkAfterReplacement();

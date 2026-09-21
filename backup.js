@@ -695,10 +695,24 @@
           const error = validateFormat3(data);
           if (error) return error;
         }
-        const result = fullResult(data.state, { reviewEvents: data.reviewEvents, practiceDraft: data.practiceDraft, format: data.format });
+        // Format 3 keeps drafts inside language profiles only. Older formats
+        // carry a single flat draft in the envelope; it belongs to English and
+        // is migrated into that profile before sanitizing, so the restored
+        // state never depends on a second, independently mutable copy.
+        let rawState = data.state;
+        if (data.format !== 3 && isRecord(rawState) && isRecord(data.practiceDraft)
+          && rawState.practiceDraft == null && !isRecord(rawState.languageProfiles)) {
+          rawState = { ...rawState, practiceDraft: data.practiceDraft };
+        }
+        const result = fullResult(rawState, { reviewEvents: data.reviewEvents, format: data.format });
         if (result.kind !== "full") return result;
         result.reviewEvents = sanitizeReviewEvents(data.reviewEvents, result.state);
-        result.practiceDraft = sanitizePracticeDraft(data.practiceDraft, result.state);
+        for (const code of LEARNING_LANGUAGES) {
+          const profile = result.state.languageProfiles[code];
+          profile.practiceDraft = sanitizePracticeDraft(profile.practiceDraft, result.state);
+        }
+        result.state.practiceDraft = result.state.languageProfiles[result.state.activeLearningLanguage].practiceDraft;
+        result.practiceDraft = result.state.practiceDraft;
         result.secretPresent = false;
         if (data.metadata.secretsIncluded === true) {
           if (isRecord(data.state?.settings)) {

@@ -445,15 +445,27 @@ function practiceSnapshot() {
   };
 }
 
-function persistPracticeDraft() {
+// The active language profile owns the draft; state.practiceDraft mirrors it.
+function writeActivePracticeDraft(draft) {
   if (!state) return;
-  state.practiceDraft = practiceSnapshot();
+  state.practiceDraft = draft;
+  if (typeof activeLanguageProfile === "function") {
+    activeLanguageProfile(state).practiceDraft = draft ?? null;
+  }
   markMetaDirty();
   save();
 }
 
+function persistPracticeDraft() {
+  if (!state) return;
+  writeActivePracticeDraft(practiceSnapshot());
+}
+
 function restorePracticeDraft() {
-  const draft = state && state.practiceDraft;
+  const profileDraft = typeof activeLanguageProfile === "function"
+    ? activeLanguageProfile(state || {}).practiceDraft
+    : null;
+  const draft = (state && state.practiceDraft) || profileDraft;
   if (!draft) return false;
   practiceState = {
     step: draft.step || "setup",
@@ -480,9 +492,7 @@ function restorePracticeDraft() {
 
 function clearPracticeDraft() {
   if (!state) return;
-  delete state.practiceDraft;
-  markMetaDirty();
-  save();
+  writeActivePracticeDraft(null);
 }
 
 /* Drop the in-memory practice session when the learning language changes.
