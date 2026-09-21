@@ -94,14 +94,16 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
+    // Network-first для навигации: `index.html` — единственный неверсионированный
+    // документ, из которого берутся все `?v=` ссылки, включая регистрацию sw.js.
+    // При cache-first запуск отдавал старый документ и лишь фоном обновлял кэш,
+    // поэтому новая версия регистрировалась на следующий запуск, а применялась
+    // только на третий — отсюда «нужно перезапустить несколько раз».
     event.respondWith((async () => {
-      const cached = await caches.match(INDEX_URL);
-      if (cached) {
-        event.waitUntil(refreshCachedRequest(request, INDEX_URL));
-        return cached;
-      }
       const network = await refreshCachedRequest(request, INDEX_URL);
-      return network || Response.error();
+      if (network) return network;
+      // Offline-запуск по-прежнему работает из кэша.
+      return (await caches.match(INDEX_URL)) || Response.error();
     })());
     return;
   }

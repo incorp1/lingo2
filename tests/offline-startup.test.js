@@ -17,10 +17,24 @@ test("установленная PWA запускается из кеша без
   assert.match(sw, new RegExp(`const CACHE = "lingo-cards-v${pkg.version.replaceAll(".", "\\.")}"`));
   assert.match(sw, /await cache\.addAll\(APP_SHELL\)/);
   assert.match(sw, /if \(request\.mode === "navigate"\)/);
-  assert.match(sw, /const cached = await caches\.match\(INDEX_URL\)/);
-  assert.match(sw, /if \(cached\) \{[\s\S]*?return cached;/);
-  assert.match(sw, /event\.waitUntil\(refreshCachedRequest\(request, INDEX_URL\)\)/);
-  assert.match(sw, /return network \|\| Response\.error\(\)/);
+  // Навигация обслуживается network-first, чтобы обновление применялось с первого
+  // запуска, но при недоступной сети документ обязан отдаваться из кеша.
+  assert.match(sw, /const network = await refreshCachedRequest\(request, INDEX_URL\)/);
+  assert.match(sw, /return \(await caches\.match\(INDEX_URL\)\) \|\| Response\.error\(\)/);
+});
+
+test("навигация не отдаёт устаревший документ, пока сеть доступна", () => {
+  const sw = read("sw.js");
+  const navigate = sw.slice(sw.indexOf('request.mode === "navigate"'), sw.indexOf("SHELL_URLS.has(url.href)"));
+  const networkAt = navigate.indexOf("const network = await refreshCachedRequest");
+  const cacheAt = navigate.indexOf("caches.match(INDEX_URL)");
+
+  assert.ok(networkAt !== -1 && cacheAt !== -1, "нужны и сетевой запрос, и offline-фолбэк");
+  assert.ok(networkAt < cacheAt, "сеть должна запрашиваться раньше кеша для index.html");
+  assert.ok(
+    !/event\.waitUntil\(refreshCachedRequest\(request, INDEX_URL\)\)/.test(navigate),
+    "фоновое обновление index.html означало бы возврат к cache-first"
+  );
 });
 
 test("в офлайн-кеш включены все локальные ресурсы страницы", () => {
