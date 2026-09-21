@@ -268,8 +268,9 @@ function renderSettingsSummaries() {
   }
   const summaryData = $("#summaryData");
   if (summaryData) {
-    const deckCount = state.decks ? state.decks.length : 0;
-    const cardCount = state.cards ? state.cards.length : 0;
+    // AUD-009: сводка описывает активный язык обучения, как и остальные экраны.
+    const deckCount = typeof activeDecks === "function" ? activeDecks().length : 0;
+    const cardCount = typeof activeCards === "function" ? activeCards().length : 0;
     summaryData.textContent = `${deckCount} ${t("settings.summary.decks") || "колод"} · ${cardCount} ${t("settings.summary.cards") || "карточек"}`;
   }
   // Footer version/storage
@@ -296,9 +297,11 @@ function formatBackupSize(bytes) {
 async function renderBackupMetadata() {
   const counts = $("#backupCounts");
   if (counts) {
+    // AUD-009: полная копия охватывает все языки, поэтому счётчик остаётся
+    // глобальным, но строка явно помечена как «все языки».
     const decks = state.decks?.length || 0;
     const cards = state.cards?.length || 0;
-    counts.textContent = t("settings.backup.counts", { decks, cards });
+    counts.textContent = t("settings.backup.countsAllLanguages", { decks, cards });
   }
   const size = $("#backupSize");
   if (size) {

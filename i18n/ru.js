@@ -155,6 +155,7 @@ window.I18N.ru = {
     "settings.backup.title": "Резервная копия и перенос",
     "settings.backup.desc": "Полная копия включает колоды, карточки, учебный прогресс, историю повторений, данные практики чтения, настройки и API-ключ. Храните файл резервной копии в безопасном месте.",
     "settings.backup.counts": "{decks} колод · {cards} карточек",
+    "settings.backup.countsAllLanguages": "{decks} колод · {cards} карточек (все языки)",
     "settings.backup.size": "Примерный размер: {size}",
     "settings.backup.sizeUnavailable": "Не удалось оценить размер",
     "settings.backup.last": "Последняя успешная копия: {date}",

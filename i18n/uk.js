@@ -217,6 +217,7 @@ window.I18N.uk = {
     "settings.backup.title": "Резервна копія та перенесення",
     "settings.backup.desc": "Повна копія містить колоди, картки, навчальний прогрес, історію повторень, дані практики читання, налаштування та API-ключ. Зберігайте файл резервної копії в безпечному місці.",
     "settings.backup.counts": "{decks} колод · {cards} карток",
+    "settings.backup.countsAllLanguages": "{decks} колод · {cards} карток (усі мови)",
     "settings.backup.size": "Приблизний розмір: {size}",
     "settings.backup.sizeUnavailable": "Не вдалося оцінити розмір",
     "settings.backup.last": "Остання успішна копія: {date}",

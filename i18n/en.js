@@ -156,6 +156,7 @@ window.I18N.en = {
     "settings.backup.title": "Backup & transfer",
     "settings.backup.desc": "The full backup includes decks, cards, study progress, review history, reading-practice data, settings, and the API key. Keep the backup file in a secure place.",
     "settings.backup.counts": "{decks} decks · {cards} cards",
+    "settings.backup.countsAllLanguages": "{decks} decks · {cards} cards (all languages)",
     "settings.backup.size": "Estimated size: {size}",
     "settings.backup.sizeUnavailable": "Size estimate unavailable",
     "settings.backup.last": "Last successful backup: {date}",
