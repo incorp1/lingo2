@@ -481,15 +481,15 @@ function practiceWordPool(period, deckId) {
 
   if (period === "last") {
     const ids = Array.isArray(state.sessionReviewedIds) ? state.sessionReviewedIds : [];
-    return state.cards.filter(c => ids.includes(c.id) && inDeck(c) && usable(c));
+    return activeCards(deckId || null).filter(c => ids.includes(c.id) && usable(c));
   }
   let cutoff = 0;
   if (period === "days") {
     cutoff = now - practiceDayWindow() * DAY_MS;
   } else cutoff = 0; // all
 
-  return state.cards.filter(c => {
-    if (!inDeck(c) || !usable(c)) return false;
+  return activeCards(deckId || null).filter(c => {
+    if (!usable(c)) return false;
     if (c.reps <= 0 && !c.lastReview) return false;
     if (period === "all") return c.reps > 0 || !!c.lastReview;
     return c.lastReview && c.lastReview >= cutoff;
@@ -608,7 +608,8 @@ function openPractice() {
   const allOpt = document.createElement("option");
   allOpt.value = ""; allOpt.textContent = t("browse.allDecks");
   deckSel.appendChild(allOpt);
-  for (const d of state.decks) {
+  const practiceDecks = activeDecks();
+  for (const d of practiceDecks) {
     const o = document.createElement("option");
     o.value = d.id; o.textContent = d.name;
     deckSel.appendChild(o);
@@ -619,7 +620,7 @@ function openPractice() {
   if (hasDraft) {
     // Restore the saved deck selection (fall back to "all" if the deck is gone).
     const savedDeck = practiceState.deckId || "";
-    deckSel.value = state.decks.some(d => d.id === savedDeck) ? savedDeck : "";
+    deckSel.value = practiceDecks.some(d => d.id === savedDeck) ? savedDeck : "";
     practiceState.deckId = deckSel.value;
     syncPracticeFormFromState();
     applyI18NSafe($("#practiceModal"));

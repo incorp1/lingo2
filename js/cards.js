@@ -77,7 +77,7 @@ function openCardEditor(cardId, preselectDeckId) {
 
   const edDeck = $("#edDeck");
   edDeck.innerHTML = "";
-  for (const d of state.decks) {
+  for (const d of activeDecks()) {
     const o = document.createElement("option");
     o.value = d.id; o.textContent = d.name; edDeck.appendChild(o);
   }
@@ -102,7 +102,7 @@ function openCardEditor(cardId, preselectDeckId) {
     $("#edHint").value = c.hint || "";
   } else {
     $("#edType").value = "basic";
-    $("#edDeck").value = preselectDeckId || state.activeDeckId || state.decks[0]?.id || "";
+    $("#edDeck").value = preselectDeckId || state.activeDeckId || firstDeckIdForLanguage() || "";
     $("#edFront").value = ""; $("#edBack").value = "";
     $("#edCloze").value = ""; $("#edExample").value = "";
     $("#edHint").value = "";
@@ -265,7 +265,7 @@ function closeModal() {
 let viewingDeckId = null;
 function openDeckBrowse(deckId) {
   const deck = getDeckById(deckId);
-  if (!deck) return;
+  if (!deck || !isDeckInActiveLanguage(deck)) return;
   viewingDeckId = deckId;
   clearBulkSelection();
   $("#filterState").value = "";

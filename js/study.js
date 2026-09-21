@@ -13,7 +13,7 @@ function renderDeckSelector() {
   sel.appendChild(all.cloneNode(true));
   filter.appendChild(all.cloneNode(true));
 
-  for (const d of state.decks) {
+  for (const d of activeDecks()) {
     const cards = getDeckCards(d.id);
     const o = document.createElement("option");
     o.value = d.id;
@@ -121,7 +121,7 @@ function renderStudy() {
     }
 
     const nd = nextDueAt(deckId);
-    const hasAny = state.cards.some(c => (!deckId || c.deckId === deckId));
+    const hasAny = activeCards(deckId).length > 0;
     const hasEnabledCategories = studyQueueHasEnabledCategories();
     let title, desc;
     if (!hasEnabledCategories) {

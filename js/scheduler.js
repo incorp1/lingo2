@@ -620,7 +620,9 @@ function refillStudyQueue(now = Date.now()) {
   if (availableSlots <= 0) return;
 
   const include = state.settings.studyQueue || { new: true, learning: true, review: true };
-  const sourceCards = session.deckId ? getDeckCards(session.deckId) : state.cards;
+  const sourceCards = session.deckId
+    ? getDeckCards(session.deckId)
+    : (typeof activeCards === "function" ? activeCards() : state.cards);
   const eligibleCards = [];
 
   for (const card of sourceCards) {

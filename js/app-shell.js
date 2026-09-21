@@ -173,7 +173,8 @@ function bindEvents() {
   };
   $("#bulkMoveBtn").onclick = async () => {
     if (bulkMutationRunning || bulkSelected.size === 0) return;
-    const options = state.decks.map((deck, index) => `${index + 1}. ${deck.name}`).join("\n");
+    const movableDecks = activeDecks();
+    const options = movableDecks.map((deck, index) => `${index + 1}. ${deck.name}`).join("\n");
     const answer = await requestTextInput({
       title: t("browse.bulk.moveTitle"),
       message: `${t("browse.bulk.movePrompt")}\n${options}`,
@@ -184,7 +185,7 @@ function bindEvents() {
     if (answer === null) return;
     const normalized = answer.trim().toLowerCase();
     const numericIndex = /^\d+$/.test(normalized) ? Number(normalized) - 1 : -1;
-    const deck = state.decks[numericIndex] || state.decks.find(item => item.name.toLowerCase() === normalized);
+    const deck = movableDecks[numericIndex] || movableDecks.find(item => item.name.toLowerCase() === normalized);
     if (!deck) {
       toast(t("browse.bulk.deckNotFound"), { error: true });
       return;

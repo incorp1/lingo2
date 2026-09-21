@@ -299,7 +299,7 @@ function friendlyWhen(ms) {
 function nextDueAt(deckId) {
   const now = Date.now();
   let min = null;
-  for (const c of state.cards) {
+  for (const c of activeCards(deckId)) {
     if (c.state === "suspended" || c.state === "new") continue;
     if (deckId && c.deckId !== deckId) continue;
     if (c.due <= now) continue;
@@ -308,7 +308,7 @@ function nextDueAt(deckId) {
   return min;
 }
 function hasNewInDeck(deckId) {
-  return state.cards.some(c => c.state === "new" && (!deckId || c.deckId === deckId));
+  return activeCards(deckId).some(c => c.state === "new");
 }
 
 /* ----- Stats view ----- */
@@ -320,7 +320,8 @@ function renderStats() {
   let mature = 0;
   let young = 0;
   let due = 0;
-  for (const card of state.cards) {
+  const statsCards = activeCards();
+  for (const card of statsCards) {
     if (card.state === "review") {
       if (card.interval >= 21) mature += 1;
       else young += 1;
@@ -333,7 +334,7 @@ function renderStats() {
     if (dayDiff >= 0 && dayDiff < 14) forecast[dayDiff] += 1;
     else if (dayDiff < 0) forecast[0] += 1;
   }
-  const total = state.cards.length;
+  const total = statsCards.length;
   const reviewed = (state.history[todayKey()]?.reviewed) || 0;
 
   let retNum = 0, retDen = 0;

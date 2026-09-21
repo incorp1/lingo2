@@ -156,7 +156,7 @@ async function deleteDeckWithUndo(deckId) {
   const ok = await mutateAndFlush(() => {
     removeDeck(deckId);
     if (state.activeDeckId === deckId) {
-      state.activeDeckId = state.decks[0]?.id || null;
+      state.activeDeckId = firstDeckIdForLanguage() || null;
       markMetaDirty();
     }
   });
@@ -208,14 +208,15 @@ function bindDeckActionMenu() {
 
 /* ----- Decks view ----- */
 function collectDeckAggregates(now = Date.now()) {
-  const aggregates = new Map(state.decks.map(deck => [deck.id, {
+  const decks = activeDecks();
+  const aggregates = new Map(decks.map(deck => [deck.id, {
     total: 0,
     new: 0,
     learning: 0,
     review: 0,
     nextDue: null,
   }]));
-  for (const card of state.cards) {
+  for (const card of activeCards()) {
     let aggregate = aggregates.get(card.deckId);
     if (!aggregate) {
       aggregate = { total: 0, new: 0, learning: 0, review: 0, nextDue: null };
@@ -312,7 +313,8 @@ function renderDecks() {
   }
 
   const list = $("#deckList");
-  if (state.decks.length === 0) {
+  const visibleDecks = activeDecks();
+  if (visibleDecks.length === 0) {
     if (list.dataset.mode !== "empty") {
       list.innerHTML = `<div class="empty-state empty-state-padded"><div class="emoji">📚</div><h2>${escape(t("decks.empty.title"))}</h2><p>${escape(t("decks.empty.desc"))}</p></div>`;
       list.dataset.mode = "empty";
@@ -324,7 +326,7 @@ function renderDecks() {
   const existing = new Map(Array.from(list.querySelectorAll(".deck-row")).map(row => [row.dataset.deckId, row]));
   const fragment = document.createDocumentFragment();
   const aggregates = collectDeckAggregates();
-  for (const d of state.decks) {
+  for (const d of visibleDecks) {
     const s = aggregates.get(d.id) || { total: 0, new: 0, learning: 0, review: 0, nextDue: null };
     const shownNew = s.new;
     const dueNow = shownNew + s.learning + s.review;
@@ -453,7 +455,7 @@ function filterBrowseCards() {
   const stateF = $("#filterState").value;
   const query = String($("#browseSearch")?.value || "").trim().toLocaleLowerCase();
   const sort = $("#browseSort")?.value || "due";
-  return state.cards.filter(c => {
+  return activeCards().filter(c => {
     if (deck && c.deckId !== deck) return false;
     if (stateF && c.state !== stateF) return false;
     if (query && !browseSearchText(c).includes(query)) return false;
@@ -850,11 +852,11 @@ async function bulkDelete() {
 function openBulkAdd(deckId) {
   const sel = $("#bulkDeck");
   sel.innerHTML = "";
-  for (const d of state.decks) {
+  for (const d of activeDecks()) {
     const o = document.createElement("option");
     o.value = d.id; o.textContent = d.name; sel.appendChild(o);
   }
-  sel.value = deckId || state.activeDeckId || state.decks[0]?.id || "";
+  sel.value = deckId || state.activeDeckId || firstDeckIdForLanguage() || "";
   $("#bulkType").value = "basic";
   $("#bulkFillExample").checked = false;
   $("#bulkText").value = "";

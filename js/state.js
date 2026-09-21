@@ -847,6 +847,39 @@ function cardLearningLanguage(card) {
   return deckLearningLanguage(card?.deckId);
 }
 
+// Language-scoped selectors. Decks and cards stay global in state, so every
+// browsing / study / editor surface must read through these helpers instead of
+// walking state.decks or state.cards directly.
+function decksForLanguage(language = state?.activeLearningLanguage) {
+  const code = normalizeLearningLanguage(language);
+  return (state?.decks || []).filter(deck => normalizeLearningLanguage(deck.learningLanguage) === code);
+}
+
+function activeDecks() {
+  return decksForLanguage();
+}
+
+function cardsForLanguage(language = state?.activeLearningLanguage) {
+  const code = normalizeLearningLanguage(language);
+  return (state?.cards || []).filter(card => deckLearningLanguage(card.deckId) === code);
+}
+
+function isDeckInActiveLanguage(deckOrId) {
+  const deck = typeof deckOrId === "string" ? deckById.get(deckOrId) : deckOrId;
+  if (!deck) return false;
+  return deckLearningLanguage(deck) === normalizeLearningLanguage(state?.activeLearningLanguage);
+}
+
+// Cards of the active language, or of one deck when an id is given.
+function activeCards(deckId = null) {
+  if (deckId) return isDeckInActiveLanguage(deckId) ? (cardsByDeck.get(deckId) || []) : [];
+  return cardsForLanguage();
+}
+
+function firstDeckIdForLanguage(language = state?.activeLearningLanguage) {
+  return decksForLanguage(language)[0]?.id || null;
+}
+
 function normalizeLoadedState(loaded) {
   loaded.revision = Number.isSafeInteger(Number(loaded.revision)) ? Number(loaded.revision) : 0;
   loaded.updatedAt = Number.isFinite(Number(loaded.updatedAt)) ? Number(loaded.updatedAt) : 0;
@@ -1118,6 +1151,9 @@ function findDuplicateCard(deckId, front, excludeCardId = null) {
 }
 
 function createCard({ deckId, type = "basic", front = "", back = "", example = "", exampleSentence = "", exampleTranslation = "", exampleTargetTerm = "", hint = "", cloze = "", info = "" }) {
+  if (!deckId || !deckById.has(deckId)) {
+    throw new Error(`createCard: unknown deckId "${deckId}"`);
+  }
   const card = {
     id: uid(),
     deckId,
