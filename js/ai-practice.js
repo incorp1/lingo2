@@ -367,6 +367,9 @@ function practiceCheckSnapshotIsCurrent(snapshot) {
   if (!snapshot || practiceState.revision !== snapshot.revision) return false;
   if (practiceContextId() !== snapshot.contextId || practiceState.step !== "run") return false;
   if (snapshot.learningLanguage && activeLearningLanguageCode() !== snapshot.learningLanguage) return false;
+  // en→nb→en keeps the code equal, so the generation token is the real guard.
+  if (typeof snapshot.languageGeneration === "number"
+    && !isLanguageGenerationCurrent(snapshot.languageGeneration)) return false;
   if ($("#practiceModal")?.hidden) return false;
   return JSON.stringify(currentPracticeAnswerSnapshot()) === snapshot.answersSignature;
 }
@@ -778,6 +781,8 @@ async function practiceGenerate() {
   const targetWords = chosen.map(c => ({ word: c.front, translation: c.back || "" }));
   // The reading text follows the learning language, never the interface one.
   const learnCode = activeLearningLanguageCode();
+  // The code alone cannot detect en→nb→en: capture the generation token too.
+  const learnGeneration = currentLanguageGeneration();
   const learnedName = learningLangName();
   const contextId = `practice:draft:${uid()}`;
   practiceState.id = contextId.slice("practice:".length);
@@ -811,7 +816,9 @@ Return JSON with this exact shape:
     });
     if (!isCurrentAiJob(job) || $("#practiceModal").hidden || practiceContextId() !== contextId) return;
     // A late generation must never land in another language's profile.
+    // The token also rejects en→nb→en, where the code alone looks unchanged.
     if (activeLearningLanguageCode() !== learnCode) return;
+    if (!isLanguageGenerationCurrent(learnGeneration)) return;
     const payload = normalizePracticePayload(data);
     if (!payload?.text || payload.questions.length < 3) throw new Error("Invalid response");
     payload.questions = payload.questions.slice(0, 3);
@@ -928,6 +935,8 @@ async function practiceCheck() {
     contextId,
     revision,
     learningLanguage: practiceState.learningLanguage || activeLearningLanguageCode(),
+    // Token pins the snapshot to one language generation, so en→nb→en is stale.
+    languageGeneration: currentLanguageGeneration(),
     answersSignature: JSON.stringify(answers.map(x => x.answer)),
   };
   persistPracticeDraft();

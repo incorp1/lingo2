@@ -46,6 +46,15 @@ test("поздний AI-ответ не пишет данные в чужой п
   assert.match(practice, /if \(snapshot\.learningLanguage && activeLearningLanguageCode\(\) !== snapshot\.learningLanguage\) return false;/);
 });
 
+test("generation-токен реально используется, а не только объявлен", () => {
+  const practice = read("js/ai-practice.js");
+  // Цепочка en→nb→en оставляет код языка прежним: спасает только токен.
+  assert.match(practice, /const learnGeneration = currentLanguageGeneration\(\);/);
+  assert.match(practice, /if \(!isLanguageGenerationCurrent\(learnGeneration\)\) return;/);
+  assert.match(practice, /languageGeneration: currentLanguageGeneration\(\),/);
+  assert.match(practice, /!isLanguageGenerationCurrent\(snapshot\.languageGeneration\)\) return false;/);
+});
+
 test("черновик практики сбрасывается при смене языка", () => {
   const practice = read("js/ai-practice.js");
   assert.match(practice, /function resetPracticeRuntime\(\)/);
