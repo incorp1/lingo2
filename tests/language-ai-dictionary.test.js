@@ -61,7 +61,8 @@ test("вызывающие модули передают активный язы
   assert.doesNotMatch(decks, /sourceLang: "auto",/);
 
   const selection = read("js/selection.js");
-  assert.match(selection, /sourceLangCode: activeLearningLanguageCode\(\),/);
+  assert.match(selection, /const sourceCode = activeLearningLanguageCode\(\);/);
+  assert.match(selection, /sourceLangCode: sourceCode,/);
 });
 
 test("устаревшие async-ответы AI отбрасываются по generation token", () => {

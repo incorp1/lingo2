@@ -501,7 +501,11 @@ async function translateSelection() {
   addBtn.disabled = true;
   let translated = "";
   try {
+    // Направление перевода выделенного слова строго задано: с языка обучения
+    // на язык интерфейса. Исходный язык не «угадывается» сервисом, иначе
+    // короткие норвежские слова определялись как английские.
     const lang = state.settings.language || "uk";
+    const sourceCode = activeLearningLanguageCode();
     // The popover displays the translation only. `quickLookup` additionally
     // waits for the dictionary API and then throws its IPA/example data away,
     // so on a phone connection it added seconds of pointless waiting. Asking
@@ -509,8 +513,8 @@ async function translateSelection() {
     translated = String(await window.LCAi.quickTranslate(word, lang, {
       signal: controller.signal,
       timeoutMs: SELECTION_TRANSLATE_TIMEOUT_MS,
-      learningLanguage: activeLearningLanguageCode(),
-      sourceLangCode: activeLearningLanguageCode(),
+      learningLanguage: sourceCode,
+      sourceLangCode: sourceCode,
     }) || "").trim();
     if (!isCurrentAiJob(job)
       || requestId !== selectionTranslateRequestId

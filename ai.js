@@ -80,8 +80,13 @@
   }
 
   const QUICK_TRANSLATE_URLS = {
-    google: ({ text, target }) =>
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`,
+    // The source language is passed explicitly instead of letting the service
+    // auto-detect it: short Norwegian words ("hus", "gate", "vind") are
+    // routinely detected as English/Danish/German, so a long-press "Перевод"
+    // returned a translation of the wrong language. The learning language is
+    // always known, so there is no reason to let the service guess it.
+    google: ({ text, source, target }) =>
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(source || "auto")}&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`,
     mymemory: ({ text, source, target }) =>
       `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(source)}|${encodeURIComponent(target)}`,
   };
