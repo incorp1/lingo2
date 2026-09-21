@@ -46,7 +46,7 @@ test("скорость сохраняется, голос ищется по ло
 
 test("выделение распознаёт норвежские буквы без потери touch-fallback и экранирования", () => {
   const selection = read("js/selection.js");
-  assert.match(selection, /const SELECTION_HAS_LETTER = \/\[A-Za-zÀ-ÖØ-öø-ÿ\]\//);
+  assert.match(selection, /const SELECTION_HAS_LETTER = \/\\p\{L\}\/u/);
   // Все три прежние ASCII-проверки заменены.
   assert.doesNotMatch(selection, /\/\[A-Za-z\]\/\.test/);
   assert.equal((selection.match(/SELECTION_HAS_LETTER\.test/g) || []).length, 3);
@@ -54,11 +54,11 @@ test("выделение распознаёт норвежские буквы б
   // touch-fallback сохранён.
   assert.match(selection, /SELECTION_TOUCH_ID/);
 
-  const hasLetter = /[A-Za-zÀ-ÖØ-öø-ÿ]/;
+  const hasLetter = /\p{L}/u;
   for (const word of ["å", "ø", "øy", "gå", "blåbær", "lærer", "hus", "gift"]) {
     assert.ok(hasLetter.test(word), word);
   }
-  const wordScan = /[A-Za-zÀ-ÖØ-öø-ÿ'’\-]+/g;
+  const wordScan = /[\p{L}\p{M}'’\-]+/gu;
   assert.deepEqual("å gå blåbær".match(wordScan), ["å", "gå", "blåbær"]);
 });
 

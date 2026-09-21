@@ -7,12 +7,14 @@ const SELECTION_MOVE_TOLERANCE = 10;
    quickly or report a failure instead of keeping the spinner for the long
    card-generation timeout. */
 const SELECTION_TRANSLATE_TIMEOUT_MS = 12000;
-const SELECTION_WORD_CHARS = /[A-Za-zÀ-ÖØ-öø-ÿ'’\-]/;
-const SELECTION_WORD_SCAN = /[A-Za-zÀ-ÖØ-öø-ÿ'’\-]+/g;
-/* A word is "letter bearing" when it contains at least one Latin letter.
+const SELECTION_WORD_CHARS = /[\p{L}\p{M}'’\-]/u;
+const SELECTION_WORD_SCAN = /[\p{L}\p{M}'’\-]+/gu;
+/* A word is "letter bearing" when it contains at least one Unicode letter.
    The old /[A-Za-z]/ probes rejected purely Norwegian words such as "å",
-   "øy" or "ål", so long-press lookup silently did nothing for them. */
-const SELECTION_HAS_LETTER = /[A-Za-zÀ-ÖØ-öø-ÿ]/;
+   "øy" or "ål", and the later Latin-1 range still rejected Cyrillic and
+   letters like "ā/ș/ł/č", so long-press lookup silently did nothing for them.
+   \p{L} keeps the gesture working for any future learning language. */
+const SELECTION_HAS_LETTER = /\p{L}/u;
 const SELECTION_HIT_PADDING = 8;
 const SELECTION_HIT_MAX_DX = 220;
 const SELECTION_TOUCH_ID = "touch";
