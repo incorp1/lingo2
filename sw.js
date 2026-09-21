@@ -44,6 +44,7 @@ const APP_SHELL = [
   "./js/selection.js?v=3.19.16",
   "./js/edge-menu.js?v=3.19.16",
   "./js/motion.js?v=3.19.16",
+  "./js/learning-language.js?v=3.19.16",
   "./js/app-shell.js?v=3.19.16",
   "./tooltips.js?v=3.19.16"
 ];

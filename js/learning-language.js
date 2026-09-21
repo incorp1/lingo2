@@ -1,0 +1,156 @@
+/* Lingo Cards — Coordinated learning-language switching.
+
+   One asynchronous operation at a time. The switch validates the target,
+   refuses re-entry, waits for the active commit, flushes the source profile,
+   writes the new selection and only then clears volatile session state.
+   A generation token protects en→nb→en: a late async continuation is rejected
+   because its token is stale, not because the language code happens to match
+   again. */
+
+let learningLanguageSwitchBusy = false;
+let learningLanguageGeneration = 0;
+
+// Every async learning-language consumer captures this token before awaiting
+// and re-checks it afterwards.
+function currentLanguageGeneration() {
+  return learningLanguageGeneration;
+}
+
+function isLanguageGenerationCurrent(token) {
+  return token === learningLanguageGeneration;
+}
+
+function isLearningLanguageSwitchBusy() {
+  return learningLanguageSwitchBusy;
+}
+
+function learningLanguageLabel(code) {
+  const registry = window.LCLanguages;
+  const language = registry?.getLanguage(code);
+  if (!language) return String(code || "");
+  const translated = typeof t === "function" ? t(language.i18nKey) : "";
+  return translated && translated !== language.i18nKey ? translated : language.aiName;
+}
+
+// Cancel every language-bound async job and volatile UI state. Called only
+// after the new selection has been durably written.
+function clearVolatileLanguageContext() {
+  session = null;
+  undoStack = [];
+  if (typeof clearAiSettingsBusyState === "function") clearAiSettingsBusyState();
+  if (typeof cancelAiSettingsRequests === "function") cancelAiSettingsRequests();
+  if (typeof clearBulkSelection === "function") clearBulkSelection();
+  if (typeof closeModal === "function") closeModal();
+  if (typeof invalidateStudyStage === "function") invalidateStudyStage();
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+  if (typeof viewingDeckId !== "undefined") viewingDeckId = null;
+}
+
+// Restore the compatibility mirror of the selected profile.
+function adoptLanguageProfile(code) {
+  const profile = activeLanguageProfile(state);
+  state.activeDeckId = profile.activeDeckId && getDeckById(profile.activeDeckId)
+    ? profile.activeDeckId
+    : firstDeckIdForLanguage(code);
+  profile.activeDeckId = state.activeDeckId;
+  state.history = profile.history || {};
+  state.streak = profile.streak || { current: 0, lastDay: null };
+  state.sessionReviewedIds = Array.isArray(profile.sessionReviewedIds) ? profile.sessionReviewedIds : [];
+  state.practiceDraft = profile.practiceDraft ?? null;
+  state.studyResume = profile.studyResume ?? null;
+}
+
+/* Switch the active learning language.
+   Returns true only when the new selection was durably written. */
+async function switchLearningLanguage(rawCode) {
+  const registry = window.LCLanguages;
+  if (!registry?.isLanguageCode(rawCode)) return false;
+  const next = registry.normalizeLanguageCode(rawCode);
+  const previous = normalizeLearningLanguage(state?.activeLearningLanguage);
+  if (next === previous) return true;
+  // Re-entry guard: a second tap while the first switch is in flight is a no-op.
+  if (learningLanguageSwitchBusy) return false;
+
+  learningLanguageSwitchBusy = true;
+  try {
+    // Pending editor drafts must be committed before the profile is flushed,
+    // otherwise their values would land in the wrong language profile.
+    if (typeof commitSettingsDrafts === "function" && commitSettingsDrafts("language-switch") === false) {
+      return false;
+    }
+    // Wait for the in-flight commit, then flush the source profile.
+    syncActiveLanguageProfile(state);
+    markMetaDirty();
+    await saveAndFlush();
+
+    const applied = await mutateAndFlush(() => {
+      state.activeLearningLanguage = next;
+      adoptLanguageProfile(next);
+      markMetaDirty();
+    });
+    if (!applied) {
+      // The write failed: keep the previous language and the previous control
+      // value. adoptLanguageProfile is not reverted here because mutateAndFlush
+      // already restored the whole previous state object.
+      state.activeLearningLanguage = normalizeLearningLanguage(state?.activeLearningLanguage, previous);
+      syncLearningLanguageControl();
+      if (typeof toast === "function") toast(t("language.learning.switchFailed"), { error: true });
+      return false;
+    }
+
+    // Confirmed write: invalidate every earlier async continuation.
+    learningLanguageGeneration += 1;
+    clearVolatileLanguageContext();
+    syncLearningLanguageControl();
+    if (typeof renderAll === "function") renderAll();
+    if (typeof toast === "function") {
+      toast(t("language.learning.switched", { lang: learningLanguageLabel(next) }));
+    }
+    return true;
+  } finally {
+    learningLanguageSwitchBusy = false;
+  }
+}
+
+// Fill the settings control and the visible learning-language context label.
+function syncLearningLanguageControl() {
+  const code = normalizeLearningLanguage(state?.activeLearningLanguage);
+  const select = document.getElementById("setLearningLanguage");
+  if (select) {
+    const registry = window.LCLanguages;
+    const options = registry ? registry.listLanguages() : [];
+    if (select.options.length !== options.length) {
+      select.replaceChildren();
+      for (const language of options) {
+        const option = document.createElement("option");
+        option.value = language.code;
+        select.appendChild(option);
+      }
+    }
+    for (const option of select.options) {
+      option.textContent = learningLanguageLabel(option.value);
+    }
+    select.value = code;
+    select.disabled = learningLanguageSwitchBusy;
+  }
+  for (const element of document.querySelectorAll("[data-learning-language-label]")) {
+    element.textContent = learningLanguageLabel(code);
+  }
+  document.body?.setAttribute("data-learning-language", code);
+}
+
+function bindLearningLanguageControl() {
+  const select = document.getElementById("setLearningLanguage");
+  if (!select || select.dataset.bound === "true") return;
+  select.dataset.bound = "true";
+  select.addEventListener("change", () => {
+    const requested = select.value;
+    switchLearningLanguage(requested).then(ok => {
+      // Rejected or failed switches must not leave a misleading selection.
+      if (!ok) syncLearningLanguageControl();
+    });
+  });
+  syncLearningLanguageControl();
+}

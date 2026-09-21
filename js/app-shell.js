@@ -581,6 +581,7 @@ function setupScreenWakeLock() {
     applyLanguage();
     bindStorageEvents();
     bindEvents();
+    bindLearningLanguageControl();
     await refreshRecoveryAction();
     bindStudyEdgeMenu();
     initializeAppNavigation();
