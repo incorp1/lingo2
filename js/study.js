@@ -565,7 +565,9 @@ async function grade(g) {
     const variantResult = advanceStudyCardVariant(g);
     session._spoken = false;
     if (!variantResult.complete) {
-      saveCurrentStudyResume();
+      state.studyResume = { deckId: session.deckId ?? null, currentId: session.currentId ?? null };
+      markMetaDirty();
+      saveCurrentStudyCycle();
       await saveAndFlush();
       await window.LCMotion?.transitionStudyCardOut();
       deferCurrentStudyCardVariant();
@@ -781,6 +783,11 @@ function cardsForStudyExampleRefresh() {
 function captureStudyAiContext(cards) {
   const language = activeLearningLanguageCode();
   const languageName = learningLangName();
+  // Языковые параметры запроса фиксируются вместе со снимком карточек.
+  const aiLanguageOptions = {
+    learningLanguage: activeLearningLanguageCode(),
+    learningLangName: learningLangName(),
+  };
   const generation = currentLanguageGeneration();
   const identities = new Map((cards || []).filter(Boolean).map(card => [card.id, card]));
   const snapshots = [...identities.values()].map(card => JSON.parse(JSON.stringify(card)));
@@ -795,7 +802,7 @@ function captureStudyAiContext(cards) {
       && ["front", "back", "type", "info", "example", "exampleSentence", "exampleTranslation", "exampleTargetTerm"]
         .every(key => JSON.stringify(card[key]) === JSON.stringify(original[key]));
   };
-  return { language, languageName, snapshots, current, matches };
+  return { language, languageName, aiLanguageOptions, snapshots, current, matches };
 }
 
 async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
@@ -867,8 +874,7 @@ async function refreshExamplesForCards(cards, sourceButton, deckId = null) {
           key: state.settings.aiKey,
           model: state.settings.aiModel || undefined,
           targetLang: aiTargetLangName(),
-          learningLanguage: context.language,
-          learningLangName: context.languageName,
+          ...context.aiLanguageOptions,
           topics: state.settings.exampleTopics,
           situations: state.settings.exampleSituations,
           styles: state.settings.exampleStyles,
@@ -1144,18 +1150,19 @@ async function requestWordInfo() {
   modal.dataset.busy = "1";
   renderWordInfoModal();
   try {
-    const info = await window.LCAi.generateWordInfo(original, {
+    const info = await window.LCAi.generateWordInfo(card, {
       provider: state.settings.aiProvider,
       key: state.settings.aiKey,
       model: state.settings.aiModel || undefined,
       temperature: state.settings.exampleTemperature,
-      learningLanguage: context.language,
-      learningLangName: context.languageName,
+      learningLanguage: context.aiLanguageOptions.learningLanguage,
+      learningLangName: learningLangName(),
       signal: job.controller.signal,
       timeoutMs: AI_TIMEOUT_MS,
       retryAttempts: 1,
     });
-    if (!isCurrentAiJob(job) || !context.matches(original)) return;
+    if (!isCurrentAiJob(job)) return;
+    if (!context.matches(original)) return;
     const ok = await mutateAndFlush(() => {
       if (!isCurrentAiJob(job) || !context.matches(original)) throw new DOMException("stale", "AbortError");
       const stored = getCardById(original.id);

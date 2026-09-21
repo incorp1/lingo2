@@ -698,9 +698,9 @@ function next({ refreshDue = false } = {}) {
   session.currentId = current.id;
   restoreStudyCardVariant(current);
   session.revealed = false;
-  refillStudyQueue(now);
   saveCurrentStudyResume();
   if (typeof save === "function") save();
+  refillStudyQueue(now);
   renderStudy();
   if (typeof scheduleNextDueRefresh === "function") scheduleNextDueRefresh();
 }
