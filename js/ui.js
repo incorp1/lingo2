@@ -27,6 +27,13 @@ function aiJobMessage() {
 }
 
 async function startAiJob(kind, contextId, retry) {
+  const languageBound = !String(kind).startsWith("settings-");
+  const generation = typeof currentLanguageGeneration === "function" ? currentLanguageGeneration() : null;
+  const staleContext = () => languageBound && (
+    (typeof isLearningLanguageSwitchBusy === "function" && isLearningLanguageSwitchBusy())
+    || (generation !== null && !isLanguageGenerationCurrent(generation))
+  );
+  if (staleContext()) return null;
   const current = activeAiJob;
   if (current && !current.controller.signal.aborted) {
     const confirmed = await confirmDialog({
@@ -35,7 +42,8 @@ async function startAiJob(kind, contextId, retry) {
       confirmLabel: t("confirm.aiReplace.action"),
       danger: true,
     });
-    if (!confirmed) return null;
+    if (!confirmed || staleContext()) return null;
+    if (activeAiJob !== current) return null;
     current.controller.abort(new DOMException("replaced", "AbortError"));
   }
   const controller = new AbortController();
@@ -79,6 +87,12 @@ function cancelAiJobsForContext(contextId) {
   if (activeAiJob && (!id || activeAiJob.contextId === id)) {
     activeAiJob.controller.abort(new DOMException("closed", "AbortError"));
   }
+}
+
+function cancelLanguageAiJobs() {
+  const job = activeAiJob;
+  if (!job || String(job.kind).startsWith("settings-")) return;
+  cancelAiJobsForContext(job.contextId);
 }
 
 async function runAbortableWorkerPool(total, concurrency, task, options = {}) {

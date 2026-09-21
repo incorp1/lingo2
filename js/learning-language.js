@@ -39,11 +39,9 @@ function clearVolatileLanguageContext() {
   undoStack = [];
   // The practice draft is per-profile: the in-memory one belongs to the old
   // language and must not be persisted into the new profile.
-  if (typeof resetPracticeRuntime === "function") resetPracticeRuntime();
-  if (typeof clearAiSettingsBusyState === "function") clearAiSettingsBusyState();
-  if (typeof cancelAiSettingsRequests === "function") cancelAiSettingsRequests();
-  if (typeof clearBulkSelection === "function") clearBulkSelection();
   if (typeof closeModal === "function") closeModal();
+  if (typeof resetPracticeRuntime === "function") resetPracticeRuntime();
+  if (typeof clearBulkSelection === "function") clearBulkSelection();
   if (typeof invalidateStudyStage === "function") invalidateStudyStage();
   if (window.speechSynthesis) {
     try { window.speechSynthesis.cancel(); } catch (e) {}
@@ -83,6 +81,13 @@ async function switchLearningLanguage(rawCode) {
     if (typeof commitSettingsDrafts === "function" && commitSettingsDrafts("language-switch") === false) {
       return false;
     }
+    // Отменённые операции не возобновляются даже при откате записи языка.
+    learningLanguageGeneration += 1;
+    if (typeof cancelLanguageAiJobs === "function") cancelLanguageAiJobs();
+    if (typeof cancelPracticeCheck === "function") cancelPracticeCheck("language switch");
+    if (typeof hideSelectionPopover === "function") hideSelectionPopover();
+    if (typeof cancelSelectionGesture === "function") cancelSelectionGesture();
+
     // Wait for the in-flight commit, then flush the source profile.
     syncActiveLanguageProfile(state);
     markMetaDirty();
@@ -103,8 +108,7 @@ async function switchLearningLanguage(rawCode) {
       return false;
     }
 
-    // Confirmed write: invalidate every earlier async continuation.
-    learningLanguageGeneration += 1;
+    // Запись подтверждена; поколение инвалидировано до первого await.
     clearVolatileLanguageContext();
     syncLearningLanguageControl();
     if (typeof renderAll === "function") renderAll();
@@ -112,6 +116,10 @@ async function switchLearningLanguage(rawCode) {
       toast(t("language.learning.switched", { lang: learningLanguageLabel(next) }));
     }
     return true;
+  } catch (error) {
+    syncLearningLanguageControl();
+    if (typeof toast === "function") toast(t("language.learning.switchFailed"), { error: true });
+    return false;
   } finally {
     // The busy flag must be cleared *before* the final control sync, otherwise
     // syncLearningLanguageControl() would latch `select.disabled = true`

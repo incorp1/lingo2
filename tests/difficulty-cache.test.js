@@ -101,7 +101,7 @@ test("difficulty is an explicit localized browse filter and PWA version is synch
   for (const locale of ["en", "ru", "uk"]) {
     assert.match(read(`i18n/${locale}.js`), /"browse\.sort\.difficulty":/);
   }
-  assert.equal(packageJson.version, "3.20.0");
-  assert.match(sw, /lingo-cards-v3\.20\.0/);
+  assert.equal(packageJson.version, "3.20.1");
+  assert.match(sw, /lingo-cards-v3\.20\.1/);
   assert.doesNotMatch(html + sw, /3\.16\.25|3\.17\.0|3\.18\.0|3\.18\.11/);
 });

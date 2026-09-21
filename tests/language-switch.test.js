@@ -54,7 +54,7 @@ function loadSwitchHarness({ failWrite = false, commitDrafts = true } = {}) {
   elements.set("setLearningLanguage", makeElement("setLearningLanguage"));
 
   const context = vm.createContext({
-    console,
+    console, AbortController, DOMException,
     structuredClone,
     JSON, Object, Array, Number, Date, Math, String, Map, Set, Error, Promise,
     document: {
@@ -115,8 +115,57 @@ function loadSwitchHarness({ failWrite = false, commitDrafts = true } = {}) {
   );
   context.__api.select = elements.get("setLearningLanguage");
   context.__api.log = log;
+  context.__api.loadAiManager = () => {
+    const source = fs.readFileSync(path.join(root, "js/ui.js"), "utf8");
+    vm.runInContext(source.slice(0, source.indexOf("function flash(")), context);
+    vm.runInContext(`
+      function uid() { return String(Math.random()); }
+      function confirmDialog() { throw new Error("неожиданное подтверждение замены AI"); }
+      Object.assign(__api, { startAiJob, isCurrentAiJob, runAbortableWorkerPool });
+    `, context);
+  };
   return context.__api;
 }
+
+test("AUD-001: переключение отменяет настоящий AI-пул и не запускает оставшиеся элементы", async () => {
+  const api = loadSwitchHarness();
+  api.loadAiManager();
+  const job = await api.startAiJob("bulk-add", "bulk:en");
+  let release;
+  const pending = new Promise(resolve => { release = resolve; });
+  const started = [];
+  const pool = api.runAbortableWorkerPool(3, 1, async index => {
+    started.push(index);
+    await pending;
+  }, { controller: job.controller });
+  const rejected = assert.rejects(pool, { name: "AbortError" });
+  await api.switchLearningLanguage("nb");
+  assert.equal(job.controller.signal.aborted, true);
+  release();
+  await rejected;
+  assert.deepEqual(started, [0]);
+  assert.ok(await api.startAiJob("practice-generate", "practice:nb"));
+  await api.switchLearningLanguage("en");
+  assert.equal(api.isCurrentAiJob(job), false);
+});
+
+test("AUD-001: отказ записи не возобновляет отменённый запрос", async () => {
+  const api = loadSwitchHarness({ failWrite: true });
+  api.loadAiManager();
+  const job = await api.startAiJob("practice-check", "practice:en");
+  assert.equal(await api.switchLearningLanguage("nb"), false);
+  assert.equal(job.controller.signal.aborted, true);
+  assert.equal(api.getState().activeLearningLanguage, "en");
+  assert.ok(await api.startAiJob("practice-generate", "practice:en:new"));
+});
+
+test("AUD-001: глобальные запросы настроек не отменяются переключением", async () => {
+  const api = loadSwitchHarness();
+  api.loadAiManager();
+  const job = await api.startAiJob("settings-models", "settings:ai-models");
+  await api.switchLearningLanguage("nb");
+  assert.equal(job.controller.signal.aborted, false);
+});
 
 test("переключение языка сначала фиксирует черновики и сбрасывает профиль, затем пишет выбор", async () => {
   const api = loadSwitchHarness();
@@ -155,7 +204,7 @@ test("ошибка записи оставляет прежний язык и с
 
   assert.equal(await api.switchLearningLanguage("nb"), false);
   assert.equal(api.getState().activeLearningLanguage, "en");
-  assert.equal(api.currentLanguageGeneration(), generationBefore, "generation не растёт без записи");
+  assert.equal(api.currentLanguageGeneration(), generationBefore + 1, "отменённые операции остаются устаревшими после отказа записи");
   assert.ok(api.getLog().some(x => x.startsWith("toast:language.learning.switchFailed")));
   assert.equal(api.getUndo(), '["undo"]', "Undo сохраняется при неудачном переключении");
 });
