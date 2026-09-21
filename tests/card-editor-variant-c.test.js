@@ -83,17 +83,17 @@ test("поля редактора автоматически растут по �
   assert.match(aiPractice, /resizeEditorTextarea\(el\)/);
 });
 
-test("релиз 3.19.16 полностью включён в PWA-оболочку", () => {
+test("релиз 3.20.0 полностью включён в PWA-оболочку", () => {
   const html = read("index.html");
   const sw = read("sw.js");
   const packageJson = JSON.parse(read("package.json"));
 
-  assert.equal(packageJson.version, "3.19.16");
-  assert.match(html, /css\/card-editor\.css\?v=3\.19\.16/);
-  assert.match(html, /css\/motion\.css\?v=3\.19\.16/);
-  assert.match(html, /js\/motion\.js\?v=3\.19\.16/);
-  assert.match(sw, /lingo-cards-v3\.19\.16/);
-  assert.match(sw, /\.\/css\/card-editor\.css\?v=3\.19\.16/);
-  assert.match(sw, /\.\/css\/motion\.css\?v=3\.19\.16/);
-  assert.match(sw, /\.\/js\/motion\.js\?v=3\.19\.16/);
+  assert.equal(packageJson.version, "3.20.0");
+  assert.match(html, /css\/card-editor\.css\?v=3\.20\.0/);
+  assert.match(html, /css\/motion\.css\?v=3\.20\.0/);
+  assert.match(html, /js\/motion\.js\?v=3\.20\.0/);
+  assert.match(sw, /lingo-cards-v3\.20\.0/);
+  assert.match(sw, /\.\/css\/card-editor\.css\?v=3\.20\.0/);
+  assert.match(sw, /\.\/css\/motion\.css\?v=3\.20\.0/);
+  assert.match(sw, /\.\/js\/motion\.js\?v=3\.20\.0/);
 });
