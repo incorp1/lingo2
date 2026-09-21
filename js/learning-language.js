@@ -175,6 +175,10 @@ function syncLearningLanguageControl() {
     element.textContent = learningLanguageLabel(code);
   }
   document.body?.setAttribute("data-learning-language", code);
+  // Сводки пикеров «Лицевая сторона» тоже называют изучаемый язык, поэтому их
+  // нужно перерисовать вместе с статическими метками.
+  if (typeof renderStudyFrontPicker === "function") renderStudyFrontPicker();
+  if (typeof renderStudyEdgeModePicker === "function") renderStudyEdgeModePicker();
 }
 
 function bindLearningLanguageControl() {

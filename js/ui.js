@@ -411,6 +411,9 @@ function applyLanguage() {
   if ($("#view-stats").classList.contains("active")) renderStats();
   if (typeof refreshDeckCardsModal === "function") refreshDeckCardsModal();
   if (typeof updateSwapBtnTitle === "function") updateSwapBtnTitle();
+  // applyI18N() переписал бы метки языка обучения переводом интерфейса,
+  // поэтому после него восстанавливаем название изучаемого языка.
+  if (typeof syncLearningLanguageControl === "function") syncLearningLanguageControl();
 }
 
 const APP_VIEWS = new Set(["study", "decks", "stats", "settings"]);
