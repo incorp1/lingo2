@@ -157,8 +157,12 @@ function reloadForServiceWorkerUpdate() {
 function showUpdateOverlay() {
   const overlay = $("#updateOverlay");
   if (!overlay) return;
+  // `#app` использует overflow-x: clip, из-за чего вложенный position: fixed
+  // обрезался и оверлей фактически не был виден. Поднимаем его в body.
+  if (overlay.parentNode !== document.body) document.body.appendChild(overlay);
   const text = overlay.querySelector(".update-overlay-text");
   if (text) text.textContent = t("pwa.updating");
+  if (!overlay.hidden) return;
   overlay.hidden = false;
   swUpdateOverlayShownAt = Date.now();
   document.body.classList.add("is-updating");
@@ -238,6 +242,9 @@ function showUpdateAvailable(registration) {
   updatePwaStatus("update");
   const notice = $("#updateNotice");
   if (notice) notice.hidden = false;
+  // Показываем blur сразу при обнаружении новой версии, а не только в момент
+  // отправки SKIP_WAITING: так процесс обновления заметен пользователю.
+  showUpdateOverlay();
   maybeApplyStandaloneUpdate(registration);
 }
 
