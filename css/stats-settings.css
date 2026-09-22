@@ -203,14 +203,15 @@
   line-height: 1.4;
   max-width: 380px;
 }
-.settings-row label { color: var(--ink); font-size: 13.5px; }
+.settings-row label {
+  color: var(--ink);
+  font-size: var(--field-label-size);
+  font-weight: var(--field-label-weight);
+}
 .settings-row input[type="text"],
 .settings-row input[type="number"],
+.settings-row input[type="password"],
 .settings-row select {
-  background: var(--bg-elev);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
   width: 100%;
 }
 .settings-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
@@ -500,18 +501,18 @@
 
 .form-row { display: grid; gap: 6px; }
 .form-row.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-row label { font-size: 13px; color: var(--ink-muted); font-weight: 500; }
-.form-row .hint { color: var(--ink-subtle); font-weight: 400; margin-left: 4px; }
-.form-row input, .form-row select, .form-row textarea {
-  background: var(--bg-elev);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  outline: none;
-  transition: border-color .12s;
-  resize: vertical;
+.form-row label {
+  font-size: var(--field-label-size);
+  color: var(--field-label-ink);
+  font-weight: var(--field-label-weight);
 }
-.form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--border-strong); }
+.form-row .hint {
+  color: var(--ink-subtle);
+  font-size: var(--field-hint-size);
+  font-weight: 400;
+  margin-left: 4px;
+}
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--field-border-focus); }
 
 input:focus,
 input:focus-visible,

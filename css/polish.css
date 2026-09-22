@@ -195,7 +195,7 @@
     padding: 8px 0;
     gap: 6px;
   }
-  .settings-row label { font-size: 13.5px; line-height: 1.3; }
+  .settings-row label { font-size: var(--field-label-size); line-height: 1.3; }
   .settings-row.with-hint > *:last-child { justify-self: start; }
   .settings-row input[type="text"],
   .settings-row input[type="number"],
@@ -203,7 +203,7 @@
     width: min(100%, 150px);
     min-height: 34px;
     padding: 5px 8px;
-    background: var(--bg-elev);
+    background: var(--field-bg);
   }
   .settings-row input[type="password"] { width: min(100%, 230px); }
   .settings-row.toggle {

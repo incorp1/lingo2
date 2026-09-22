@@ -52,9 +52,9 @@
 
 #editorModal .editor-word-card label,
 #editorModal .editor-word-card .label-row label {
-  color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 650;
+  color: var(--field-label-ink);
+  font-size: var(--field-label-size);
+  font-weight: var(--field-label-weight);
   line-height: 1.35;
 }
 
@@ -157,18 +157,19 @@
 }
 
 #editorModal .editor-details label {
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--field-label-ink);
+  font-size: var(--field-label-size);
+  font-weight: var(--field-label-weight);
   line-height: 1.35;
 }
 
 #editorModal .editor-details input,
 #editorModal .editor-details select,
 #editorModal .editor-details textarea {
-  min-height: 42px;
-  padding: 9px 11px;
-  font-size: 15px;
-  line-height: 1.4;
+  min-height: var(--field-h);
+  padding: var(--field-pad-y) var(--field-pad-x);
+  font-size: 16px;
+  line-height: var(--field-line-height);
 }
 
 #editorModal .editor-details textarea {

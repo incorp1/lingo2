@@ -199,7 +199,7 @@
     min-height: 36px;
     padding: 5px 9px;
     border-radius: 9px;
-    font-size: 16px;
+    font-size: var(--field-font-size);
   }
 
   .view-settings .settings-row input[type="number"],
