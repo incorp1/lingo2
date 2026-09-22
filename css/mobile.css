@@ -295,13 +295,13 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
-  .study-filter-panel { gap: 7px; }
+  .study-filter-panel { gap: 4px; }
   .study-filter-heading { font-size: 12px; }
   .stat-chip {
     justify-content: center;
-    padding: 6px 2px;
+    padding: 2px 2px;
     min-width: 0;
-    min-height: 42px;
+    min-height: 30px;
     gap: 5px;
     background: transparent;
     border: 0;
