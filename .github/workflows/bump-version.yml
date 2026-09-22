@@ -44,6 +44,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html sw.js js/stats.js VERSION
+          git add index.html sw.js js/stats.js VERSION package.json package-lock.json
           git commit -m "chore(pwa): bump asset version [skip bump]"
           git push origin "HEAD:${GITHUB_REF_NAME}"
