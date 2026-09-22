@@ -185,7 +185,7 @@ const NUMERIC_RANGES = Object.freeze({
   leechThreshold: { ui: [0, 50], import: [0, 50] },
   exampleTemperature: { ui: [0, 2], import: [0, 2] },
   ttsRate: { ui: [0.3, 1.5], import: [0.3, 1.5] },
-  practiceDays: { ui: [1, 180], import: [1, 180] },
+  practiceDays: { ui: [1, 45], import: [1, 45] },
 });
 
 const SETTINGS_SCHEMA = Object.freeze({

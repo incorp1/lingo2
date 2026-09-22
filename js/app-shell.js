@@ -315,8 +315,8 @@ function bindEvents() {
   });
   const practiceDaysEl = $("#practiceDays");
   if (practiceDaysEl) practiceDaysEl.addEventListener("input", () => {
-    // Position 0 is the "last session" window; 1..180 are real day windows.
-    const pos = Math.min(180, Math.max(0, parseInt(practiceDaysEl.value, 10) || 0));
+    // Position 0 is the "last session" window; 1..45 are real day windows.
+    const pos = Math.min(45, Math.max(0, parseInt(practiceDaysEl.value, 10) || 0));
     if (pos === 0) {
       practiceState.period = "last";
     } else {

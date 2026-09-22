@@ -528,10 +528,10 @@ function resetPracticeRuntime() {
   if (modal && !modal.hidden && typeof closeDialog === "function") closeDialog(modal);
 }
 
-/* Slider semantics: 0 = "last session", 1..180 = that many days back.
-   practiceDays keeps storing only real day counts (1..180) so old backups and
+/* Slider semantics: 0 = "last session", 1..45 = that many days back.
+   practiceDays keeps storing only real day counts (1..45) so old backups and
    the settings schema stay valid; position 0 lives in practiceState.period. */
-const PRACTICE_MAX_DAYS = 180;
+const PRACTICE_MAX_DAYS = 45;
 
 function practiceDayWindow() {
   const v = parseInt((state.settings && state.settings.practiceDays) || 7, 10);
