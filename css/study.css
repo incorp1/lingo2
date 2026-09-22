@@ -222,7 +222,7 @@
   font-size: 12px; color: var(--ink-subtle);
 }
 .card-stage .speaker-btn {
-  position: absolute; top: 16px; right: 16px;
+  position: static;
   /* Bare accent glyph: no circular surface, no outline. iOS Safari paints its
      own button chrome unless `appearance` is reset, which kept the circle
      visible on iPhone even after the background was cleared. */
@@ -290,6 +290,44 @@
 .card-stage .edit-link {
   position: absolute; top: 16px; left: 16px;
   background: transparent; border: none; color: var(--ink-faint); font-size: 12px;
+}
+
+/* Правая колонка инструментов карточки: «информация о слове» — в конце той же
+   строки, что и левые иконки, а озвучивание — ровно под ней. Так обе кнопки
+   попадают под большой палец правой руки. */
+.card-stage .card-stage-side-tools {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-stage .card-stage-side-tools .info-link,
+.card-stage .card-stage-side-tools .speaker-btn {
+  position: relative;
+  top: auto;
+  right: auto;
+  left: auto;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+}
+
+.card-stage .card-stage-side-tools .info-link svg,
+.card-stage .card-stage-side-tools .speaker-btn svg {
+  width: 19px;
+  height: 19px;
 }
 
 /* Pencil icon: same icon-button metrics as the undo chevron next to it. */

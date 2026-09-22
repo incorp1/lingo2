@@ -238,18 +238,22 @@
     justify-content: flex-start;
     gap: 10px;
   }
-  .card-stage .edit-link,
-  .card-stage .speaker-btn {
-    top: 12px;
-  }
   .card-stage .edit-link {
+    top: 12px;
     left: 12px;
     font-size: 12px;
   }
-  .card-stage .speaker-btn {
+  /* Колонка справа: «информация о слове» на одной строке с левыми иконками,
+     озвучивание — под ней. Позиционируется контейнер, а не кнопки. */
+  .card-stage .card-stage-side-tools {
+    top: 12px;
     right: 12px;
-    width: 32px;
-    height: 32px;
+    gap: 7px;
+  }
+  .card-stage .card-stage-side-tools .info-link,
+  .card-stage .card-stage-side-tools .speaker-btn {
+    width: 34px;
+    height: 34px;
   }
   .card-stage .card-front {
     font-size: clamp(24px, 7vw, 30px);

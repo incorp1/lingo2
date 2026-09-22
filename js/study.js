@@ -237,17 +237,22 @@ function renderStudy() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
       </button>
 
+    </div>
+    <!-- Правая колонка инструментов: «информация о слове» стоит в конце той же
+         строки, что и левые иконки, а озвучивание — строго под ней, чтобы обе
+         кнопки попадали под большой палец правой руки. -->
+    <div class="card-stage-side-tools">
       <button class="edit-link info-link" id="wordInfoBtn"${session.revealed ? "" : " disabled"} title="${escape(t("study.info.button"))}" aria-label="${escape(t("study.info.button"))}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       </button>
+      <button class="speaker-btn" id="ttsBtn"${reversed ? " disabled" : ""} title="${escape(t("study.pronounce"))}" aria-label="${escape(t("study.pronounce"))}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M11 5L6 9H3v6h3l5 4z"/>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+          <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+        </svg>
+      </button>
     </div>
-    <button class="speaker-btn" id="ttsBtn"${reversed ? " disabled" : ""} title="${escape(t("study.pronounce"))}" aria-label="${escape(t("study.pronounce"))}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-        <path d="M11 5L6 9H3v6h3l5 4z"/>
-        <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
-        <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
-      </svg>
-    </button>
     <div class="card-front${contextFront ? " context-front" : ""}">${frontHTML}</div>
     ${(!reversed && card.hint) ? `<div class="pronunciation">${escape(card.hint)}</div>` : ""}
     ${session.revealed && card.type !== "cloze" ? `
