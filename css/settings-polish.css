@@ -854,30 +854,35 @@
 }
 
 /*
- * Иконка подсказки: остаётся на той же строке, что и заголовок, и никогда не
- * растягивает строку. Контейнер заголовка становится flex-строкой только при
- * наличии иконки, поэтому чистые заголовки сохраняют обычное усечение.
+ * ВАЖНО ПРО СОВМЕСТИМОСТЬ: здесь намеренно НЕ используется `:has()`.
+ * На iPhone 7 максимальная версия Safari — iOS 15, где `:has()` не
+ * поддерживается. Более того, Safari отбрасывает ВЕСЬ селекторный список,
+ * содержащий неизвестную псевдоклассовую функцию, поэтому прежние правила на
+ * `:has()` просто игнорировались целиком и текст продолжал переноситься.
+ *
+ * Иконка подсказки — инлайновый элемент внутри `<b>`. Так как `<b>` объявлен
+ * блочным с `white-space: nowrap`, иконка естественным образом остаётся на
+ * строке заголовка без каких-либо условных селекторов.
  */
-.view-settings .settings-action-row > span:first-child > b:has(> .info-tip-wrap),
-.settings-action-list .settings-action-row > span:first-child > b:has(> .info-tip-wrap) {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-
 .view-settings .settings-action-row .info-tip-wrap,
 .settings-action-list .settings-action-row .info-tip-wrap {
-  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
   max-width: 100%;
-  min-width: 0;
   white-space: nowrap;
 }
 
+.view-settings .settings-action-row .info-tip-icon,
+.settings-action-list .settings-action-row .info-tip-icon {
+  flex: 0 0 auto;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 /*
- * Когда tooltips.js привязал подсказку к самой строке (иконка вставлена как
- * прямой потомок текстовой колонки), не даём ей занимать отдельную строку
- * грида — переносим её в конец строки заголовка по базовой линии.
+ * Запасной случай: если подсказка оказалась прямым потомком текстовой колонки
+ * (а не заголовка), она не должна занимать отдельную строку грида.
  */
 .view-settings .settings-action-row > span:first-child > .info-tip-wrap,
 .settings-action-list .settings-action-row > span:first-child > .info-tip-wrap {
@@ -885,24 +890,6 @@
   justify-self: start;
   align-self: center;
   margin-left: 6px;
-}
-
-.view-settings .settings-action-row > span:first-child:has(> .info-tip-wrap),
-.settings-action-list .settings-action-row > span:first-child:has(> .info-tip-wrap) {
-  grid-template-columns: minmax(0, auto) auto;
-  justify-content: start;
-}
-
-.view-settings .settings-action-row > span:first-child:has(> .info-tip-wrap) > b,
-.view-settings .settings-action-row > span:first-child:has(> .info-tip-wrap) > small,
-.settings-action-list .settings-action-row > span:first-child:has(> .info-tip-wrap) > b,
-.settings-action-list .settings-action-row > span:first-child:has(> .info-tip-wrap) > small {
-  grid-column: 1 / -1;
-}
-
-.view-settings .settings-action-row > span:first-child:has(> .info-tip-wrap) > b,
-.settings-action-list .settings-action-row > span:first-child:has(> .info-tip-wrap) > b {
-  grid-column: 1;
 }
 
 /* Шеврон справа не сжимается и не влияет на высоту строки. */

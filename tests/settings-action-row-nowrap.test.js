@@ -39,14 +39,24 @@ test("иконка подсказки остаётся на строке заг�
   // tooltips.js дописывает .info-tip-wrap внутрь текстового якоря строки.
   assert.match(tooltips, /wrap\.className = "info-tip-wrap"/);
 
-  // Заголовок с иконкой становится flex-строкой, иконка не сжимается.
+  // КРИТИЧНО: правила строк действий не должны зависеть от `:has()`.
+  // Safari на iOS 15 (максимум для iPhone 7) не поддерживает `:has()` и
+  // отбрасывает весь селекторный список с ним, из-за чего правило переставало
+  // применяться и заголовки снова переносились.
+  const actionRowRules = css.slice(css.indexOf(".settings-action-row .info-tip-wrap"));
+  assert.ok(
+    !/\.settings-action-row[^{]*:has\(/.test(css),
+    "правила строк действий не должны использовать :has() — он недоступен в Safari iOS 15"
+  );
+
+  // Иконка — инлайновый элемент на строке заголовка и не сжимается.
   assert.match(
-    css,
-    /\.settings-action-list \.settings-action-row > span:first-child > b:has\(> \.info-tip-wrap\) \{[\s\S]*?display: flex;[\s\S]*?align-items: center;/
+    actionRowRules,
+    /\.settings-action-list \.settings-action-row \.info-tip-wrap \{[\s\S]*?display: inline-flex;[\s\S]*?vertical-align: middle;[\s\S]*?white-space: nowrap;/
   );
   assert.match(
-    css,
-    /\.settings-action-list \.settings-action-row \.info-tip-wrap \{[\s\S]*?flex: 0 0 auto;[\s\S]*?white-space: nowrap;/
+    actionRowRules,
+    /\.settings-action-list \.settings-action-row \.info-tip-icon \{[\s\S]*?flex: 0 0 auto;/
   );
 
   // Если иконка оказалась прямым потомком колонки, она не занимает отдельную строку грида.
