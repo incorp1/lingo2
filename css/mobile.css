@@ -246,14 +246,19 @@
   /* Ряд справа: сначала озвучивание, затем «информация о слове» — обе кнопки
      на одной строке с левыми иконками. Позиционируется контейнер, не кнопки. */
   .card-stage .card-stage-side-tools {
-    top: 12px;
-    right: 12px;
-    gap: 6px;
+    top: 9px;
+    right: 8px;
+    gap: 2px;
   }
   .card-stage .card-stage-side-tools .info-link,
   .card-stage .card-stage-side-tools .speaker-btn {
-    width: 34px;
-    height: 34px;
+    width: 24px;
+    height: 24px;
+  }
+  .card-stage .card-stage-side-tools .info-link svg,
+  .card-stage .card-stage-side-tools .speaker-btn svg {
+    width: 15px;
+    height: 15px;
   }
   .card-stage .card-front {
     font-size: clamp(24px, 7vw, 30px);

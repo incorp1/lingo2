@@ -304,7 +304,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
 }
 
 .card-stage .card-stage-side-tools .info-link,
@@ -313,22 +313,22 @@
   top: auto;
   right: auto;
   left: auto;
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
   flex: none;
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 9px;
+  border-radius: 6px;
   background: transparent;
 }
 
 .card-stage .card-stage-side-tools .info-link svg,
 .card-stage .card-stage-side-tools .speaker-btn svg {
-  width: 19px;
-  height: 19px;
+  width: 15px;
+  height: 15px;
 }
 
 /* Pencil icon: same icon-button metrics as the undo chevron next to it. */
