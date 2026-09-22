@@ -5,12 +5,15 @@ const path = require("node:path");
 
 const root = path.join(__dirname, "..");
 const read = file => fs.readFileSync(path.join(root, file), "utf8");
+// Версия релиза читается из package.json: хардкод номера ломал тесты на
+// каждом выпуске, хотя PWA-оболочка оставалась согласованной.
+const releaseVersion = () => JSON.parse(read("package.json")).version;
 
 test("вариант A подключён к рабочему экрану колоды", () => {
   const html = read("index.html");
   assert.match(html, /id="deckBrowseSubtitle"/);
   assert.match(html, /id="deckBrowseAddBtn"/);
-  assert.match(html, /css\/deck-browser-vA\.css\?v=3\.20\.5/);
+  assert.match(html, new RegExp(`css/deck-browser-vA\\.css\\?v=${releaseVersion().replace(/\./g, "\\.")}`));
 });
 
 test("тап по строке открывает редактор, не перехватывая вложенные действия", () => {
@@ -42,6 +45,7 @@ test("фильтры оформлены компактным выпадающи�
 
 test("новый стиль входит в PWA app shell", () => {
   const sw = read("sw.js");
-  assert.match(sw, /lingo-cards-v3\.20\.5/);
-  assert.match(sw, /deck-browser-vA\.css\?v=3\.20\.5/);
+  const v = releaseVersion().replace(/\./g, "\\.");
+  assert.match(sw, new RegExp(`lingo-cards-v${v}`));
+  assert.match(sw, new RegExp(`deck-browser-vA\\.css\\?v=${v}`));
 });

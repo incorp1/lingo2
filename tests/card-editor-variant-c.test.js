@@ -83,17 +83,22 @@ test("поля редактора автоматически растут по �
   assert.match(aiPractice, /resizeEditorTextarea\(el\)/);
 });
 
-test("релиз 3.20.5 полностью включён в PWA-оболочку", () => {
+test("текущий релиз полностью включён в PWA-оболочку", () => {
   const html = read("index.html");
   const sw = read("sw.js");
   const packageJson = JSON.parse(read("package.json"));
 
-  assert.equal(packageJson.version, "3.20.5");
-  assert.match(html, /css\/card-editor\.css\?v=3\.20\.5/);
-  assert.match(html, /css\/motion\.css\?v=3\.20\.5/);
-  assert.match(html, /js\/motion\.js\?v=3\.20\.5/);
-  assert.match(sw, /lingo-cards-v3\.20\.5/);
-  assert.match(sw, /\.\/css\/card-editor\.css\?v=3\.20\.5/);
-  assert.match(sw, /\.\/css\/motion\.css\?v=3\.20\.5/);
-  assert.match(sw, /\.\/js\/motion\.js\?v=3\.20\.5/);
+  // Версия релиза берётся из package.json, а не хардкодится: иначе каждый
+  // выпуск ломал тесты, хотя оболочка была согласована.
+  const version = packageJson.version;
+  assert.match(version, /^\d+(?:\.\d+)*$/);
+  const v = version.replace(/\./g, "\\.");
+
+  assert.match(html, new RegExp(`css/card-editor\\.css\\?v=${v}`));
+  assert.match(html, new RegExp(`css/motion\\.css\\?v=${v}`));
+  assert.match(html, new RegExp(`js/motion\\.js\\?v=${v}`));
+  assert.match(sw, new RegExp(`lingo-cards-v${v}`));
+  assert.match(sw, new RegExp(`\\./css/card-editor\\.css\\?v=${v}`));
+  assert.match(sw, new RegExp(`\\./css/motion\\.css\\?v=${v}`));
+  assert.match(sw, new RegExp(`\\./js/motion\\.js\\?v=${v}`));
 });
