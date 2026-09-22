@@ -1306,15 +1306,18 @@ select {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
-  min-height: 30px !important;
-  height: 30px !important;
-  padding: 0 24px 0 12px !important;
+  /* iOS Safari игнорирует line-height у select и обрезает текст при жёсткой
+     высоте, поэтому высоту задаём симметричными паддингами, а не height. */
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 7px 24px 7px 12px !important;
   text-indent: 0 !important;
   border: 1px solid var(--border-strong) !important;
   border-bottom: 1px solid var(--border-strong) !important;
   border-radius: 999px !important;
   font-size: 12.5px !important;
-  line-height: 28px !important;
+  line-height: 1.15 !important;
+  vertical-align: middle !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis !important;

@@ -1053,3 +1053,11 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
 
 /* P26: SM-2 only visibility */
 .sm2-only[hidden] { display: none !important; }
+
+/* v3.20.8 — баннер обновления должен быть заметен при запуске приложения. */
+.update-notice.is-visible {
+  display: flex;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .34);
+  animation: updateNoticeIn .28s ease both;
+}
+.update-notice.is-visible[hidden] { display: none; }

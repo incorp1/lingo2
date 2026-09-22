@@ -241,11 +241,17 @@ function showUpdateAvailable(registration) {
   swRegistration = registration;
   updatePwaStatus("update");
   const notice = $("#updateNotice");
-  if (notice) notice.hidden = false;
-  // Показываем blur сразу при обнаружении новой версии, а не только в момент
-  // отправки SKIP_WAITING: так процесс обновления заметен пользователю.
-  showUpdateOverlay();
-  maybeApplyStandaloneUpdate(registration);
+  if (notice) {
+    notice.hidden = false;
+    // Подсветка баннера: раньше обновление применялось само и почти мгновенно
+    // перезагружало страницу, поэтому пользователь ничего не успевал увидеть.
+    notice.classList.add("is-visible");
+  }
+  if (typeof toast === "function") {
+    try { toast(t("pwa.updateAvailable")); } catch { /* i18n ещё не готов */ }
+  }
+  // Оверлей и авто-применение больше не запускаются при обнаружении версии:
+  // решение о перезагрузке принимает пользователь кнопкой «Перезагрузить».
 }
 
 function watchServiceWorkerRegistration(registration) {
