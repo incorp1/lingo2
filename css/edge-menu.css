@@ -264,9 +264,26 @@
 
   body.edge-menu-swiping .study-edge-action:hover,
   body.edge-menu-swiping .study-edge-action:focus,
-  body.edge-menu-swiping .study-edge-action:focus-visible {
-    background: transparent;
-    outline: none;
+  body.edge-menu-swiping .study-edge-action:focus-visible,
+  body.edge-menu-swiping .study-edge-action:active {
+    background: transparent !important;
+    outline: none !important;
+  }
+
+  /* Пока меню открывается свайпом, палец физически находится над одним из
+     пунктов. Без этого iOS подсвечивает его как выбранный до следующего
+     касания. Блокируем и подсветку, и приём указателя на время анимации. */
+  body.edge-menu-swiping .study-edge-menu,
+  body.edge-menu-opening .study-edge-menu {
+    pointer-events: none;
+  }
+
+  body.edge-menu-opening .study-edge-action:hover,
+  body.edge-menu-opening .study-edge-action:active,
+  body.edge-menu-opening .study-edge-action:focus,
+  body.edge-menu-opening .study-edge-action:focus-visible {
+    background: transparent !important;
+    outline: none !important;
   }
 
   .study-edge-action:hover,

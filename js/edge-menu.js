@@ -16,6 +16,7 @@ let edgeRestoreFocus = null;
 let edgeAnchorY = window.innerHeight / 2;
 let edgeCloseSequence = 0;
 let edgeClickGuardUntil = 0;
+let edgeOpeningGuardTimer = null;
 
 function guardSyntheticEdgeClick() {
   edgeClickGuardUntil = performance.now() + 500;
@@ -34,6 +35,12 @@ function consumeSyntheticEdgeClick(event) {
 
 function setEdgeGestureSwiping(active) {
   document.body.classList.toggle("edge-menu-swiping", active);
+  // Снимаем hover/active-подсветку с пункта, под которым проехал палец:
+  // iOS оставляет её до следующего касания, из-за чего после свайпа открытое
+  // меню выглядело так, будто пункт уже выбран.
+  if (active && document.activeElement instanceof HTMLElement) {
+    if ($("#studyEdgeMenu")?.contains(document.activeElement)) document.activeElement.blur();
+  }
 }
 
 function captureEdgeGesturePointer(gesture) {
@@ -144,6 +151,13 @@ function openStudyEdgeMenu(anchorY = edgeAnchorY, { focus = false, persistAnchor
   scrim.hidden = false;
   menu.setAttribute("aria-hidden", "false");
   updateStudyEdgeTabState();
+  // Пока меню выезжает, палец ещё находится над ним. Блокируем приём указателя
+  // и подсветку, иначе пункт под пальцем остаётся «выбранным» после свайпа.
+  document.body.classList.add("edge-menu-opening");
+  window.clearTimeout(edgeOpeningGuardTimer);
+  edgeOpeningGuardTimer = window.setTimeout(() => {
+    document.body.classList.remove("edge-menu-opening");
+  }, 380);
   requestAnimationFrame(() => requestAnimationFrame(() => {
     if (!edgeMenuAnimatingOpen) return;
     menu.classList.add("is-open");
@@ -161,6 +175,9 @@ function closeStudyEdgeMenu({ restoreFocus = false } = {}) {
   const scrim = $("#studyEdgeScrim");
   if (!menu || !scrim) return;
   edgeMenuAnimatingOpen = false;
+  window.clearTimeout(edgeOpeningGuardTimer);
+  edgeOpeningGuardTimer = null;
+  document.body.classList.remove("edge-menu-opening");
   const sequence = ++edgeCloseSequence;
   menu.classList.remove("is-open");
   scrim.classList.remove("is-open");
@@ -327,6 +344,13 @@ function bindStudyEdgeMenu() {
       guardSyntheticEdgeClick();
       setEdgeAnchorY(event.clientY, { persist: true });
       if (edgeMenuOpen) positionStudyEdgeMenu(edgeAnchorY);
+    } else {
+      // Тап обрабатываем сами на pointerup, а не ждём синтетический click:
+      // на iOS он приходит с задержкой, иногда теряется после смещения пальца
+      // или подавляется соседними обработчиками — отсюда «срабатывает не всегда».
+      event.preventDefault();
+      guardSyntheticEdgeClick();
+      toggleFromTab();
     }
     tab.classList.remove("is-dragging");
     edgeTabGesture = null;
@@ -386,9 +410,14 @@ function bindStudyEdgeMenu() {
     }
     if (signedDx >= EDGE_OPEN_DISTANCE && signedDx > dy * EDGE_HORIZONTAL_BIAS) {
       edgeGesture.completed = true;
-      setEdgeAnchorY(edgeGesture.startY, { persist: true });
-      if (edgeGesture.mode === "open") openStudyEdgeMenu(edgeAnchorY, { persistAnchor: false });
-      else closeStudyEdgeMenu();
+      if (edgeGesture.mode === "open") {
+        // Якорь двигаем только при открытии: свайп закрытия не должен
+        // переставлять язычок туда, где палец случайно начал жест.
+        setEdgeAnchorY(edgeGesture.startY, { persist: true });
+        openStudyEdgeMenu(edgeAnchorY, { persistAnchor: false });
+      } else {
+        closeStudyEdgeMenu();
+      }
       edgeGesture.tracking = false;
     }
   }, { passive: false, capture: true });
