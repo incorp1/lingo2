@@ -567,7 +567,14 @@ Return ONLY JSON in this exact shape:
     const prompt = userPrompt(word, targetLang, sourceLang);
     return withRetry(attemptOptions =>
       chatJson(provider, model || PROVIDER_DEFAULTS[provider]?.model, key, SYSTEM_PROMPT, prompt, 0.4, { ...options, ...attemptOptions }),
-      { signal: options.signal, timeoutMs: options.timeoutMs, deadlineAt: options.deadlineAt }
+      {
+        // Одна повторная попытка вместо трёх: три попытки с экспоненциальной
+        // паузой растягивали неудачный запрос на десятки секунд.
+        attempts: Number.isFinite(options.retryAttempts) ? Math.max(1, options.retryAttempts) : 2,
+        signal: options.signal,
+        timeoutMs: options.timeoutMs,
+        deadlineAt: options.deadlineAt,
+      }
     );
   }
 

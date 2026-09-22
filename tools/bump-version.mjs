@@ -54,7 +54,11 @@ async function main() {
     const source = await readFile(file, "utf8");
     const updated = source
       .replace(/\?v=\d+\.\d+\.\d+/g, `?v=${next}`)
-      .replace(/(const CACHE = "lingo-cards-v)\d+\.\d+\.\d+(")/, `$1${next}$2`);
+      .replace(/(const CACHE = "lingo-cards-v)\d+\.\d+\.\d+(")/, `$1${next}$2`)
+      // Видимый пользователю номер версии в настройках раньше оставался
+      // захардкоженным (v3.20.8), поэтому по экрану было невозможно понять,
+      // обновилось ли установленное PWA на самом деле.
+      .replace(/(<span class="app-build-version">v)\d+\.\d+\.\d+(<\/span>)/, `$1${next}$2`);
     if (updated !== source) await writeFile(file, updated);
   }
 

@@ -7,7 +7,9 @@
 const $  = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-const AI_TIMEOUT_MS = 45000;
+// 45 секунд ожидания означали, что зависший запрос держал интерфейс почти
+// минуту. 25 секунд достаточно для ответа любой поддерживаемой модели.
+const AI_TIMEOUT_MS = 25000;
 let toastTimer = 0;
 let activeDialog = null;
 const dialogStack = [];
