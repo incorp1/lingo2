@@ -84,9 +84,9 @@
   .study-filter-panel { gap: 4px; }
   .study-filter-heading { font-size: 12px; }
   .study-stats { gap: 4px; }
-  .stat-chip { padding: 2px 3px; min-height: 28px; line-height: 1.2; }
+  .stat-chip { padding: 0 3px; min-height: 22px; line-height: 1.2; }
   .filter-state-mark { width: 15px; height: 15px; font-size: 13px; }
-  .card-stage { padding: 12px; gap: 7px; }
+  .card-stage { padding: 12px; gap: 7px; max-width: 100%; overflow-x: hidden; }
   .card-stage .card-front { padding-top: 30px; }
   .card-stage .card-meta { gap: 5px; }
   .grade-btn { min-height: 48px; padding: 7px 6px; gap: 2px; }

@@ -3,7 +3,7 @@
 /* Views */
 .view { display: none; padding: 28px; max-width: 1100px; width: 100%; margin: 0 auto; flex: 1; min-width: 0; }
 .view.active { display: block; }
-.view-study.active { display: flex; flex-direction: column; gap: 24px; padding-bottom: 40px; }
+.view-study.active { display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px; }
 
 /* Study */
 .study-filter-panel { display: grid; gap: 6px; }
@@ -72,7 +72,7 @@
   pointer-events: none;
 }
 
-.study-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.study-stats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
 
 .deck-browse-header {
@@ -92,8 +92,8 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 28px;
-  padding: 2px 4px;
+  min-height: 22px;
+  padding: 0 4px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -158,6 +158,9 @@
   box-shadow: var(--shadow-sm);
   width: 100%;
   min-width: 0;
+  max-width: 100%;
+  /* Длинные слова и примеры не должны растягивать карточку по горизонтали. */
+  overflow-x: hidden;
 }
 .card-stage .card-front {
   font-family: var(--font-serif);
