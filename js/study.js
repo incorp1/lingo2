@@ -255,12 +255,12 @@ function renderStudy() {
     </div>
     <div class="card-front${contextFront ? " context-front" : ""}">${frontHTML}</div>
     ${(!reversed && card.hint) ? (session.revealed
-      ? `<div class="pronunciation">${escape(card.hint)}</div>`
-      : `<button type="button" class="pronunciation pronunciation-spoiler" id="pronunciationSpoiler" aria-expanded="false" title="${escape(t("study.spoiler.show"))}" aria-label="${escape(t("study.spoiler.show"))}"><span class="spoiler-text">${escape(card.hint)}</span><span class="spoiler-cover" aria-hidden="true"></span></button>`) : ""}
+      ? `<div class="pronunciation">[${escape(hintCore(card.hint))}]</div>`
+      : `<div class="pronunciation">[<button type="button" class="pronunciation-spoiler" id="pronunciationSpoiler" aria-expanded="false" title="${escape(t("study.spoiler.show"))}" aria-label="${escape(t("study.spoiler.show"))}"><span class="spoiler-text">${escape(hintCore(card.hint))}</span><span class="spoiler-cover" aria-hidden="true"></span></button>]</div>`) : ""}
     ${session.revealed && card.type !== "cloze" ? `
       <div class="divider"></div>
       <div class="card-back${contextFront ? " card-translation" : ""}">${backHTML}</div>
-      ${(reversed && card.hint) ? `<div class="pronunciation pronunciation-back">${escape(card.hint)}</div>` : ""}
+      ${(reversed && card.hint) ? `<div class="pronunciation pronunciation-back">[${escape(hintCore(card.hint))}]</div>` : ""}
       ${definitionHTML ? `<div class="card-definition">${definitionHTML}</div>` : ""}
       ${exampleHTML ? `<div class="card-example">"${exampleHTML}"</div>` : ""}
     ` : ""}
@@ -313,6 +313,15 @@ function renderStudy() {
     actions.hidden = true;
     revealEl.hidden = false;
   }
+}
+
+/* Транскрипция всегда показывается в квадратных скобках: [kot].
+   В данных слово может храниться как «kot», «/kot/» или «[kot]»,
+   поэтому перед выводом снимаем уже имеющееся обрамление. */
+function hintCore(value) {
+  const text = String(value ?? "").trim();
+  const unwrapped = text.replace(/^[/[\]]+/, "").replace(/[/[\]]+$/, "").trim();
+  return unwrapped || text;
 }
 
 function splitExampleLines(text) {
