@@ -16,7 +16,7 @@ fi
 # Хук нужен только когда меняется код приложения, а не документация.
 if git diff --cached --name-only | grep -Eq '\.(js|css|html|webmanifest)$'; then
   node tools/bump-version.mjs || exit 1
-  git add index.html sw.js js/stats.js VERSION
+  git add index.html sw.js js/stats.js VERSION package.json package-lock.json
 fi
 
 exit 0

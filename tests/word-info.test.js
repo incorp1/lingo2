@@ -17,11 +17,14 @@ test("кнопка «i» на карточке активна только по�
   assert.match(css, /\.sheet-grabber/);
   assert.match(css, /\.modal-panel \.modal-head \{ touch-action: none/);
 
-  // Floating animation only for the enabled buttons.
-  assert.match(css, /@keyframes card-tool-float/);
-  assert.match(css, /\.card-stage \.speaker-btn:not\(:disabled\) svg,[^}]*animation: card-tool-float/);
-  assert.match(css, /\.card-stage \.info-link:not\(:disabled\) svg/);
-  assert.doesNotMatch(css, /\.info-link:disabled[^}]*animation/);
+  /* Раньше глифы правых кнопок «покачивались» (card-tool-float). В коммите
+     a3b362a анимацию осознанно отключили: вертикальный сдвиг ломал
+     выравнивание правого ряда с кнопками «назад»/«редактирование».
+     Контракт теперь обратный — иконки в правом ряду стоят неподвижно. */
+  assert.match(css, /\.card-stage \.card-stage-side-tools \.speaker-btn svg,[\s\S]{0,80}?animation: none/);
+  assert.match(css, /\.card-stage \.card-stage-side-tools \.info-link svg/);
+  assert.match(css, /\.card-stage \.info-link:not\(:disabled\)/);
+  assert.doesNotMatch(css, /animation: card-tool-float/);
 });
 
 test("модалка информации о слове подключена к разметке и i18n", () => {

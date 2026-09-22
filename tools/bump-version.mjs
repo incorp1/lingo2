@@ -62,8 +62,42 @@ async function main() {
     if (updated !== source) await writeFile(file, updated);
   }
 
+  // package.json / package-lock.json — тоже часть релизных метаданных.
+  // Раньше скрипт их не трогал, поэтому после каждого автоподъёма версия
+  // ассетов уезжала вперёд, а `package.json` оставался на старой. Тесты
+  // (offline-startup, p46-p60-regression, settings-redesign и др.) выводят
+  // ожидаемую версию именно из `package.json`, и весь релизный набор падал.
+  await bumpPackageManifests(next);
+
   await writeFile(VERSION_FILE, `${next}\n`);
   console.log(`Версия обновлена: ${current} -> ${next}`);
+}
+
+/* Обновляет версию в package.json и обоих местах package-lock.json,
+   сохраняя форматирование файлов (отступ в 2 пробела + перевод строки). */
+async function bumpPackageManifests(next) {
+  const pkgFile = path.join(ROOT, "package.json");
+  const pkg = JSON.parse(await readFile(pkgFile, "utf8"));
+  if (pkg.version !== next) {
+    pkg.version = next;
+    await writeFile(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`);
+  }
+
+  const lockFile = path.join(ROOT, "package-lock.json");
+  let lockRaw;
+  try {
+    lockRaw = await readFile(lockFile, "utf8");
+  } catch {
+    return; // lock-файла может не быть — это не повод падать.
+  }
+  const lock = JSON.parse(lockRaw);
+  let changed = false;
+  if (lock.version !== next) { lock.version = next; changed = true; }
+  if (lock.packages?.[""] && lock.packages[""].version !== next) {
+    lock.packages[""].version = next;
+    changed = true;
+  }
+  if (changed) await writeFile(lockFile, `${JSON.stringify(lock, null, 2)}\n`);
 }
 
 main().catch(error => {
