@@ -241,7 +241,7 @@ function renderStudy() {
            четыре кнопки гарантированно стоят на одной горизонтальной линии.
            Порядок: озвучивание, затем «информация о слове» у правого края. -->
       <div class="card-stage-side-tools">
-      <button class="speaker-btn" id="ttsBtn"${reversed ? " disabled" : ""} title="${escape(t("study.pronounce"))}" aria-label="${escape(t("study.pronounce"))}">
+      <button class="speaker-btn" id="ttsBtn"${(reversed && !session.revealed) ? " disabled" : ""} title="${escape(t("study.pronounce"))}" aria-label="${escape(t("study.pronounce"))}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="M11 5L6 9H3v6h3l5 4z"/>
           <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
@@ -274,14 +274,11 @@ function renderStudy() {
     $("#editCurrentBtn").onclick = () => openCardEditor(card.id);
     $("#wordInfoBtn").onclick = () => openWordInfo(card);
     $("#ttsBtn").onclick = () => {
-      const visibleFrontSpeech = contextFront ? contextFront.sentence : frontText;
-      // Озвучивание всегда идёт на языке обучения: русская/украинская сторона
-      // карточки не произносится, вместо неё читается термин на изучаемом
-      // языке, иначе кнопка TTS проговаривала бы перевод голосом интерфейса.
-      const learningSideText = reversed ? card.back : card.front;
-      const toSpeak = session.revealed
-        ? (reversed ? card.front : (learningSideText || card.front))
-        : (card.type === "cloze" ? stripCloze(card.cloze) : visibleFrontSpeech);
+      // Кнопка всегда произносит только слово карточки на языке обучения:
+      // в режиме «Предложение» не читается весь контекст, а на обратной
+      // стороне (русский/украинский фронт) слово доступно после показа ответа.
+      const toSpeak = cardEnglishTerm(card);
+      if (!toSpeak) return;
       speak(toSpeak, { lang: learningSpeechLocale() });
     };
   }
