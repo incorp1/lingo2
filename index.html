@@ -7,23 +7,23 @@
 <title>Lingo Cards — Spaced Repetition</title>
 <meta name="theme-color" content="#C96442" />
 <meta name="description" content="Spaced repetition for language learning" />
-<script src="theme-init.js?v=3.20.23"></script>
+<script src="theme-init.js?v=3.20.24"></script>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="apple-touch-icon" href="icon-192.png" />
-<link rel="stylesheet" href="css/base.css?v=3.20.23" />
-<link rel="stylesheet" href="css/study.css?v=3.20.23" />
-<link rel="stylesheet" href="css/decks.css?v=3.20.23" />
-<link rel="stylesheet" href="css/stats-settings.css?v=3.20.23" />
-<link rel="stylesheet" href="css/mobile.css?v=3.20.23" />
-<link rel="stylesheet" href="css/features.css?v=3.20.23" />
-<link rel="stylesheet" href="css/polish.css?v=3.20.23" />
-<link rel="stylesheet" href="css/edge-menu.css?v=3.20.23" />
-<link rel="stylesheet" href="css/settings-responsive.css?v=3.20.23" />
-<link rel="stylesheet" href="css/settings-polish.css?v=3.20.23" />
-<link rel="stylesheet" href="css/deck-browser-vA.css?v=3.20.23" />
-<link rel="stylesheet" href="css/card-editor.css?v=3.20.23" />
-<link rel="stylesheet" href="css/motion.css?v=3.20.23" />
+<link rel="stylesheet" href="css/base.css?v=3.20.24" />
+<link rel="stylesheet" href="css/study.css?v=3.20.24" />
+<link rel="stylesheet" href="css/decks.css?v=3.20.24" />
+<link rel="stylesheet" href="css/stats-settings.css?v=3.20.24" />
+<link rel="stylesheet" href="css/mobile.css?v=3.20.24" />
+<link rel="stylesheet" href="css/features.css?v=3.20.24" />
+<link rel="stylesheet" href="css/polish.css?v=3.20.24" />
+<link rel="stylesheet" href="css/edge-menu.css?v=3.20.24" />
+<link rel="stylesheet" href="css/settings-responsive.css?v=3.20.24" />
+<link rel="stylesheet" href="css/settings-polish.css?v=3.20.24" />
+<link rel="stylesheet" href="css/deck-browser-vA.css?v=3.20.24" />
+<link rel="stylesheet" href="css/card-editor.css?v=3.20.24" />
+<link rel="stylesheet" href="css/motion.css?v=3.20.24" />
 </head>
 <body>
   <div id="app">
@@ -310,7 +310,7 @@
             <span data-i18n="settings.back">Назад</span>
           </button>
           <div class="app-build-meta" id="appBuildMeta" aria-label="Application version">
-            <span class="app-build-version">v3.20.23</span>
+            <span class="app-build-version">v3.20.24</span>
             <time datetime="2026-07-19T17:00:00+03:00">19.07.2026 17:00</time>
           </div>
         </div>
@@ -1050,7 +1050,7 @@ FSRS — современный умный режим: он подстраива
         <div class="modal-body editor-body">
           <section class="editor-word-card" id="edFrontRow">
             <label for="edFront" data-i18n="modal.front">Front</label>
-            <textarea id="edFront" rows="2" data-i18n-ph="modal.frontPh" placeholder="ubiquitous"></textarea>
+            <textarea id="edFront" rows="2" data-i18n-ph="modal.frontPh" placeholder="For example: ubiquitous"></textarea>
             <div class="editor-ai-row">
               <button class="btn primary ai-gen-btn" id="aiGenBtn" type="button" title="Fill with AI">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/></svg>
@@ -1064,20 +1064,20 @@ FSRS — современный умный режим: он подстраива
           </section>
           <section class="editor-word-card editor-translation" id="edBackRow">
             <label for="edBack" data-i18n="modal.back">Back</label>
-            <textarea id="edBack" rows="2" data-i18n-ph="modal.backPh" placeholder="translation"></textarea>
+            <textarea id="edBack" rows="2" data-i18n-ph="modal.backPh" placeholder="For example: present everywhere"></textarea>
           </section>
           <section class="editor-word-card editor-cloze" id="edClozeRow" hidden>
             <label for="edCloze"><span data-i18n="modal.cloze">Cloze text</span> <span class="hint" data-i18n="modal.cloze.hint">wrap hidden parts in {{ }}</span></label>
-            <textarea id="edCloze" rows="3" data-i18n-ph="modal.clozePh" placeholder="The {{ubiquitous}} smartphone changed everything."></textarea>
+            <textarea id="edCloze" rows="3" data-i18n-ph="modal.clozePh" placeholder="For example: The {{ubiquitous}} smartphone changed everything."></textarea>
           </section>
           <div class="editor-details">
             <div class="editor-word-card editor-secondary-card">
               <label for="edExample"><span data-i18n="modal.example">Example</span> <span class="hint" data-i18n="modal.example.hint">optional</span></label>
-              <textarea id="edExample" rows="2" data-i18n-ph="modal.examplePh" placeholder="Plastic is ubiquitous in modern life."></textarea>
+              <textarea id="edExample" rows="2" data-i18n-ph="modal.examplePh" placeholder="For example: Plastic is ubiquitous in modern life."></textarea>
             </div>
             <div class="editor-word-card editor-secondary-card">
               <label for="edHint"><span data-i18n="modal.pron">Pronunciation</span></label>
-              <textarea id="edHint" rows="2" placeholder="/juːˈbɪkwɪtəs/"></textarea>
+              <textarea id="edHint" rows="2" data-i18n-ph="modal.pronPh" placeholder="For example: /juːˈbɪkwɪtəs/"></textarea>
             </div>
             <div class="editor-selects">
               <div class="form-row">
@@ -1389,31 +1389,31 @@ FSRS — современный умный режим: он подстраива
       <div class="update-overlay-text" data-i18n="pwa.updating">Updating the app…</div>
     </div>
 
-    <script src="languages.js?v=3.20.23"></script>
-    <script src="storage.js?v=3.20.23"></script>
-    <script src="fsrs.js?v=3.20.23"></script>
-    <script src="ai.js?v=3.20.23"></script>
-    <script src="seed.js?v=3.20.23"></script>
-    <script src="i18n/uk.js?v=3.20.23"></script>
-    <script src="i18n/ru.js?v=3.20.23"></script>
-    <script src="i18n/en.js?v=3.20.23"></script>
-    <script src="i18n/runtime.js?v=3.20.23"></script>
-    <script src="tooltips.js?v=3.20.23"></script>
-    <script src="backup.js?v=3.20.23"></script>
-    <script src="js/state.js?v=3.20.23"></script>
-    <script src="js/scheduler.js?v=3.20.23"></script>
-    <script src="js/ui.js?v=3.20.23"></script>
-    <script src="js/study.js?v=3.20.23"></script>
-    <script src="js/decks.js?v=3.20.23"></script>
-    <script src="js/stats.js?v=3.20.23"></script>
-    <script src="js/settings.js?v=3.20.23"></script>
-    <script src="js/ai-practice.js?v=3.20.23"></script>
-    <script src="js/cards.js?v=3.20.23"></script>
-    <script src="js/import-export.js?v=3.20.23"></script>
-    <script src="js/selection.js?v=3.20.23"></script>
-    <script src="js/edge-menu.js?v=3.20.23"></script>
-    <script src="js/motion.js?v=3.20.23"></script>
-    <script src="js/learning-language.js?v=3.20.23"></script>
-    <script src="js/app-shell.js?v=3.20.23"></script>
+    <script src="languages.js?v=3.20.24"></script>
+    <script src="storage.js?v=3.20.24"></script>
+    <script src="fsrs.js?v=3.20.24"></script>
+    <script src="ai.js?v=3.20.24"></script>
+    <script src="seed.js?v=3.20.24"></script>
+    <script src="i18n/uk.js?v=3.20.24"></script>
+    <script src="i18n/ru.js?v=3.20.24"></script>
+    <script src="i18n/en.js?v=3.20.24"></script>
+    <script src="i18n/runtime.js?v=3.20.24"></script>
+    <script src="tooltips.js?v=3.20.24"></script>
+    <script src="backup.js?v=3.20.24"></script>
+    <script src="js/state.js?v=3.20.24"></script>
+    <script src="js/scheduler.js?v=3.20.24"></script>
+    <script src="js/ui.js?v=3.20.24"></script>
+    <script src="js/study.js?v=3.20.24"></script>
+    <script src="js/decks.js?v=3.20.24"></script>
+    <script src="js/stats.js?v=3.20.24"></script>
+    <script src="js/settings.js?v=3.20.24"></script>
+    <script src="js/ai-practice.js?v=3.20.24"></script>
+    <script src="js/cards.js?v=3.20.24"></script>
+    <script src="js/import-export.js?v=3.20.24"></script>
+    <script src="js/selection.js?v=3.20.24"></script>
+    <script src="js/edge-menu.js?v=3.20.24"></script>
+    <script src="js/motion.js?v=3.20.24"></script>
+    <script src="js/learning-language.js?v=3.20.24"></script>
+    <script src="js/app-shell.js?v=3.20.24"></script>
 </body>
 </html>

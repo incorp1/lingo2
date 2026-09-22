@@ -94,6 +94,32 @@
   box-shadow: none;
 }
 
+/* Placeholder must read as a hint, not as already entered content:
+   no accent colour, no underline, lighter weight. */
+#editorModal .editor-word-card textarea::placeholder {
+  color: var(--ink-decorative);
+  -webkit-text-fill-color: var(--ink-decorative);
+  font-weight: 450;
+  opacity: 1;
+  text-decoration-line: none;
+}
+
+#editorModal .editor-word-card textarea::-webkit-input-placeholder {
+  color: var(--ink-decorative);
+  -webkit-text-fill-color: var(--ink-decorative);
+  font-weight: 450;
+  opacity: 1;
+  text-decoration-line: none;
+}
+
+#editorModal .editor-details input::placeholder,
+#editorModal .editor-details textarea::placeholder {
+  color: var(--ink-decorative);
+  -webkit-text-fill-color: var(--ink-decorative);
+  opacity: 1;
+  text-decoration-line: none;
+}
+
 #editorModal .ai-gen-btn {
   justify-self: start;
   min-height: 38px;
