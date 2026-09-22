@@ -1,0 +1,22 @@
+#!/bin/sh
+# Автоподъём версии PWA перед каждым коммитом.
+#
+# Без этого версия в `?v=` и в имени кэша `sw.js` оставалась прежней, браузер
+# считал service worker неизменным и установленное PWA продолжало отдавать
+# старые CSS/JS. Хук гарантирует, что каждый коммит меняет байты `sw.js`.
+#
+# Установка (один раз в клоне):
+#   git config core.hooksPath .githooks
+
+# Правки самих версионных файлов не должны вызывать рекурсию.
+if [ -n "$LINGO_SKIP_VERSION_BUMP" ]; then
+  exit 0
+fi
+
+# Хук нужен только когда меняется код приложения, а не документация.
+if git diff --cached --name-only | grep -Eq '\.(js|css|html|webmanifest)$'; then
+  node tools/bump-version.mjs || exit 1
+  git add index.html sw.js js/stats.js VERSION
+fi
+
+exit 0
