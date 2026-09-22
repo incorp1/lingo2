@@ -60,11 +60,15 @@
   display: none;
 }
 
+/* Одна общая панель на всю ширину карточки: левые кнопки («назад»,
+   «редактирование») и правая группа («озвучивание», «информация о слове»)
+   лежат в одном flex-ряду, поэтому всегда стоят на одной высоте. */
 .card-stage-tools {
   position: absolute;
   top: 16px;
   left: 16px;
-  display: inline-flex;
+  right: 16px;
+  display: flex;
   align-items: center;
   gap: 2px;
   z-index: 2;
@@ -416,6 +420,7 @@
   .card-stage .card-stage-tools {
     top: 9px;
     left: 8px;
+    right: 8px;
   }
 
   .card-stage .card-stage-tools .edit-link {

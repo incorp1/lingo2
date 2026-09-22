@@ -291,10 +291,8 @@
    справа, а динамик — слева от неё, поэтому длинный текст карточки не
    перекрывается кнопкой озвучивания. */
 .card-stage .card-stage-side-tools {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
+  position: static;
+  margin-left: auto;
   display: flex;
   flex-direction: row;
   align-items: center;

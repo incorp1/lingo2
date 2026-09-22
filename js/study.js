@@ -237,11 +237,10 @@ function renderStudy() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
       </button>
 
-    </div>
-    <!-- Правый ряд инструментов: озвучивание и «информация о слове» стоят в
-         одной строке, чтобы кнопка динамика не накладывалась на длинный текст
-         карточки. Кнопка информации остаётся на своём прежнем месте справа. -->
-    <div class="card-stage-side-tools">
+      <!-- Правая группа лежит внутри той же панели инструментов, поэтому все
+           четыре кнопки гарантированно стоят на одной горизонтальной линии.
+           Порядок: озвучивание, затем «информация о слове» у правого края. -->
+      <div class="card-stage-side-tools">
       <button class="speaker-btn" id="ttsBtn"${reversed ? " disabled" : ""} title="${escape(t("study.pronounce"))}" aria-label="${escape(t("study.pronounce"))}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="M11 5L6 9H3v6h3l5 4z"/>
@@ -252,6 +251,7 @@ function renderStudy() {
       <button class="edit-link info-link" id="wordInfoBtn"${session.revealed ? "" : " disabled"} title="${escape(t("study.info.button"))}" aria-label="${escape(t("study.info.button"))}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       </button>
+      </div>
     </div>
     <div class="card-front${contextFront ? " context-front" : ""}">${frontHTML}</div>
     ${(!reversed && card.hint) ? `<div class="pronunciation">${escape(card.hint)}</div>` : ""}
