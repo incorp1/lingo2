@@ -315,9 +315,15 @@ function bindEvents() {
   });
   const practiceDaysEl = $("#practiceDays");
   if (practiceDaysEl) practiceDaysEl.addEventListener("input", () => {
-    state.settings.practiceDays = Math.min(180, Math.max(1, parseInt(practiceDaysEl.value) || 7));
-    markSettingsDirty();
-    practiceState.period = "days";
+    // Position 0 is the "last session" window; 1..180 are real day windows.
+    const pos = Math.min(180, Math.max(0, parseInt(practiceDaysEl.value, 10) || 0));
+    if (pos === 0) {
+      practiceState.period = "last";
+    } else {
+      practiceState.period = "days";
+      state.settings.practiceDays = pos;
+      markSettingsDirty();
+    }
     practiceState.selectedIds = null;
     save();
     persistPracticeDraft();
@@ -331,12 +337,6 @@ function bindEvents() {
   };
   const practiceHistBtn = $("#practiceHistoryBtn");
   if (practiceHistBtn) practiceHistBtn.onclick = togglePracticeHistory;
-  $("#practiceDeck").addEventListener("change", () => {
-    practiceState.deckId = $("#practiceDeck").value || "";
-    practiceState.selectedIds = null;
-    persistPracticeDraft();
-    updatePracticeCounts();
-  });
   $("#practiceCount").addEventListener("change", () => {
     practiceState.count = $("#practiceCount").value || "8";
     persistPracticeDraft();

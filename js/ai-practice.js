@@ -528,9 +528,24 @@ function resetPracticeRuntime() {
   if (modal && !modal.hidden && typeof closeDialog === "function") closeDialog(modal);
 }
 
+/* Slider semantics: 0 = "last session", 1..180 = that many days back.
+   practiceDays keeps storing only real day counts (1..180) so old backups and
+   the settings schema stay valid; position 0 lives in practiceState.period. */
+const PRACTICE_MAX_DAYS = 180;
+
 function practiceDayWindow() {
   const v = parseInt((state.settings && state.settings.practiceDays) || 7, 10);
-  return Math.min(180, Math.max(1, isNaN(v) ? 7 : v));
+  return Math.min(PRACTICE_MAX_DAYS, Math.max(1, isNaN(v) ? 7 : v));
+}
+
+/* Slider value derived from the current period, never the other way around. */
+function practiceSliderValue() {
+  return practiceState.period === "last" ? 0 : practiceDayWindow();
+}
+
+/* The deck always follows the Study tab selection; practice has no own picker. */
+function practiceDeckId() {
+  return state.activeDeckId || "";
 }
 
 function practiceWordPool(period, deckId) {
@@ -564,21 +579,29 @@ function practiceChosenCards(deckId) {
 }
 
 function updatePracticeCounts() {
-  const deckId = $("#practiceDeck")?.value || null;
-  ["last", "all", "days"].forEach(p => {
-    const el = document.querySelector(`[data-period-count="${p}"]`);
-    if (el) el.textContent = practiceWordPool(p, deckId).length;
-  });
-  // Days slider label
-  const daysValue = $("#practiceDaysValue");
-  if (daysValue) daysValue.textContent = practiceDayWindow();
+  const deckId = practiceDeckId() || null;
+  const el = document.querySelector('[data-period-count="all"]');
+  if (el) el.textContent = practiceWordPool("all", deckId).length;
+
+  // Slider label + count reflect the position: 0 → last session, N → N days.
+  const isLast = practiceState.period === "last";
+  const label = $("#practiceDaysLabel");
+  if (label) {
+    label.textContent = isLast
+      ? t("practice.period.last")
+      : `${t("practice.period.daysPre")} ${practiceDayWindow()} ${t("practice.period.daysPost")}`;
+  }
+  const sliderCount = $("#practiceDaysCount");
+  if (sliderCount) sliderCount.textContent = practiceWordPool(isLast ? "last" : "days", deckId).length;
   const daysInput = $("#practiceDays");
-  if (daysInput && String(daysInput.value) !== String(practiceDayWindow())) daysInput.value = practiceDayWindow();
+  if (daysInput && String(daysInput.value) !== String(practiceSliderValue())) {
+    daysInput.value = practiceSliderValue();
+  }
 
   // Highlight active period control
   $$("#practicePeriod .period-opt").forEach(b => b.classList.toggle("active", b.dataset.period === practiceState.period));
   const daysRow = document.querySelector(".practice-days-row");
-  if (daysRow) daysRow.classList.toggle("active", practiceState.period === "days");
+  if (daysRow) daysRow.classList.toggle("active", practiceState.period !== "all");
 
   renderPracticeWordPreview(deckId);
 
@@ -663,28 +686,16 @@ function openPractice() {
   }
 
   // Build deck selector
-  const deckSel = $("#practiceDeck");
-  deckSel.innerHTML = "";
-  const allOpt = document.createElement("option");
-  allOpt.value = ""; allOpt.textContent = t("browse.allDecks");
-  deckSel.appendChild(allOpt);
-  const practiceDecks = activeDecks();
-  for (const d of practiceDecks) {
-    const o = document.createElement("option");
-    o.value = d.id; o.textContent = d.name;
-    deckSel.appendChild(o);
-  }
+  // Deck comes from the Study tab; nothing to build here.
 
   // Try to restore an in-progress session; otherwise start fresh.
   const hasDraft = restorePracticeDraft();
   if (hasDraft) {
-    // Restore the saved deck selection (fall back to "all" if the deck is gone).
-    const savedDeck = practiceState.deckId || "";
-    deckSel.value = practiceDecks.some(d => d.id === savedDeck) ? savedDeck : "";
-    practiceState.deckId = deckSel.value;
+    // The deck is no longer chosen here: always follow the Study tab.
+    practiceState.deckId = practiceDeckId();
     syncPracticeFormFromState();
     applyI18NSafe($("#practiceModal"));
-    openDialog($("#practiceModal"), $("#practiceDeck"));
+    openDialog($("#practiceModal"), $("#practiceDays"));
     renderPracticeHistory();
 
     const step = practiceState.step || "setup";
@@ -708,8 +719,7 @@ function openPractice() {
     return;
   }
 
-  deckSel.value = state.activeDeckId || "";
-  practiceState.deckId = deckSel.value;
+  practiceState.deckId = practiceDeckId();
   practiceState.period = (Array.isArray(state.sessionReviewedIds) && state.sessionReviewedIds.length) ? "last" : "days";
   practiceState.selectedIds = null;
   practiceState.payload = null;
@@ -720,13 +730,11 @@ function openPractice() {
   updatePracticeCounts();
   renderPracticeHistory();
   applyI18NSafe($("#practiceModal"));
-  openDialog($("#practiceModal"), $("#practiceDeck"));
+  openDialog($("#practiceModal"), $("#practiceDays"));
 }
 
 /* Mirror the saved practiceState onto the setup form controls. */
 function syncPracticeFormFromState() {
-  const deckSel = $("#practiceDeck");
-  if (deckSel) deckSel.value = practiceState.deckId || "";
   const countSel = $("#practiceCount");
   if (countSel && practiceState.count) countSel.value = String(practiceState.count);
   const levelSel = $("#practiceLevel");
@@ -778,7 +786,7 @@ async function practiceGenerate() {
     return;
   }
 
-  const deckId = $("#practiceDeck").value;
+  const deckId = practiceDeckId();
   const period = practiceState.period || "days";
   practiceState.period = period;
   practiceState.deckId = deckId;

@@ -118,7 +118,7 @@ function updateSwapBtnTitle() {
 }
 
 /* ----- Service worker ----- */
-const SERVICE_WORKER_URL = "sw.js?v=3.20.28";
+const SERVICE_WORKER_URL = "sw.js?v=3.20.29";
 let swRegistration = null;
 let swRefreshing = false;
 let swUpdateApplying = false;
