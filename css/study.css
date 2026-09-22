@@ -219,25 +219,56 @@
   transition: opacity .32s ease, filter .32s ease;
   user-select: none;
 }
+/* Текстура — настоящий «телевизионный шум»: мелкое зерно генерируется
+   SVG-фильтром feTurbulence (data:-URI разрешён в img-src), а иллюзия
+   мерцания создаётся быстрым сдвигом двух слоёв зерна в разные стороны. */
 .card-stage .pronunciation-spoiler .spoiler-cover {
   position: absolute;
   inset: 0;
   border-radius: 6px;
-  background-color: color-mix(in srgb, var(--ink-muted) 22%, transparent);
-  background-image:
-    radial-gradient(currentColor 41%, transparent 42%),
-    radial-gradient(currentColor 41%, transparent 42%);
-  background-size: 7px 7px;
-  background-position: 0 0, 3.5px 3.5px;
-  color: var(--ink-muted);
-  opacity: .85;
+  background-color: color-mix(in srgb, var(--ink-muted) 20%, transparent);
+  opacity: .9;
   transition: opacity .34s ease, transform .34s ease, filter .34s ease;
-  animation: spoiler-shimmer 2.6s linear infinite;
   pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
 }
-@keyframes spoiler-shimmer {
-  from { background-position: 0 0, 3.5px 3.5px; }
-  to   { background-position: 14px 0, 17.5px 3.5px; }
+.card-stage .pronunciation-spoiler .spoiler-cover::before,
+.card-stage .pronunciation-spoiler .spoiler-cover::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: calc(100% + 120px);
+  height: calc(100% + 120px);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.card-stage .pronunciation-spoiler .spoiler-cover::before {
+  opacity: .5;
+  animation: spoiler-static-a .26s steps(6, end) infinite;
+}
+.card-stage .pronunciation-spoiler .spoiler-cover::after {
+  opacity: .38;
+  animation: spoiler-static-b .19s steps(5, end) infinite;
+}
+@keyframes spoiler-static-a {
+  0%   { transform: translate3d(0, 0, 0); }
+  20%  { transform: translate3d(-23px, 14px, 0); }
+  40%  { transform: translate3d(31px, -27px, 0); }
+  60%  { transform: translate3d(-42px, -9px, 0); }
+  80%  { transform: translate3d(17px, 38px, 0); }
+  100% { transform: translate3d(-11px, -35px, 0); }
+}
+@keyframes spoiler-static-b {
+  0%   { transform: translate3d(0, 0, 0); }
+  25%  { transform: translate3d(37px, 21px, 0); }
+  50%  { transform: translate3d(-29px, -33px, 0); }
+  75%  { transform: translate3d(13px, -18px, 0); }
+  100% { transform: translate3d(-40px, 27px, 0); }
 }
 .card-stage .pronunciation-spoiler.is-open .spoiler-text {
   opacity: 1;
@@ -255,7 +286,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .card-stage .pronunciation-spoiler .spoiler-text,
-  .card-stage .pronunciation-spoiler .spoiler-cover {
+  .card-stage .pronunciation-spoiler .spoiler-cover,
+  .card-stage .pronunciation-spoiler .spoiler-cover::before,
+  .card-stage .pronunciation-spoiler .spoiler-cover::after {
     transition-duration: .01ms;
     animation: none;
   }
