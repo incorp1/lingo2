@@ -254,7 +254,9 @@ function renderStudy() {
       </div>
     </div>
     <div class="card-front${contextFront ? " context-front" : ""}">${frontHTML}</div>
-    ${(!reversed && card.hint) ? `<div class="pronunciation">${escape(card.hint)}</div>` : ""}
+    ${(!reversed && card.hint) ? (session.revealed
+      ? `<div class="pronunciation">${escape(card.hint)}</div>`
+      : `<button type="button" class="pronunciation pronunciation-spoiler" id="pronunciationSpoiler" aria-expanded="false" title="${escape(t("study.spoiler.show"))}" aria-label="${escape(t("study.spoiler.show"))}"><span class="spoiler-text">${escape(card.hint)}</span><span class="spoiler-cover" aria-hidden="true"></span></button>`) : ""}
     ${session.revealed && card.type !== "cloze" ? `
       <div class="divider"></div>
       <div class="card-back${contextFront ? " card-translation" : ""}">${backHTML}</div>
@@ -270,6 +272,20 @@ function renderStudy() {
 
   if (changed) {
     $("#undoBtn").onclick = undo;
+    const spoiler = $("#pronunciationSpoiler");
+    if (spoiler) {
+      spoiler.onclick = event => {
+        // Раскрытие спойлера не должно приводить к показу ответа,
+        // если по карточке навешен другой обработчик тапа.
+        event.stopPropagation();
+        if (spoiler.classList.contains("is-open")) return;
+        spoiler.classList.add("is-open");
+        spoiler.setAttribute("aria-expanded", "true");
+        const label = t("study.spoiler.shown");
+        spoiler.setAttribute("title", label);
+        spoiler.setAttribute("aria-label", label);
+      };
+    }
     updateUndoBtn();
     $("#editCurrentBtn").onclick = () => openCardEditor(card.id);
     $("#wordInfoBtn").onclick = () => openWordInfo(card);
