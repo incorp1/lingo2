@@ -1286,31 +1286,58 @@ select {
     padding: 0;
   }
 }
-/* v3.20.6 — фикс селектора языка обучения (iOS Safari / iPhone 7).
-   Мобильное правило `select { ... !important }` выше сбрасывало границы,
-   фон и padding, из-за чего появлялась вторая (системная/фоновая) стрелка
-   и текст упирался в левый край. Перекрываем его явно. */
+/* v3.20.7 — селектор языка обучения: компактная «пилюля» с аккуратным
+   шевроном. Мобильное правило `select { ... !important }` выше сбрасывало
+   рамку/padding и подставляло фоновую стрелку, из-за чего на iOS стрелки
+   накладывались, а текст упирался в край. Перекрываем его явно. */
+.study-language-picker {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
 .study-language-picker select,
 .view-study .study-language-picker select {
   -webkit-appearance: none !important;
   appearance: none !important;
   background-image: none !important;
   background-color: var(--bg-elev) !important;
-  width: auto !important;
-  max-width: 190px !important;
-  min-height: 34px !important;
-  padding: 6px 30px 6px 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 0 24px 0 12px !important;
   text-indent: 0 !important;
   border: 1px solid var(--border-strong) !important;
   border-bottom: 1px solid var(--border-strong) !important;
   border-radius: 999px !important;
-  line-height: 1.2 !important;
+  font-size: 12.5px !important;
+  line-height: 28px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis !important;
 }
 .study-language-picker select::-ms-expand { display: none !important; }
+/* Единственная стрелка — рисуем её сами, символ в разметке прячем. */
 .study-language-chevron {
   position: absolute;
-  right: 10px;
+  right: 11px;
   top: 50%;
-  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  margin-top: -5px;
+  border: 0;
+  border-right: 1.5px solid var(--ink-faint);
+  border-bottom: 1.5px solid var(--ink-faint);
+  transform: rotate(45deg);
+  font-size: 0 !important;
+  line-height: 0;
+  color: transparent;
   pointer-events: none;
+}
+@media (max-width: 640px) {
+  .study-filter-topline { gap: 10px; }
+  .study-language-picker { max-width: 52vw; }
 }
