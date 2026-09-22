@@ -270,21 +270,15 @@
   0%, 100% { -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
   50% { -webkit-transform: translate3d(0, -3px, 0); transform: translate3d(0, -3px, 0); }
 }
-.card-stage .speaker-btn:not(:disabled) svg,
-.card-stage .info-link:not(:disabled) svg {
-  -webkit-animation: card-tool-float 3.4s ease-in-out infinite;
-  animation: card-tool-float 3.4s ease-in-out infinite;
-  will-change: transform;
-}
-/* Phase-shift the two buttons so they never bob in sync. */
-.card-stage .info-link:not(:disabled) svg {
-  -webkit-animation-delay: -1.7s;
-  animation-delay: -1.7s;
-}
-.card-stage .speaker-btn:not(:disabled):hover svg,
-.card-stage .info-link:not(:disabled):hover svg {
-  -webkit-animation-duration: 1.9s;
-  animation-duration: 1.9s;
+/* Анимация «покачивания» сдвигала правые иконки по вертикали, из-за чего они
+   переставали совпадать по уровню с кнопками «назад» и «редактирование».
+   Поэтому в правом ряду глифы стоят неподвижно. */
+.card-stage .card-stage-side-tools .speaker-btn svg,
+.card-stage .card-stage-side-tools .info-link svg {
+  -webkit-animation: none;
+  animation: none;
+  -webkit-transform: none;
+  transform: none;
 }
 
 .card-stage .edit-link {
