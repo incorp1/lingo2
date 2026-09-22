@@ -640,21 +640,49 @@ Return ONLY JSON in this exact shape:
         : Date.now() + Math.max(1, Number(opts.timeoutMs) || DEFAULT_TIMEOUT_MS),
     };
 
-    const results = await Promise.allSettled([
-      callDictionary(word, auxTimeout(requestOptions)),
-      mode === "ai" ? callLLM(provider, model || PROVIDER_DEFAULTS[provider]?.model,
-                              key, word, targetLang, learnedName, requestOptions) : Promise.resolve(null),
-      quickTranslate(word, targetLangCode || "uk", auxTimeout(requestOptions)),
-    ]);
+    // Вспомогательные источники запускаются параллельно, но НЕ блокируют выдачу:
+    // раньше `Promise.allSettled` ждал их все, поэтому генерация всегда длилась
+    // столько, сколько работал самый медленный бесплатный сервис, даже если
+    // модель ответила за секунду. Теперь мы ждём только модель, а словарь и
+    // переводчик используем как резерв — и только если модель чего-то не дала.
+    const settle = (promise) => promise.then(
+      value => ({ status: "fulfilled", value }),
+      reason => ({ status: "rejected", reason })
+    );
+    const dictPromise = settle(callDictionary(word, auxTimeout(requestOptions)));
+    const translationPromise = settle(quickTranslate(word, targetLangCode || "uk", auxTimeout(requestOptions)));
+    const aiResult = await settle(
+      mode === "ai"
+        ? callLLM(provider, model || PROVIDER_DEFAULTS[provider]?.model, key, word, targetLang, learnedName, requestOptions)
+        : Promise.resolve(null)
+    );
     throwIfAborted(opts.signal);
 
-    const dict = results[0].status === "fulfilled" ? results[0].value : null;
-    const translation = results[2].status === "fulfilled" ? String(results[2].value || "").trim() : "";
-    let ai = null;
-    if (results[1].status === "fulfilled" && results[1].value) ai = normalize(results[1].value);
-    else if (results[1].status === "rejected") {
-      if (!dict && !translation) throw results[1].reason || new Error("AI failed");
+    let ai = aiResult.status === "fulfilled" && aiResult.value ? normalize(aiResult.value) : null;
+
+    const readDict = async () => {
+      const r = await dictPromise;
+      return r.status === "fulfilled" ? r.value : null;
+    };
+    const readTranslation = async () => {
+      const r = await translationPromise;
+      return r.status === "fulfilled" ? String(r.value || "").trim() : "";
+    };
+
+    // Резервные источники нужны только для незаполненных моделью полей.
+    const needsDict = !ai || !cleanIPA(ai.ipa) || !ai.example;
+    const needsTranslation = !ai || !ai.back;
+    const dict = needsDict ? await readDict() : null;
+    const translation = needsTranslation ? await readTranslation() : "";
+
+    if (aiResult.status === "rejected" && !dict && !translation) {
+      throw aiResult.reason || new Error("AI failed");
     }
+    const results = [
+      needsDict ? await dictPromise : { status: "fulfilled", value: null },
+      aiResult,
+      needsTranslation ? await translationPromise : { status: "fulfilled", value: "" },
+    ];
 
     // IPA: prefer the AI's, then the dictionary's — but only if it actually
     // looks like a transcription of THIS word (cleanIPA drops foreign/garbage).
