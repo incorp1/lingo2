@@ -15,6 +15,56 @@
   letter-spacing: .01em;
   color: var(--ink-muted);
 }
+/* Заголовок «Что учим сейчас» слева, пикер языка обучения — справа. */
+.study-filter-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.study-filter-topline .study-filter-heading { min-width: 0; }
+.study-language-picker { position: relative; flex: none; display: flex; align-items: center; }
+.study-language-picker select {
+  appearance: none;
+  -webkit-appearance: none;
+  max-width: 190px;
+  min-height: 32px;
+  padding: 5px 26px 5px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: border-color .12s, background-color .12s;
+}
+.study-language-picker select:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong));
+}
+.study-language-picker select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.study-language-picker select:disabled { opacity: .6; cursor: default; }
+.study-language-picker select option {
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: 500;
+}
+.study-language-chevron {
+  position: absolute;
+  right: 10px;
+  color: var(--ink-faint);
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .study-stats { display: flex; gap: 8px; flex-wrap: wrap; }
 
 

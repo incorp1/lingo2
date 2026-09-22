@@ -151,10 +151,19 @@ async function switchLearningLanguage(rawCode) {
 }
 
 // Fill the settings control and the visible learning-language context label.
+// Пикеров языка обучения два: в настройках и в строке «Что учим сейчас».
+// Оба наполняются и синхронизируются одинаково.
+const LEARNING_LANGUAGE_SELECT_IDS = ["setLearningLanguage", "studyLearningLanguage"];
+
+function learningLanguageSelects() {
+  return LEARNING_LANGUAGE_SELECT_IDS
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+}
+
 function syncLearningLanguageControl() {
   const code = normalizeLearningLanguage(state?.activeLearningLanguage);
-  const select = document.getElementById("setLearningLanguage");
-  if (select) {
+  for (const select of learningLanguageSelects()) {
     const registry = window.LCLanguages;
     const options = registry ? registry.listLanguages() : [];
     if (select.options.length !== options.length) {
@@ -182,15 +191,16 @@ function syncLearningLanguageControl() {
 }
 
 function bindLearningLanguageControl() {
-  const select = document.getElementById("setLearningLanguage");
-  if (!select || select.dataset.bound === "true") return;
-  select.dataset.bound = "true";
-  select.addEventListener("change", () => {
-    const requested = select.value;
-    switchLearningLanguage(requested).then(ok => {
-      // Rejected or failed switches must not leave a misleading selection.
-      if (!ok) syncLearningLanguageControl();
+  for (const select of learningLanguageSelects()) {
+    if (select.dataset.bound === "true") continue;
+    select.dataset.bound = "true";
+    select.addEventListener("change", () => {
+      const requested = select.value;
+      switchLearningLanguage(requested).then(ok => {
+        // Rejected or failed switches must not leave a misleading selection.
+        if (!ok) syncLearningLanguageControl();
+      });
     });
-  });
+  }
   syncLearningLanguageControl();
 }

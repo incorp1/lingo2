@@ -562,15 +562,47 @@ textarea:focus-visible {
   align-items: center;
   gap: 12px;
   max-width: calc(100vw - 40px);
-  padding: 10px 12px 10px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border-strong));
+  border-radius: 14px;
   background: var(--panel);
   color: var(--ink);
   box-shadow: var(--shadow-lg);
   font-size: 13px;
+  animation: updateNoticeIn 260ms cubic-bezier(.25, 1, .5, 1) both;
 }
 .update-notice[hidden] { display: none; }
+.update-notice-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+.update-notice-icon svg { width: 18px; height: 18px; }
+.update-notice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.update-notice-text b { font-size: 13.5px; font-weight: 700; line-height: 1.25; }
+.update-notice-text small {
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+.update-notice-btn { flex: none; }
+@keyframes updateNoticeIn {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .update-notice { animation: none; }
+}
 
 /* ----- Оверлей применения обновления ----- */
 .update-overlay {

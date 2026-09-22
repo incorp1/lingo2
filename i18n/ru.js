@@ -277,6 +277,7 @@ window.I18N.ru = {
     "pwa.online": "Онлайн",
     "pwa.offline": "Офлайн",
     "pwa.updateAvailable": "Доступно обновление",
+    "pwa.updateHint": "Перезапустите, чтобы установить новую версию",
     "pwa.restart": "Перезапустить",
     "pwa.updating": "Обновляем приложение…",
     "toast.unknownFormat": "Неизвестный формат файла",

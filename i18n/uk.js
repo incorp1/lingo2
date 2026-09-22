@@ -339,6 +339,7 @@ window.I18N.uk = {
     "pwa.online": "Онлайн",
     "pwa.offline": "Офлайн",
     "pwa.updateAvailable": "Доступне оновлення",
+    "pwa.updateHint": "Перезапустіть, щоб встановити нову версію",
     "pwa.restart": "Перезапустити",
     "pwa.updating": "Оновлюємо застосунок…",
     "toast.unknownFormat": "Невідомий формат файлу",

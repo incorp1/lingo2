@@ -111,7 +111,13 @@
       <!-- STUDY VIEW -->
       <section class="view view-study active" id="view-study">
         <div class="study-filter-panel" aria-labelledby="studyFilterHeading">
-          <h2 class="study-filter-heading" id="studyFilterHeading" data-i18n="study.filters.heading">What we're studying now</h2>
+          <div class="study-filter-topline">
+            <h2 class="study-filter-heading" id="studyFilterHeading" data-i18n="study.filters.heading">What we're studying now</h2>
+            <div class="study-language-picker">
+              <select id="studyLearningLanguage" data-i18n-aria-label="language.learning.label" aria-label="Язык обучения"></select>
+              <span class="study-language-chevron" aria-hidden="true">⌄</span>
+            </div>
+          </div>
           <div class="study-stats" aria-label="Study card filters" data-i18n-aria-label="study.filters.ariaLabel">
             <button type="button" class="stat-chip new" id="studyFilterNew" aria-pressed="true">
               <span class="filter-state-mark" aria-hidden="true">✓</span>
@@ -1369,8 +1375,14 @@ FSRS — современный умный режим: он подстраива
 
     <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
     <aside class="update-notice" id="updateNotice" hidden role="status" aria-live="polite">
-      <span data-i18n="pwa.updateAvailable">Update available</span>
-      <button class="btn small primary" id="applyUpdateBtn" type="button" data-i18n="pwa.restart">Restart</button>
+      <span class="update-notice-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v9"/><path d="m8 10 4-4 4 4"/><path d="M5 18h14"/></svg>
+      </span>
+      <span class="update-notice-text">
+        <b data-i18n="pwa.updateAvailable">Update available</b>
+        <small data-i18n="pwa.updateHint">Restart to install the new version</small>
+      </span>
+      <button class="btn small primary update-notice-btn" id="applyUpdateBtn" type="button" data-i18n="pwa.restart">Restart</button>
     </aside>
     <div class="update-overlay" id="updateOverlay" hidden role="status" aria-live="assertive">
       <div class="update-overlay-spinner" aria-hidden="true"></div>

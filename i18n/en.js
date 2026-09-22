@@ -278,6 +278,7 @@ window.I18N.en = {
     "pwa.online": "Online",
     "pwa.offline": "Offline",
     "pwa.updateAvailable": "Update available",
+    "pwa.updateHint": "Restart to install the new version",
     "pwa.restart": "Restart",
     "pwa.updating": "Updating the app…",
     "toast.unknownFormat": "Unknown file format",
