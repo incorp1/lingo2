@@ -45,7 +45,46 @@ function replaceSelectionData(word, context) {
 }
 
 function lookupZoneAt(target) {
+  if (isEditableTarget(target)) return null;
   return target?.closest?.(LOOKUP_SELECTOR) || null;
+}
+
+/* ------------------------------------------------------------------------
+   Editable-field guard
+
+   Раньше глобальные слушатели lookup-жеста (touchstart/pointerdown/click/
+   scroll) безусловно звали clearLookupSelection(), а он выполнял
+   window.getSelection().removeAllRanges(). В WebKit (iOS) выделение
+   документа и каретка внутри <input>/<textarea> — один и тот же объект
+   Selection, поэтому снятие диапазонов убивало каретку только что
+   сфокусированного поля: клавиатура уже открыта, а набираемый текст
+   никуда не попадал, пока пользователь не тапнет по полю второй раз.
+
+   Поэтому: любая работа с выделением документа должна обходить стороной
+   редактируемые поля. Это единая точка проверки — новые обработчики
+   обязаны пользоваться ею, а не повторять условие.
+   ------------------------------------------------------------------------ */
+const EDITABLE_SELECTOR = "input, textarea, select, [contenteditable]:not([contenteditable='false'])";
+
+function isEditableTarget(target) {
+  const el = target?.nodeType === 1 ? target : target?.parentElement;
+  if (!el?.closest) return false;
+  return !!el.closest(EDITABLE_SELECTOR);
+}
+
+/* true, если каретка/выделение сейчас живёт внутри поля ввода. */
+function selectionTouchesEditable() {
+  if (isEditableTarget(document.activeElement)) return true;
+  let sel = null;
+  try { sel = window.getSelection(); } catch { return false; }
+  if (!sel || sel.rangeCount === 0) return false;
+  return isEditableTarget(sel.anchorNode) || isEditableTarget(sel.focusNode);
+}
+
+/* Единственный разрешённый способ снять выделение документа. */
+function clearDocumentSelection() {
+  if (selectionTouchesEditable()) return;
+  try { window.getSelection()?.removeAllRanges(); } catch {}
 }
 
 function selectionIsInsideLookupZone(sel) {
@@ -346,7 +385,8 @@ function clearLookupSelection(options = {}) {
   lookupSelection = null;
   invalidateWordGeometry();
   selectionHighlightLayer?.replaceChildren();
-  try { window.getSelection()?.removeAllRanges(); } catch {}
+  // Никогда не трогаем каретку активного поля ввода: см. Editable-field guard.
+  clearDocumentSelection();
   if (!options.keepPopover) hideSelectionPopover();
 }
 
@@ -444,7 +484,7 @@ function finishSelectionGesture() {
 
 function handleTextSelection() {
   if (selectionPopoverInteracting) return;
-  try { window.getSelection()?.removeAllRanges(); } catch {}
+  clearDocumentSelection();
 }
 
 function showSelectionPopover(word, rect) {
