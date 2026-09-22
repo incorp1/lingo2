@@ -39,6 +39,20 @@
     return lang?.translatorCode || normalized;
   }
   const DEFAULT_TIMEOUT_MS = 30000;
+  // Вспомогательные бесплатные источники (словарь и переводчик) не должны
+  // задерживать генерацию карточки: они запускаются параллельно с LLM через
+  // Promise.allSettled, поэтому зависший на 30 секунд переводчик раньше
+  // растягивал всю генерацию до таймаута даже при мгновенном ответе модели.
+  const AUX_TIMEOUT_MS = 9000;
+
+  // Урезает окно ожидания для второстепенного запроса, не выходя за общий
+  // дедлайн операции.
+  function auxTimeout(options = {}, ms = AUX_TIMEOUT_MS) {
+    const cap = Date.now() + ms;
+    const deadlineAt = Number.isFinite(options.deadlineAt) ? Math.min(options.deadlineAt, cap) : cap;
+    const timeoutMs = Math.min(Math.max(1, Number(options.timeoutMs) || DEFAULT_TIMEOUT_MS), ms);
+    return { ...options, timeoutMs, deadlineAt };
+  }
 
   function abortError(reason = "cancelled") {
     return new DOMException(reason, "AbortError");
@@ -261,6 +275,55 @@ Return ONLY JSON in this exact shape:
   }
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  // Ответ модели иногда приходит обрезанным или с "хвостом" после JSON
+  // (особенно у маленьких моделей на норвежских словах). Строгий JSON.parse в
+  // таком случае бросал ошибку, и карточка не заполнялась вообще. Поэтому при
+  // неудачном разборе поля вытаскиваются по отдельности из сырого текста.
+  function parseModelJson(text) {
+    const raw = String(text || "");
+    const json = extractJSON(raw);
+    try {
+      const parsed = JSON.parse(json);
+      if (parsed && typeof parsed === "object") return parsed;
+    } catch { /* fall through to lenient extraction */ }
+
+    const out = {};
+    const readString = (keyPattern) => {
+      const m = json.match(new RegExp(`"${keyPattern}"\\s*:\\s*"((?:\\\\.|[^"\\\\])*)"`));
+      if (!m) return "";
+      try {
+        return JSON.parse(`"${m[1]}"`);
+      } catch {
+        return m[1];
+      }
+    };
+    for (const key of ["translation", "ipa", "example", "exampleTranslation", "example_translation", "exampleTargetTerm", "example_target_term", "info", "text"]) {
+      const value = readString(key);
+      if (value) out[key] = value;
+    }
+    const synonyms = json.match(/"synonyms"\s*:\s*\[([^\]]*)\]/);
+    if (synonyms) {
+      out.synonyms = synonyms[1]
+        .split(",")
+        .map(part => part.trim().replace(/^"|"$/g, "").trim())
+        .filter(Boolean);
+    }
+    const itemsBlock = json.match(/"items"\s*:\s*\[([\s\S]*)/);
+    if (itemsBlock) {
+      const items = [];
+      const objectRe = /\{(?:[^{}]|\\.)*\}/g;
+      let match;
+      while ((match = objectRe.exec(itemsBlock[1]))) {
+        try {
+          items.push(JSON.parse(match[0]));
+        } catch { /* skip malformed item */ }
+      }
+      if (items.length) out.items = items;
+    }
+    if (!Object.keys(out).length) throw new Error("Malformed AI JSON response");
+    return out;
+  }
 
   function parseRetryAfter(value) {
     const raw = String(value || "").trim();
@@ -540,7 +603,7 @@ Return ONLY JSON in this exact shape:
     if (!r.ok) throw await responseError(r);
     const data = await r.json();
     const text = data.choices?.[0]?.message?.content || "";
-    return JSON.parse(extractJSON(text));
+    return parseModelJson(text);
   }
 
   async function callGoogle(model, key, systemPrompt, userPrompt, temperature, options = {}) {
@@ -558,7 +621,7 @@ Return ONLY JSON in this exact shape:
     if (!r.ok) throw await responseError(r);
     const data = await r.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    return JSON.parse(extractJSON(text));
+    return parseModelJson(text);
   }
 
   async function generate(word, opts = {}) {
@@ -578,10 +641,10 @@ Return ONLY JSON in this exact shape:
     };
 
     const results = await Promise.allSettled([
-      callDictionary(word, requestOptions),
+      callDictionary(word, auxTimeout(requestOptions)),
       mode === "ai" ? callLLM(provider, model || PROVIDER_DEFAULTS[provider]?.model,
                               key, word, targetLang, learnedName, requestOptions) : Promise.resolve(null),
-      quickTranslate(word, targetLangCode || "uk", requestOptions),
+      quickTranslate(word, targetLangCode || "uk", auxTimeout(requestOptions)),
     ]);
     throwIfAborted(opts.signal);
 
@@ -606,12 +669,22 @@ Return ONLY JSON in this exact shape:
     let exampleTranslation = (ai?.exampleTranslation || "").trim();
     if (example && !exampleTranslation) {
       try {
-        exampleTranslation = (await quickTranslate(example, targetLangCode || "uk", requestOptions)).trim();
+        exampleTranslation = (await quickTranslate(example, targetLangCode || "uk", auxTimeout(requestOptions))).trim();
+      } catch { /* leave empty on failure */ }
+    }
+
+    // Перевод самого слова: если модель его не вернула (частый случай для
+    // норвежского, когда JSON приходит неполным), берём результат бесплатного
+    // переводчика, а не оставляем поле пустым.
+    let back = (ai?.back || "").trim() || translation;
+    if (!back) {
+      try {
+        back = (await quickTranslate(word, targetLangCode || "uk", auxTimeout(requestOptions))).trim();
       } catch { /* leave empty on failure */ }
     }
 
     const output = {
-      back: ai?.back || translation || "",
+      back,
       ipa,
       example,
       exampleTranslation,
