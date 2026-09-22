@@ -3,6 +3,10 @@ const EDGE_OPEN_DISTANCE = 40;
 const EDGE_HORIZONTAL_BIAS = 1.15;
 const EDGE_MENU_GAP = 8;
 const EDGE_TAB_DRAG_THRESHOLD = 8;
+// Палец на телефоне всегда немного «плывёт» при тапе, поэтому у самого язычка
+// порог перетаскивания заметно выше: иначе обычный тап превращался в drag,
+// язычок прыгал к пальцу, а клик подавлялся и меню не открывалось.
+const EDGE_TAB_DRAG_START = 18;
 const EDGE_ANCHOR_STORAGE_KEY = "lingo-cards-edge-anchor";
 let edgeGesture = null;
 let edgeTabGesture = null;
@@ -286,6 +290,11 @@ function bindStudyEdgeMenu() {
 
   tab.addEventListener("pointerdown", event => {
     if (!isEdgeMenuAvailable() || event.pointerType === "mouse") return;
+    // Касание язычка не должно одновременно запускать общий свайп-жест по
+    // документу: раньше оба обработчика боролись за один и тот же pointer,
+    // свайп «закрытия» подавлял клик и тап срабатывал через раз.
+    event.stopPropagation();
+    edgeGesture = null;
     edgeTabGesture = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -299,7 +308,7 @@ function bindStudyEdgeMenu() {
     if (!edgeTabGesture || event.pointerId !== edgeTabGesture.pointerId) return;
     const dx = event.clientX - edgeTabGesture.startX;
     const dy = event.clientY - edgeTabGesture.startY;
-    if (!edgeTabGesture.dragging && Math.hypot(dx, dy) >= EDGE_TAB_DRAG_THRESHOLD) {
+    if (!edgeTabGesture.dragging && Math.hypot(dx, dy) >= EDGE_TAB_DRAG_START) {
       if (Math.abs(dx) > Math.abs(dy) * EDGE_HORIZONTAL_BIAS) return;
       edgeTabGesture.dragging = true;
       tab.classList.add("is-dragging");
@@ -332,6 +341,11 @@ function bindStudyEdgeMenu() {
   document.addEventListener("pointerdown", event => {
     if (document.body.getAttribute("data-view") !== "study") return;
     if (!isEdgeMenuAvailable() || event.pointerType === "mouse" || edgeTabGesture) return;
+    // Язычок обрабатывает свой жест сам. Этот слушатель висит в capture-фазе и
+    // раньше стартовал свайп прямо поверх тапа по язычку: небольшое смещение
+    // пальца засчитывалось как свайп, клик подавлялся guardSyntheticEdgeClick,
+    // и меню открывалось через раз.
+    if (event.target instanceof Node && tab.contains(event.target)) return;
     const menuExpanded = edgeMenuOpen || edgeMenuAnimatingOpen;
     if (!menuExpanded && event.clientX < window.innerWidth * EDGE_OPEN_START_RATIO) return;
     edgeGesture = {
