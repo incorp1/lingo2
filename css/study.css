@@ -241,19 +241,19 @@
   left: -60px;
   width: calc(100% + 120px);
   height: calc(100% + 120px);
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.34' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 120px 120px;
   mix-blend-mode: screen;
   will-change: transform;
 }
 .card-stage .pronunciation-spoiler .spoiler-cover::before {
-  opacity: .5;
-  animation: spoiler-static-a .26s steps(6, end) infinite;
+  opacity: .55;
+  animation: spoiler-static-a 1.15s steps(5, end) infinite;
 }
 .card-stage .pronunciation-spoiler .spoiler-cover::after {
-  opacity: .38;
-  animation: spoiler-static-b .19s steps(5, end) infinite;
+  opacity: .4;
+  animation: spoiler-static-b .95s steps(4, end) infinite;
 }
 @keyframes spoiler-static-a {
   0%   { transform: translate3d(0, 0, 0); }
