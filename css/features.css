@@ -434,9 +434,12 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 .topbar-study svg { width: 15px; height: 15px; }
 
 .practice-panel { width: min(680px, 94vw); }
-.practice-sub { font-size: 12.5px; color: var(--ink-subtle); margin-top: 3px; line-height: 1.45; }
-.practice-body { gap: 18px; }
-.practice-step { display: flex; flex-direction: column; gap: 16px; }
+.practice-sub { font-size: 12.5px; color: var(--ink-subtle); margin-top: 2px; line-height: 1.4; }
+/* Compact rhythm: one spacing scale for the whole practice modal. */
+.practice-body { gap: 12px; }
+.practice-step { display: flex; flex-direction: column; gap: 12px; }
+.practice-step > .form-row { margin: 0; gap: 6px; }
+.practice-step > .form-row > label { margin-bottom: 2px; }
 
 /* Period chooser */
 .practice-period { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -498,7 +501,7 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 22px 24px;
+  padding: 18px 20px;
   max-height: 44vh;
   overflow: auto;
 }
@@ -530,15 +533,15 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 .practice-tts { margin-top: 14px; }
 
 /* Questions */
-.practice-questions { display: flex; flex-direction: column; gap: 16px; }
+.practice-questions { display: flex; flex-direction: column; gap: 10px; }
 .practice-q-title {
   font-size: 13px; color: var(--ink-faint); font-weight: 700;
   text-transform: uppercase; letter-spacing: .04em;
 }
 .practice-q {
   display: grid;
-  gap: 8px;
-  padding: 14px;
+  gap: 6px;
+  padding: 11px 12px;
   border: 1px solid var(--border-strong);
   border-radius: 13px;
   background: var(--bg-elev);
@@ -627,16 +630,20 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 .practice-foot {
   flex: 0 0 auto;
   width: 100%;
-  margin-top: 2px;
-  padding: 16px 0 0;
+  margin-top: 0;
+  padding: 11px 0 0;
   flex-wrap: wrap;
   border-top: 1px solid var(--border);
 }
 
 @media (max-width: 560px) {
   .practice-story-body { font-size: 16px; }
-  .practice-story { padding: 18px; }
+  .practice-story { padding: 14px 15px; }
   .period-opt { flex: 1 1 auto; justify-content: space-between; }
+  .practice-body { gap: 10px; }
+  .practice-step { gap: 10px; }
+  .practice-q { padding: 10px 11px; }
+  .practice-foot { padding-top: 10px; }
 }
 
 /* ========================================================================
@@ -672,8 +679,8 @@ body:not([data-view="study"]) .study-only { display: none !important; }
    Practice — day slider, selectable word chips, history
    ======================================================================== */
 .practice-days-row {
-  margin-top: 10px;
-  padding: 10px 13px;
+  margin-top: 6px;
+  padding: 8px 11px;
   background: var(--bg-elev);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
@@ -698,8 +705,8 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 }
 
 .practice-wordpreview-wrap {
-  display: flex; flex-direction: column; gap: 8px;
-  padding-top: 6px;
+  display: flex; flex-direction: column; gap: 6px;
+  padding-top: 0;
 }
 .practice-wordpreview-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .practice-wordpreview-title {
@@ -719,7 +726,7 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 .practice-chip.selectable.on { font-weight: 600; }
 .practice-chip.selectable:hover { border-color: var(--difficulty-fg); opacity: 1; }
 
-.practice-history-block { display: flex; flex-direction: column; gap: 8px; }
+.practice-history-block { display: flex; flex-direction: column; gap: 6px; }
 .practice-history-toggle { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; }
 .practice-history-count {
   font-family: var(--font-mono); font-size: 12px;
