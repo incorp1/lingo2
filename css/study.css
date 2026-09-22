@@ -26,11 +26,16 @@
 .study-filter-topline .study-filter-heading { min-width: 0; }
 .study-language-picker { position: relative; flex: none; display: flex; align-items: center; }
 .study-language-picker select {
+  /* Полный сброс нативной стрелки: иначе рядом с .study-language-chevron
+     появляется вторая системная стрелка и они накладываются. */
   appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
   max-width: 190px;
-  min-height: 32px;
-  padding: 5px 26px 5px 11px;
+  min-height: 34px;
+  padding: 6px 30px 6px 16px;
+  text-indent: 0;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
   background: var(--bg-elev);
@@ -56,6 +61,8 @@
   color: var(--ink);
   font-weight: 500;
 }
+/* IE/Edge legacy тоже рисует собственную стрелку — скрываем её. */
+.study-language-picker select::-ms-expand { display: none; }
 .study-language-chevron {
   position: absolute;
   right: 10px;
