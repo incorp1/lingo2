@@ -17,9 +17,19 @@ function aiTargetLangName() {
    endpoint and the translator source code. Defined in js/state.js. */
 
 function learningLangName() {
-  return window.LCLanguages?.getLanguage
-    ? window.LCLanguages.getLanguage(activeLearningLanguageCode()).aiName
-    : "English";
+  return learningLangNameOf(activeLearningLanguageCode());
+}
+
+/* Name of a specific learning language code. Feedback for an already generated
+   session must follow the language that session was created in, so it must be
+   resolvable from a stored code and not only from the current switcher. */
+function learningLangNameOf(code) {
+  const languages = window.LCLanguages;
+  if (!languages?.getLanguage) return "English";
+  const normalized = languages.isLanguageCode?.(code)
+    ? languages.normalizeLanguageCode(code)
+    : (languages.DEFAULT_LANGUAGE || "en");
+  return languages.getLanguage(normalized)?.aiName || "English";
 }
 
 function applyAdvancedReviewState() {
@@ -957,7 +967,11 @@ async function practiceCheck() {
   btn.classList.add("loading"); btn.textContent = t("practice.checking");
   fb.hidden = false; fb.innerHTML = `<div class="ai-status">${escape(t("practice.checking"))}</div>`;
 
-  const sys = `You evaluate reading-comprehension answers for language learners: both the content of each answer and the grammatical correctness of the learner's wording. Output ONLY valid JSON.`;
+  /* Feedback must be written in the language the session was generated in,
+     not in the current switcher value and not in the interface language. */
+  const feedbackLangName = learningLangNameOf(checkSnapshot.learningLanguage);
+  const sys = `You evaluate reading-comprehension answers for language learners: both the content of each answer and the grammatical correctness of the learner's wording. Output ONLY valid JSON.
+Every human-readable string you produce ("feedback", "model", "grammar.note", "summary") MUST be written in ${feedbackLangName}. Never answer in English unless ${feedbackLangName} is English.`;
   const prompt = `Story:
 ${p.text}
 
