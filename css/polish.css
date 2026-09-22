@@ -1286,3 +1286,31 @@ select {
     padding: 0;
   }
 }
+/* v3.20.6 — фикс селектора языка обучения (iOS Safari / iPhone 7).
+   Мобильное правило `select { ... !important }` выше сбрасывало границы,
+   фон и padding, из-за чего появлялась вторая (системная/фоновая) стрелка
+   и текст упирался в левый край. Перекрываем его явно. */
+.study-language-picker select,
+.view-study .study-language-picker select {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: none !important;
+  background-color: var(--bg-elev) !important;
+  width: auto !important;
+  max-width: 190px !important;
+  min-height: 34px !important;
+  padding: 6px 30px 6px 16px !important;
+  text-indent: 0 !important;
+  border: 1px solid var(--border-strong) !important;
+  border-bottom: 1px solid var(--border-strong) !important;
+  border-radius: 999px !important;
+  line-height: 1.2 !important;
+}
+.study-language-picker select::-ms-expand { display: none !important; }
+.study-language-chevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
