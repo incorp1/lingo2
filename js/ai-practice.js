@@ -967,11 +967,18 @@ async function practiceCheck() {
   btn.classList.add("loading"); btn.textContent = t("practice.checking");
   fb.hidden = false; fb.innerHTML = `<div class="ai-status">${escape(t("practice.checking"))}</div>`;
 
-  /* Feedback must be written in the language the session was generated in,
-     not in the current switcher value and not in the interface language. */
-  const feedbackLangName = learningLangNameOf(checkSnapshot.learningLanguage);
+  /* Feedback is bilingual: first the language the session was generated in
+     (not the current switcher value), then the interface language, so the
+     learner can always fall back to a language they fully understand.
+     When both resolve to the same language the text is written only once. */
+  const studyLangName = learningLangNameOf(checkSnapshot.learningLanguage);
+  const uiLangName = aiTargetLangName();
+  const bilingual = studyLangName !== uiLangName;
+  const langRule = bilingual
+    ? `Every human-readable string you produce ("feedback", "model", "grammar.note", "summary") MUST be bilingual: first the ${studyLangName} version, then " / ", then the ${uiLangName} version of the SAME text. Example shape: "<${studyLangName} text> / <${uiLangName} text>". Never output only one language, and never add any other language.`
+    : `Every human-readable string you produce ("feedback", "model", "grammar.note", "summary") MUST be written in ${studyLangName}, with no translation appended.`;
   const sys = `You evaluate reading-comprehension answers for language learners: both the content of each answer and the grammatical correctness of the learner's wording. Output ONLY valid JSON.
-Every human-readable string you produce ("feedback", "model", "grammar.note", "summary") MUST be written in ${feedbackLangName}. Never answer in English unless ${feedbackLangName} is English.`;
+${langRule}`;
   const prompt = `Story:
 ${p.text}
 
