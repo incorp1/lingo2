@@ -171,9 +171,15 @@
   max-width: min(720px, 100%);
   overflow-wrap: anywhere;
 }
+/* Контекстная сторона — это несколько строк предложения, а не одно слово,
+   поэтому межстрочный интервал задаётся отдельным токеном. Класс
+   `.context-front` специфичнее мобильных правил `.card-stage .card-front`,
+   поэтому его значение нужно менять только через `--context-front-line-height`,
+   иначе адаптивные переопределения перестанут работать. */
 .card-stage .card-front.context-front {
+  --context-front-line-height: 1.18;
   font-size: clamp(24px, 4vw, 34px);
-  line-height: 1.38;
+  line-height: var(--context-front-line-height);
   letter-spacing: -0.015em;
 }
 .card-stage .context-target {
