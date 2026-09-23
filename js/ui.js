@@ -641,7 +641,7 @@ const SWIPE_BACK_PARALLAX = 0.3;
 const SWIPE_BACK_DIM = 0.32;
 // Leading-edge fade width grows with the dragged distance.
 const SWIPE_BACK_FADE_MIN_PX = 8;
-const SWIPE_BACK_FADE_MAX_RATIO = 0.45;
+const SWIPE_BACK_FADE_MAX_RATIO = 0.5;
 const SWIPE_BACK_NO_START = 'input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [data-no-swipe-back]';
 
 function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll = () => 0, isWindowScroll = false, onCommit }) {
@@ -656,7 +656,9 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
   const apply = (g, x) => {
     const progress = Math.min(1, Math.max(0, x / g.width));
     g.panel.style.transform = `translate3d(${x}px,0,0)`;
-    const fade = Math.round(SWIPE_BACK_FADE_MIN_PX + progress * g.width * SWIPE_BACK_FADE_MAX_RATIO);
+    // Ease-out cubic: the fade widens quickly at the start of the drag.
+    const fadeT = 1 - Math.pow(1 - Math.min(1, progress * 1.6), 3);
+    const fade = Math.round(SWIPE_BACK_FADE_MIN_PX + fadeT * g.width * SWIPE_BACK_FADE_MAX_RATIO);
     // Set inline (not via var()) — Safari 15 does not reliably repaint masks
     // driven by custom properties.
     const mask = `linear-gradient(to right, rgba(0,0,0,0) 0, rgba(0,0,0,0.35) ${Math.round(fade * 0.3)}px, rgba(0,0,0,0.8) ${Math.round(fade * 0.6)}px, #000 ${fade}px)`;
