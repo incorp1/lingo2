@@ -16,6 +16,9 @@ test("непрозрачные color-mix() в CSS имеют фолбэк для
       if (m[2] === "transparent" || m[3] === "transparent") continue;
       // Фолбэк может быть вынесен в блок @supports not (… color-mix …) того же файла.
       if (/@supports not \([^)]*color-mix/.test(css) && m[0].includes("88%, var(--bg) 12%")) continue;
+      // Внутри @supports (color: color-mix(...)) фолбэк не нужен — Safari 15 блок пропускает.
+      const lastSupports = css.lastIndexOf("@supports (color: color-mix", m.index);
+      if (lastSupports !== -1 && css.slice(lastSupports, m.index).split("{").length - css.slice(lastSupports, m.index).split("}").length > 0) continue;
       const before = css.slice(Math.max(0, m.index - 200), m.index);
       assert.match(before, new RegExp(m[1] + String.raw`:\s*[^;{}]*;\s*$`), `${file}: нет фолбэка для «${m[0]}»`);
     }

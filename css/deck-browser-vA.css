@@ -309,8 +309,8 @@
   #deckBrowse .browse-state .state-pill {
     padding: 2px 6px;
     border-radius: 999px;
-    /* Базовые цвета без color-mix: Safari 15 (iPhone 7). Каскадный фолбэк
-       «prop: a; prop: color-mix(var())» там НЕ работает — объявление с var()
+    /* Базовые цвета без смешивания: Safari 15 (iPhone 7). Каскадный фолбэк
+       «prop: a; prop: mix(var())» там НЕ работает — объявление с var()
        принимается при разборе и становится невалидным уже при вычислении. */
     background: rgba(127, 127, 127, .12);
     color: var(--difficulty-fg);
