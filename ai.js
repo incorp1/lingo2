@@ -246,7 +246,7 @@ INPUT:
 ${JSON.stringify(items)}
 
 Return ONLY JSON in this exact shape:
-{"items":[{"id":"input id","example":"one English sentence","exampleTranslation":"translated sentence","exampleTargetTerm":"exact translated word or phrase copied from exampleTranslation"}]}`;
+{"items":[{"id":"input id","example":"one ${learned} sentence","exampleTranslation":"translated sentence","exampleTargetTerm":"exact translated word or phrase copied from exampleTranslation"}]}`;
   }
 
   function setLastRateInfo(provider, model, headers) {
