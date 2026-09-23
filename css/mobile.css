@@ -259,8 +259,8 @@
   }
   .card-stage .card-stage-side-tools .info-link svg,
   .card-stage .card-stage-side-tools .speaker-btn svg {
-    width: 15px;
-    height: 15px;
+    width: 19px;
+    height: 19px;
   }
   .card-stage .card-front {
     font-size: clamp(24px, 7vw, 30px);

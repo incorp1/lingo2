@@ -31,5 +31,19 @@ test("анимация не сдвигает иконки и не использ
 });
 
 test("уважается «Уменьшение движения»", () => {
-  assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.card-stage \.card-stage-side-tools \.speaker-btn \.tool-wave,[\s\S]{0,120}?animation: none/);
+  assert.match(css, /prefers-reduced-motion: reduce\) \{[^}]*\.card-stage \.card-stage-side-tools \.speaker-btn \.tool-wave,[^}]*animation: none/);
+});
+
+test("иконки произношения и информации увеличены до 19px", () => {
+  const mobile = fs.readFileSync(path.join(root, "css/mobile.css"), "utf8");
+  for (const src of [css, mobile]) {
+    assert.match(src, /\.card-stage-side-tools \.speaker-btn svg \{\s*width: 19px;\s*height: 19px;/);
+  }
+});
+
+test("плюс «Добавить карточку» анимирован постоянно, пауза при открытом меню, отключение при reduce", () => {
+  assert.match(css, /@-webkit-keyframes add-plus-nudge/);
+  assert.match(css, /\.add-card-trigger\.bare-icon-btn:not\(:disabled\) svg \{[^}]*-webkit-animation: add-plus-nudge[^}]*infinite/);
+  assert.match(css, /\.add-card-trigger\.bare-icon-btn\[aria-expanded="true"\] svg \{[^}]*animation-play-state: paused/);
+  assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.add-card-trigger\.bare-icon-btn svg,/);
 });

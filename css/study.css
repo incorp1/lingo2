@@ -434,8 +434,8 @@
 
 .card-stage .card-stage-side-tools .info-link svg,
 .card-stage .card-stage-side-tools .speaker-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 19px;
+  height: 19px;
 }
 
 /* Pencil icon: same icon-button metrics as the undo chevron next to it. */
@@ -495,7 +495,33 @@
   -webkit-animation: card-tool-nudge 2.4s cubic-bezier(.36, .07, .19, .97) infinite;
   animation: card-tool-nudge 2.4s cubic-bezier(.36, .07, .19, .97) infinite;
 }
+/* Плюс «Добавить карточку»: та же манера — короткий жест и пауза.
+   Поворот на четверть оборота с лёгким «вдохом» вокруг центра; кнопка и её
+   область нажатия не двигаются. Пока меню открыто, анимация на паузе. */
+@-webkit-keyframes add-plus-nudge {
+  0%, 60%, 100% { -webkit-transform: rotate(0deg) scale(1); transform: rotate(0deg) scale(1); }
+  20% { -webkit-transform: rotate(90deg) scale(1.15); transform: rotate(90deg) scale(1.15); }
+  35% { -webkit-transform: rotate(90deg) scale(1); transform: rotate(90deg) scale(1); }
+  59.9% { -webkit-transform: rotate(90deg) scale(1); transform: rotate(90deg) scale(1); }
+}
+@keyframes add-plus-nudge {
+  0%, 60%, 100% { -webkit-transform: rotate(0deg) scale(1); transform: rotate(0deg) scale(1); }
+  20% { -webkit-transform: rotate(90deg) scale(1.15); transform: rotate(90deg) scale(1.15); }
+  35% { -webkit-transform: rotate(90deg) scale(1); transform: rotate(90deg) scale(1); }
+  59.9% { -webkit-transform: rotate(90deg) scale(1); transform: rotate(90deg) scale(1); }
+}
+.add-card-trigger.bare-icon-btn:not(:disabled) svg {
+  -webkit-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+  -webkit-animation: add-plus-nudge 2.8s cubic-bezier(.34, 1.56, .64, 1) infinite;
+  animation: add-plus-nudge 2.8s cubic-bezier(.34, 1.56, .64, 1) infinite;
+}
+.add-card-trigger.bare-icon-btn[aria-expanded="true"] svg {
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
+}
 @media (prefers-reduced-motion: reduce) {
+  .add-card-trigger.bare-icon-btn svg,
   .card-stage .card-stage-side-tools .speaker-btn .tool-wave,
   .card-stage .card-stage-side-tools .info-link svg.tool-info-icon {
     -webkit-animation: none;
