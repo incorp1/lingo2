@@ -648,13 +648,24 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
   let gesture = null;
   const currentScroll = () => (isWindowScroll ? window.scrollY : container.scrollTop);
 
-  const paint = (g, x) => {
+  // Writes happen at most once per display frame: iOS delivers touchmove
+  // faster than it paints, and writing styles per event causes judder.
+  const apply = (g, x) => {
     const progress = Math.min(1, Math.max(0, x / g.width));
-    g.x = x;
     g.panel.style.transform = `translate3d(${x}px,0,0)`;
     g.under.style.transform = `translate3d(${-g.width * SWIPE_BACK_PARALLAX * (1 - progress)}px,0,0)`;
-    container.style.setProperty("--swipe-back-dim", String(SWIPE_BACK_DIM * (1 - progress)));
-    container.style.setProperty("--swipe-back-progress", String(progress));
+    container.style.setProperty("--swipe-back-dim", (SWIPE_BACK_DIM * (1 - progress)).toFixed(3));
+    container.style.setProperty("--swipe-back-progress", progress.toFixed(3));
+  };
+  const paint = (g, x) => {
+    g.x = x;
+    if (g.frame) return;
+    g.frame = requestAnimationFrame(() => { g.frame = 0; apply(g, g.x); });
+  };
+  const paintNow = (g, x) => {
+    if (g.frame) { cancelAnimationFrame(g.frame); g.frame = 0; }
+    g.x = x;
+    apply(g, x);
   };
 
   const begin = g => {
@@ -679,9 +690,11 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
     // The detail panel must cover everything down to the viewport bottom,
     // otherwise short sections leave the parent visible below them.
     g.panel.style.minHeight = `${Math.max(pRect.height, window.innerHeight - pRect.top)}px`;
+    paintNow(g, 0);
   };
 
   const cleanup = (g, restoreUnderHidden) => {
+    if (g.frame) { cancelAnimationFrame(g.frame); g.frame = 0; }
     container.classList.remove("swipe-back-active", "swipe-back-settling");
     container.style.removeProperty("--swipe-back-dim");
     container.style.removeProperty("--swipe-back-ms");
@@ -705,10 +718,12 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
     container.classList.add("swipe-back-settling");
     let finished = false;
     const finish = () => { if (!finished) { finished = true; done(); } };
-    if (ms === 0 || distance < 1) { paint(g, toX); finish(); return; }
+    if (ms === 0 || distance < 1) { paintNow(g, toX); finish(); return; }
     g.panel.addEventListener("transitionend", event => { if (event.target === g.panel) finish(); }, { once: true });
     window.setTimeout(finish, ms + 80);
-    requestAnimationFrame(() => paint(g, toX));
+    // Flush the last finger position, then start the transition next frame.
+    paintNow(g, g.x);
+    requestAnimationFrame(() => paintNow(g, toX));
   };
 
   const cancel = (g, velocity = 0) => settle(g, 0, velocity, () => cleanup(g, true));

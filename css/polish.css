@@ -1407,7 +1407,11 @@ select {
 }
 
 /* Interactive swipe-back — universal for any container/detail/parent trio
-   (classes are toggled by bindSwipeBack in js/ui.js). */
+   (classes are toggled by bindSwipeBack in js/ui.js). Modelled on the iOS
+   navigation pop: the detail card follows the finger with a soft gradient
+   edge shadow (visible on dark themes too), the parent slides in from -30%
+   under a fading dim. Only transform/opacity change per frame, so everything
+   stays on the compositor even on iPhone 7 / Safari 15. */
 .swipe-back-active {
   position: relative;
   overflow-x: hidden;
@@ -1416,9 +1420,20 @@ select {
   position: relative;
   z-index: 2;
   background: var(--bg);
-  box-shadow: -10px 0 28px rgba(0, 0, 0, 0.18);
-  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   will-change: transform;
+}
+.swipe-back-active > .swipe-back-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -18px;
+  width: 18px;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.12) 35%, rgba(0, 0, 0, 0));
+  opacity: calc(1 - var(--swipe-back-progress, 0) * 0.6);
 }
 .swipe-back-active > .swipe-back-under {
   display: block;
@@ -1426,6 +1441,8 @@ select {
   z-index: 1;
   margin: 0;
   pointer-events: none;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   will-change: transform;
 }
 .swipe-back-active > .swipe-back-under::after {
@@ -1438,19 +1455,31 @@ select {
   background: #000;
   opacity: var(--swipe-back-dim, 0);
   pointer-events: none;
+  will-change: opacity;
 }
-.swipe-back-settling > .swipe-back-panel,
-.swipe-back-settling > .swipe-back-under {
-  transition: transform var(--swipe-back-ms, 240ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+/* Expensive effects and stray transitions inside the moving layers are the
+   main source of dropped frames on older iPhones — freeze them mid-gesture. */
+.swipe-back-active > .swipe-back-panel *,
+.swipe-back-active > .swipe-back-under * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+.swipe-back-active > .swipe-back-panel {
+  animation: none !important;
 }
 /* Chrome that belongs to the detail screen (e.g. the top "Back" button)
    fades out with the gesture instead of sitting over the parent. */
 .swipe-back-active [data-swipe-back-fade] {
   opacity: calc(1 - var(--swipe-back-progress, 0));
 }
-.swipe-back-settling [data-swipe-back-fade] {
-  transition: opacity var(--swipe-back-ms, 240ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+.swipe-back-settling > .swipe-back-panel,
+.swipe-back-settling > .swipe-back-under {
+  transition: transform var(--swipe-back-ms, 240ms) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.swipe-back-settling > .swipe-back-under::after {
+.swipe-back-settling > .swipe-back-under::after,
+.swipe-back-settling > .swipe-back-panel::before,
+.swipe-back-settling [data-swipe-back-fade] {
   transition: opacity var(--swipe-back-ms, 240ms) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
