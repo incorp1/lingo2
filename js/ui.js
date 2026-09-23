@@ -419,12 +419,8 @@ const APP_VIEWS = new Set(["study", "decks", "stats", "settings"]);
 const SETTINGS_ROUTES = new Set(["home", "learning", "generation", "card-sound", "appearance", "data"]);
 const SETTINGS_OVERLAYS = new Set(["algorithm", "picker", "voice", "confirm"]);
 const SETTINGS_SCROLL_PREFIX = "lingo-cards:settings-scroll:";
-const SETTINGS_EDGE_SWIPE_START_PX = 28;
-const SETTINGS_EDGE_SWIPE_DISTANCE_PX = 72;
-const SETTINGS_EDGE_SWIPE_HORIZONTAL_BIAS = 1.35;
 let currentAppState = { view: "study", settingsRoute: "home", overlay: null };
 let applyingPopState = false;
-let settingsEdgeSwipe = null;
 const settingsOverlayDialogs = new Map();
 
 function layoutMode() {
@@ -646,67 +642,142 @@ function settingsEdgeSwipeBack() {
   return false;
 }
 
+/* Interactive swipe-back (iOS-style): the detail panel follows the finger,
+   the parent screen slides in from underneath with parallax and a fading dim.
+   Release decides by distance OR velocity, then the panel settles with a
+   velocity-matched duration. Touch events are used (not pointer events)
+   because only touchmove.preventDefault() reliably blocks Safari scrolling. */
+const SETTINGS_SWIPE_LOCK_PX = 10;
+const SETTINGS_SWIPE_PARALLAX = 0.3;
+const SETTINGS_SWIPE_DIM = 0.14;
+const SETTINGS_SWIPE_NO_START = 'input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [data-no-swipe-back]';
+
 function initializeSettingsEdgeSwipe() {
   const settingsView = $("#view-settings");
   if (!settingsView) return;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let settling = false;
 
-  settingsView.addEventListener("pointerdown", event => {
-    settingsEdgeSwipe = null;
-    if (event.pointerType === "mouse" ||
-        currentAppState.view !== "settings" ||
-        !settingsView.classList.contains("active") ||
-        layoutMode() !== "mobile" ||
-        event.clientX > SETTINGS_EDGE_SWIPE_START_PX) return;
-    settingsEdgeSwipe = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      tracking: true,
-      accepted: false,
-    };
+  const canStart = target =>
+    !settling &&
+    currentAppState.view === "settings" &&
+    settingsView.classList.contains("active") &&
+    layoutMode() === "mobile" &&
+    currentAppState.settingsRoute !== "home" &&
+    !currentAppState.overlay &&
+    !target?.closest?.(SETTINGS_SWIPE_NO_START);
+
+  const paint = (g, x) => {
+    const progress = Math.min(1, Math.max(0, x / g.width));
+    g.x = x;
+    g.panel.style.transform = `translate3d(${x}px,0,0)`;
+    g.under.style.transform = `translate3d(${-g.width * SETTINGS_SWIPE_PARALLAX * (1 - progress)}px,0,0)`;
+    settingsView.style.setProperty("--settings-swipe-dim", String(SETTINGS_SWIPE_DIM * (1 - progress)));
+  };
+
+  const begin = g => {
+    g.locked = true;
+    g.width = settingsView.clientWidth || window.innerWidth;
+    let underScroll = 0;
+    try {
+      underScroll = Number(sessionStorage.getItem(settingsScrollKey({ ...currentAppState, settingsRoute: "home" }))) || 0;
+    } catch {}
+    g.underScroll = underScroll;
+    const a = document.activeElement;
+    if (a && g.panel.contains(a) && a !== document.body) a.blur?.();
+    g.under.hidden = false;
+    g.under.inert = true;
+    g.under.style.top = `${g.panel.offsetTop - underScroll}px`;
+    g.under.style.left = `${g.panel.offsetLeft}px`;
+    g.under.style.width = `${g.panel.offsetWidth}px`;
+    settingsView.classList.add("settings-swipe-active");
+  };
+
+  const cleanup = g => {
+    settingsView.classList.remove("settings-swipe-active", "settings-swipe-settling");
+    settingsView.style.removeProperty("--settings-swipe-dim");
+    settingsView.style.removeProperty("--settings-swipe-ms");
+    for (const el of [g.panel, g.under]) {
+      el.style.transform = el.style.top = el.style.left = el.style.width = "";
+    }
+    settling = false;
+  };
+
+  const settle = (g, toX, velocity, done) => {
+    const distance = Math.abs(toX - g.x);
+    const speed = Math.max(Math.abs(velocity), 0.9); // px/ms
+    const ms = reducedMotion.matches ? 0 : Math.round(Math.min(320, Math.max(160, distance / speed)));
+    settling = true;
+    settingsView.style.setProperty("--settings-swipe-ms", `${ms}ms`);
+    settingsView.classList.add("settings-swipe-settling");
+    let finished = false;
+    const finish = () => { if (finished) return; finished = true; done(); };
+    if (ms === 0 || distance < 1) { paint(g, toX); finish(); return; }
+    g.panel.addEventListener("transitionend", event => { if (event.target === g.panel) finish(); }, { once: true });
+    window.setTimeout(finish, ms + 80);
+    requestAnimationFrame(() => paint(g, toX));
+  };
+
+  const cancel = (g, velocity = 0) => settle(g, 0, velocity, () => {
+    if (currentAppState.settingsRoute !== "home") {
+      g.under.hidden = true;
+      g.under.inert = true;
+    }
+    cleanup(g);
+  });
+
+  const commit = (g, velocity) => settle(g, g.width, velocity, () => {
+    if (!navigateToSettings("home", { focus: true })) { cancel(g); return; }
+    settingsView.scrollTop = g.underScroll;
+    cleanup(g);
+  });
+
+  let gesture = null;
+  settingsView.addEventListener("touchstart", event => {
+    gesture = null;
+    if (event.touches.length !== 1 || !canStart(event.target)) return;
+    const route = currentAppState.settingsRoute;
+    const panel = $(`#settings-${CSS.escape(route)}`);
+    const under = $("#settings-home");
+    if (!panel || !under) return;
+    const t = event.touches[0];
+    gesture = { startX: t.clientX, startY: t.clientY, x: 0, locked: false, panel, under, samples: [{ x: 0, t: event.timeStamp }] };
   }, { passive: true });
 
-  settingsView.addEventListener("pointermove", event => {
-    const swipe = settingsEdgeSwipe;
-    if (!swipe || swipe.pointerId !== event.pointerId || !swipe.tracking) return;
-    if (currentAppState.view !== "settings" ||
-        !settingsView.classList.contains("active") ||
-        layoutMode() !== "mobile") {
-      settingsEdgeSwipe = null;
-      return;
+  settingsView.addEventListener("touchmove", event => {
+    const g = gesture;
+    if (!g) return;
+    if (event.touches.length !== 1) { if (g.locked) cancel(g); gesture = null; return; }
+    const t = event.touches[0];
+    const dx = t.clientX - g.startX;
+    const dy = t.clientY - g.startY;
+    if (!g.locked) {
+      if (Math.abs(dx) < SETTINGS_SWIPE_LOCK_PX && Math.abs(dy) < SETTINGS_SWIPE_LOCK_PX) return;
+      if (dx <= 0 || Math.abs(dx) < Math.abs(dy) * 1.2 || window.getSelection?.()?.toString()) { gesture = null; return; }
+      begin(g);
     }
-    const dx = event.clientX - swipe.startX;
-    const dy = Math.abs(event.clientY - swipe.startY);
-    if (dx < 0 || dy > Math.max(18, dx / SETTINGS_EDGE_SWIPE_HORIZONTAL_BIAS)) {
-      swipe.tracking = false;
-      return;
-    }
-    if (dx >= SETTINGS_EDGE_SWIPE_DISTANCE_PX &&
-        dx > dy * SETTINGS_EDGE_SWIPE_HORIZONTAL_BIAS) {
-      swipe.accepted = true;
-      event.preventDefault();
-    }
+    event.preventDefault();
+    const x = Math.max(0, dx);
+    paint(g, x);
+    g.samples.push({ x, t: event.timeStamp });
+    if (g.samples.length > 6) g.samples.shift();
   }, { passive: false });
 
-  const finishSettingsEdgeSwipe = event => {
-    const swipe = settingsEdgeSwipe;
-    if (!swipe || swipe.pointerId !== event.pointerId) return;
-    settingsEdgeSwipe = null;
-    const dx = event.clientX - swipe.startX;
-    const dy = Math.abs(event.clientY - swipe.startY);
-    if (swipe.tracking && swipe.accepted &&
-        currentAppState.view === "settings" &&
-        settingsView.classList.contains("active") &&
-        dx >= SETTINGS_EDGE_SWIPE_DISTANCE_PX &&
-        dx > dy * SETTINGS_EDGE_SWIPE_HORIZONTAL_BIAS) {
-      event.preventDefault();
-      settingsEdgeSwipeBack();
-    }
+  const end = event => {
+    const g = gesture;
+    gesture = null;
+    if (!g?.locked) return;
+    const recent = g.samples.filter(s => event.timeStamp - s.t < 100);
+    const first = recent[0] || g.samples[0];
+    const last = g.samples[g.samples.length - 1];
+    const velocity = (last.x - first.x) / Math.max(1, last.t - first.t);
+    const shouldCommit = event.type !== "touchcancel" && velocity > -0.2 &&
+      (g.x > g.width * 0.45 || (velocity > 0.35 && g.x > 24));
+    if (shouldCommit) commit(g, velocity);
+    else cancel(g, velocity);
   };
-  settingsView.addEventListener("pointerup", finishSettingsEdgeSwipe, { passive: false });
-  settingsView.addEventListener("pointercancel", event => {
-    if (settingsEdgeSwipe?.pointerId === event.pointerId) settingsEdgeSwipe = null;
-  }, { passive: true });
+  settingsView.addEventListener("touchend", end, { passive: true });
+  settingsView.addEventListener("touchcancel", end, { passive: true });
 }
 
 function initializeAppNavigation() {

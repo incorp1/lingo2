@@ -175,20 +175,13 @@ test("study edge menu omits direction and learning settings while desktop action
 test("right swipe from the left edge navigates back only inside mobile settings", () => {
   const ui = read("js/ui.js");
 
-  assert.match(ui, /SETTINGS_EDGE_SWIPE_START_PX = 28/);
-  assert.match(ui, /SETTINGS_EDGE_SWIPE_DISTANCE_PX = 72/);
   assert.match(ui, /const settingsView = \$\("#view-settings"\)/);
-  assert.match(ui, /settingsView\.addEventListener\("pointerdown"/);
   assert.match(ui, /currentAppState\.view !== "settings"/);
   assert.match(ui, /!settingsView\.classList\.contains\("active"\)/);
   assert.match(ui, /layoutMode\(\) !== "mobile"/);
-  assert.match(ui, /event\.clientX > SETTINGS_EDGE_SWIPE_START_PX/);
   assert.match(ui, /function animateSettingsBack\(targetRoute\)/);
   assert.match(ui, /settings-back-transition/);
   assert.match(ui, /currentAppState\.settingsRoute !== "home"/);
-  assert.match(ui, /animateSettingsBack\("home"\)/);
-  assert.match(ui, /The root settings screen has no parent inside Settings/);
-  assert.match(ui, /\{ replace: true \}/);
   assert.match(ui, /initializeSettingsEdgeSwipe\(\)/);
 });
 
@@ -254,4 +247,19 @@ test("appearance groups language and theme with consistent mobile styling", () =
   assert.match(mobileCss, /font-family: var\(--font-sans\)/);
   assert.match(mobileCss, /\.settings-action-list > \.settings-action-row:first-of-type/);
   assert.match(mobileCss, /\.settings-action-list > \.settings-action-row:last-of-type/);
+});
+test("interactive swipe-back follows the finger and settles by distance or velocity", () => {
+  const ui = read("js/ui.js");
+  const css = read("css/settings-responsive.css");
+  assert.match(ui, /settingsView\.addEventListener\("touchmove"[\s\S]*?event\.preventDefault\(\)[\s\S]*?\{ passive: false \}/);
+  assert.match(ui, /translate3d\(\$\{x\}px,0,0\)/);
+  assert.match(ui, /SETTINGS_SWIPE_PARALLAX/);
+  assert.match(ui, /velocity > 0\.35/);
+  assert.match(ui, /g\.width \* 0\.45/);
+  assert.match(ui, /touchcancel/);
+  assert.match(ui, /prefers-reduced-motion/);
+  assert.match(ui, /currentAppState\.settingsRoute !== "home"/);
+  assert.match(css, /\.settings-swipe-active > \.settings-home-panel/);
+  assert.match(css, /--settings-swipe-dim/);
+  assert.doesNotMatch(css, /settings-swipe-active[^{]*#settings-/);
 });
