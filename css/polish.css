@@ -1408,8 +1408,8 @@ select {
 
 /* Interactive swipe-back — universal for any container/detail/parent trio
    (classes are toggled by bindSwipeBack in js/ui.js). Modelled on the iOS
-   navigation pop: the detail card follows the finger with a soft gradient
-   edge shadow (visible on dark themes too), the parent slides in from -30%
+   navigation pop: the detail card follows the finger with a gradient
+   transparency on its leading edge, the parent slides in from -30%
    under a fading dim. Only transform/opacity change per frame, so everything
    stays on the compositor even on iPhone 7 / Safari 15. */
 .swipe-back-active {
@@ -1424,16 +1424,12 @@ select {
   backface-visibility: hidden;
   will-change: transform;
 }
-.swipe-back-active > .swipe-back-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -18px;
-  width: 18px;
-  pointer-events: none;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.12) 35%, rgba(0, 0, 0, 0));
-  opacity: calc(1 - var(--swipe-back-progress, 0) * 0.6);
+/* Soft leading edge: the departing card dissolves into the parent through
+   a gradient alpha mask instead of a hard cut. The -webkit- prefix is
+   required on Safari 15 (iPhone 7). */
+.swipe-back-active > .swipe-back-panel {
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.35) 12px, rgba(0, 0, 0, 0.8) 26px, #000 44px);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.35) 12px, rgba(0, 0, 0, 0.8) 26px, #000 44px);
 }
 .swipe-back-active > .swipe-back-under {
   display: block;
@@ -1479,7 +1475,6 @@ select {
   transition: transform var(--swipe-back-ms, 240ms) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .swipe-back-settling > .swipe-back-under::after,
-.swipe-back-settling > .swipe-back-panel::before,
 .swipe-back-settling [data-swipe-back-fade] {
   transition: opacity var(--swipe-back-ms, 240ms) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
