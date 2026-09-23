@@ -457,6 +457,51 @@
   width: 15px;
   height: 15px;
 }
+
+/* Вариант B: постоянная смысловая анимация, пока кнопка активна.
+   - Волны динамика только меняют прозрачность: иконка не сдвигается и остаётся
+     на одной линии с «назад» и «редактированием».
+   - «i» покачивается вокруг своего центра (поворот всего svg, без сдвига).
+   - Анимируются только opacity/transform — это дёшево даже для iPhone 7;
+     префиксы -webkit- нужны для старых версий Safari.
+   - Неактивная (disabled) кнопка и системное «Уменьшение движения» — без анимации. */
+@-webkit-keyframes card-tool-wave { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes card-tool-wave { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@-webkit-keyframes card-tool-nudge {
+  0%, 55%, 100% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+  10% { -webkit-transform: rotate(-14deg); transform: rotate(-14deg); }
+  20% { -webkit-transform: rotate(10deg); transform: rotate(10deg); }
+  30% { -webkit-transform: rotate(-6deg); transform: rotate(-6deg); }
+  40% { -webkit-transform: rotate(3deg); transform: rotate(3deg); }
+}
+@keyframes card-tool-nudge {
+  0%, 55%, 100% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+  10% { -webkit-transform: rotate(-14deg); transform: rotate(-14deg); }
+  20% { -webkit-transform: rotate(10deg); transform: rotate(10deg); }
+  30% { -webkit-transform: rotate(-6deg); transform: rotate(-6deg); }
+  40% { -webkit-transform: rotate(3deg); transform: rotate(3deg); }
+}
+.card-stage .card-stage-side-tools .speaker-btn:not(:disabled) .tool-wave {
+  -webkit-animation: card-tool-wave 1.4s ease-in-out infinite;
+  animation: card-tool-wave 1.4s ease-in-out infinite;
+}
+.card-stage .card-stage-side-tools .speaker-btn:not(:disabled) .tool-wave-2 {
+  -webkit-animation-delay: .2s;
+  animation-delay: .2s;
+}
+.card-stage .card-stage-side-tools .info-link:not(:disabled) svg.tool-info-icon {
+  -webkit-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+  -webkit-animation: card-tool-nudge 2.4s cubic-bezier(.36, .07, .19, .97) infinite;
+  animation: card-tool-nudge 2.4s cubic-bezier(.36, .07, .19, .97) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-stage .card-stage-side-tools .speaker-btn .tool-wave,
+  .card-stage .card-stage-side-tools .info-link svg.tool-info-icon {
+    -webkit-animation: none;
+    animation: none;
+  }
+}
 .card-stage .edit-link:hover { color: var(--accent); }
 
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: 14px; color: var(--ink-subtle); }
