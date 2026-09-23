@@ -433,6 +433,11 @@
   z-index: 100;
 }
 .modal[hidden] { display: none; }
+/* Scroll lock under any open modal (JS: bindModalScrollLock in js/ui.js;
+   the touch guard there covers Safari 15, which ignores overscroll-behavior). */
+.modal, .modal-panel, .modal-body { overscroll-behavior: contain; }
+html.modal-scroll-locked,
+html.modal-scroll-locked body { overflow: hidden; }
 .confirm-modal { z-index: 300; }
 .duplicate-modal { z-index: 300; }
 .duplicate-panel { width: min(520px, 92vw); }

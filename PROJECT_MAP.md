@@ -54,6 +54,7 @@
 | Не приходит обновление / не работает офлайн | `js/stats.js` → `registerSW`, `applyServiceWorkerUpdate` | `sw.js`, `_headers`, раздел 6 этой карты |
 | Баннер/оверлей обновления приложения | `js/stats.js` → работа с `#updateNotice`, `#updateOverlay` | `index.html` → `updateNotice`, `updateOverlay`; `css/stats-settings.css` |
 | Версия ассетов не обновилась на iPhone | `tools/bump-version.mjs`, `VERSION` | `.githooks/pre-commit`, `.github/workflows/bump-version.yml`, раздел 6 |
+| Под открытой модалкой прокручивается/свайпается экран | `js/ui.js` → `bindModalScrollLock`, `syncModalScrollLock` (работает для всех `.modal` автоматически) | `css/stats-settings.css` → `html.modal-scroll-locked`; тест `modal-scroll-lock.test.js` |
 | Клавиатура перекрывает элементы iPhone | `js/app-shell.js` → `updateAppViewportHeight`, `updateSettingsViewport` | `css/mobile.css`, профильный CSS; события `focusin` / `focusout` |
 
 
@@ -312,6 +313,7 @@ SW обслуживает навигацию из кэша с фоновым о�
 | Применение обновления PWA и версия ассетов | `pwa-update-apply.test.js` |
 | Направление перевода выделения, юникод-буквы | `selection-translate-direction.test.js`, `selection-unicode-letters.test.js` |
 | Таб-бар при открытом select | `select-keeps-tabbar.test.js` |
+| Блокировка прокрутки под модалками | `modal-scroll-lock.test.js` |
 | Сводные исправления по анализу | `analysis-fixes.test.js` |
 
 Файлы `language-storage-harness.cjs` и `legacy-language-fixture.cjs` — вспомогательные хелперы, а не самостоятельные тесты.

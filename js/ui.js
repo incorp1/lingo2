@@ -971,3 +971,85 @@ function initializeAppNavigation() {
     }
   }
 })();
+
+/* Modal scroll lock — universal for every `.modal` (word info, reading
+   practice, editors, confirms…). While any modal is visible the page under
+   it must never scroll. `overscroll-behavior` alone is not enough: Safari 15
+   (iPhone 7) ignores it, so vertical swipes reaching the edge of the modal's
+   scroll area (or starting on a non-scrollable part: header, backdrop, footer)
+   chain to the underlying view. The touchmove guard lets a gesture scroll
+   only an element inside the topmost modal that can actually move in that
+   direction; everything else is cancelled. Styles: css/stats-settings.css
+   (html.modal-scroll-locked). */
+const MODAL_SCROLL_LOCK_CLASS = "modal-scroll-locked";
+const MODAL_SCROLL_EXEMPT = 'input[type="range"]';
+
+function openModals() {
+  return Array.from(document.querySelectorAll(".modal:not([hidden])"));
+}
+
+function topmostOpenModal() {
+  const list = openModals();
+  if (!list.length) return null;
+  // Highest z-index wins; later DOM order breaks ties (it paints on top).
+  return list.reduce((top, el) => {
+    const z = parseInt(getComputedStyle(el).zIndex, 10) || 0;
+    const topZ = parseInt(getComputedStyle(top).zIndex, 10) || 0;
+    return z >= topZ ? el : top;
+  });
+}
+
+function canScrollInDirection(el, axis, delta) {
+  const style = getComputedStyle(el);
+  const overflow = axis === "y" ? style.overflowY : style.overflowX;
+  if (!/(auto|scroll)/.test(overflow) && el.tagName !== "TEXTAREA") return false;
+  const pos = axis === "y" ? el.scrollTop : el.scrollLeft;
+  const size = axis === "y" ? el.scrollHeight - el.clientHeight : el.scrollWidth - el.clientWidth;
+  if (size <= 1) return false;
+  // Finger moving down (delta > 0) scrolls content towards the start.
+  return delta > 0 ? pos > 0 : pos < size - 1;
+}
+
+function modalGestureCanScroll(target, modal, axis, delta) {
+  for (let el = target; el && el !== modal.parentNode; el = el.parentElement) {
+    if (el.nodeType === 1 && canScrollInDirection(el, axis, delta)) return true;
+    if (el === modal) break;
+  }
+  return false;
+}
+
+function syncModalScrollLock() {
+  document.documentElement.classList.toggle(MODAL_SCROLL_LOCK_CLASS, openModals().length > 0);
+}
+
+function bindModalScrollLock() {
+  if (bindModalScrollLock.bound) return;
+  bindModalScrollLock.bound = true;
+  let start = null;
+  document.addEventListener("touchstart", event => {
+    start = event.touches.length === 1
+      ? { x: event.touches[0].clientX, y: event.touches[0].clientY }
+      : null;
+  }, { passive: true, capture: true });
+  document.addEventListener("touchmove", event => {
+    if (!document.documentElement.classList.contains(MODAL_SCROLL_LOCK_CLASS)) return;
+    if (!start || event.touches.length !== 1 || !event.cancelable) return; // pinch-zoom stays native
+    const target = event.target && event.target.nodeType === 1 ? event.target : event.target?.parentElement;
+    if (target?.closest?.(MODAL_SCROLL_EXEMPT)) return;
+    const modal = topmostOpenModal();
+    if (!modal || !target || !modal.contains(target)) { event.preventDefault(); return; }
+    const t = event.touches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
+    const axis = Math.abs(dy) >= Math.abs(dx) ? "y" : "x";
+    if (!modalGestureCanScroll(target, modal, axis, axis === "y" ? dy : dx)) event.preventDefault();
+  }, { passive: false, capture: true });
+  // Reacts to every show/hide of any modal, whoever toggles `hidden`.
+  new MutationObserver(syncModalScrollLock).observe(document.body, {
+    subtree: true, attributes: true, attributeFilter: ["hidden"], childList: true
+  });
+  syncModalScrollLock();
+}
+
+if (typeof document !== "undefined" && document.body && typeof MutationObserver === "function") bindModalScrollLock();
