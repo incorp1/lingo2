@@ -40,6 +40,15 @@
 
 ## 3. Обязательные ограничения
 
+### Совместимость с iPhone 7 (Safari 15 / iOS 15)
+Каждая правка CSS/JS обязана корректно работать и выглядеть на iPhone 7 (максимум iOS 15; ориентир — Safari 15.0).
+- `color-mix()` — только внутри `@supports (color: color-mix(...))`, базовое правило — готовый цвет (`node tools/fix-color-mix.mjs`).
+- Не использовать `:has()` без класса-замены из JS; `dvh/svh/lvh` — только после строки-фолбэка с `var(--app-vh)`.
+- `backdrop-filter` и `mask-*` — всегда вместе с `-webkit-`-вариантом; для blur нужен полупрозрачный фон без `color-mix`; не анимировать `backdrop-filter` в `@keyframes`.
+- Не использовать `@property`, `@container`, `@layer`, CSS nesting, `oklch/lab`, `text-wrap`, `subgrid`.
+- JS: без `.at()`, `findLast`, `toSorted`, `Object.hasOwn`, `structuredClone` (есть полифил в `theme-init.js`), `crypto.randomUUID`, `Intl.Segmenter`, `<dialog>`/`inert` без проверки.
+- Стражи: `tests/color-mix-guard.test.js`, `tests/ios15-css-compat.test.js` — при новых приёмах дополнять их.
+
 
 ### Данные
 

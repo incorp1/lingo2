@@ -118,7 +118,7 @@ function updateSwapBtnTitle() {
 }
 
 /* ----- Service worker ----- */
-const SERVICE_WORKER_URL = "sw.js?v=3.20.55";
+const SERVICE_WORKER_URL = "sw.js?v=3.20.56";
 let swRegistration = null;
 let swRefreshing = false;
 let swUpdateApplying = false;
@@ -280,7 +280,29 @@ function requestServiceWorkerUpdate() {
   }, 250);
 }
 
+const BUILD_LOADED_KEY = "lingo.buildLoadedAt";
+
+function renderBuildLoadedAt() {
+  const meta = document.getElementById("appBuildMeta");
+  const time = meta && meta.querySelector("time");
+  if (!time) return;
+  const version = (meta.querySelector(".app-build-version")?.textContent || "").trim();
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(BUILD_LOADED_KEY) || "null"); } catch {}
+  if (!saved || saved.version !== version || !saved.at) {
+    saved = { version, at: new Date().toISOString() };
+    try { localStorage.setItem(BUILD_LOADED_KEY, JSON.stringify(saved)); } catch {}
+  }
+  const d = new Date(saved.at);
+  if (Number.isNaN(d.getTime())) return;
+  const p = n => String(n).padStart(2, "0");
+  time.setAttribute("datetime", d.toISOString());
+  time.textContent = `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  time.title = "Дата и время загрузки обновления";
+}
+
 function registerSW() {
+  renderBuildLoadedAt();
   window.addEventListener("online", requestServiceWorkerUpdate);
   window.addEventListener("pageshow", requestServiceWorkerUpdate);
   document.addEventListener?.("visibilitychange", requestServiceWorkerUpdate);

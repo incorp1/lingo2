@@ -633,14 +633,17 @@ textarea:focus-visible {
   justify-content: center;
   gap: 14px;
   padding: 24px;
-  background: var(--bg);
-  backdrop-filter: blur(14px) saturate(120%);
+  /* Полупрозрачный фон без color-mix: иначе на Safari 15 blur не виден. */
+  background: rgba(245, 244, 238, 0.62);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px) saturate(120%);
   animation: updateOverlayIn 220ms cubic-bezier(.25, 1, .5, 1) both;
 }
 @supports (color: color-mix(in srgb, red 50%, blue)) {
-  .update-overlay { background: color-mix(in srgb, var(--bg) 62%, transparent); }
+  .update-overlay,
+  [data-theme="dark"] .update-overlay { background: color-mix(in srgb, var(--bg) 62%, transparent); }
 }
+[data-theme="dark"] .update-overlay { background: rgba(30, 29, 27, 0.62); }
 .update-overlay[hidden] { display: none; }
 /* Во время применения обновления UI под блуром не должен принимать ввод. */
 body.is-updating > *:not(.update-overlay) { pointer-events: none; }
@@ -663,7 +666,7 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
   text-align: center;
 }
 @keyframes updateOverlayIn {
-  from { opacity: 0; backdrop-filter: blur(0); }
+  from { opacity: 0; }
   to { opacity: 1; }
 }
 @keyframes updateOverlaySpin {
