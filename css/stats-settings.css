@@ -497,7 +497,10 @@
   color: #fff;
 }
 .btn.danger:hover { filter: brightness(.94); }
-.btn.danger:focus-visible { outline: 3px solid color-mix(in srgb, var(--bad) 28%, transparent); outline-offset: 2px; }
+.btn.danger:focus-visible { outline: 3px solid var(--bad-soft); outline-offset: 2px; }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .btn.danger:focus-visible { outline: 3px solid color-mix(in srgb, var(--bad) 28%, transparent); }
+}
 
 .form-row { display: grid; gap: 6px; }
 .form-row.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -542,7 +545,7 @@ textarea:focus-visible {
 .toast-action {
   min-height: 34px;
   padding: 5px 10px;
-  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border: 1px solid var(--border);
   border-radius: 8px;
   background: transparent;
   color: inherit;
@@ -550,7 +553,13 @@ textarea:focus-visible {
   font-weight: 700;
   cursor: pointer;
 }
-.toast-action:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .toast-action { border: 1px solid color-mix(in srgb, currentColor 28%, transparent); }
+}
+.toast-action:hover { background: transparent; }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .toast-action:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+}
 .toast-action:disabled { opacity: .55; cursor: default; }
 .toast[hidden] { display: none; }
 .toast.is-error { border-color: var(--bad); color: var(--bad); }
@@ -564,13 +573,16 @@ textarea:focus-visible {
   gap: 12px;
   max-width: calc(100vw - 40px);
   padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border-strong));
+  border: 1px solid var(--border-strong);
   border-radius: 14px;
   background: var(--panel);
   color: var(--ink);
   box-shadow: var(--shadow-lg);
   font-size: 13px;
   animation: updateNoticeIn 260ms cubic-bezier(.25, 1, .5, 1) both;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .update-notice { border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border-strong)); }
 }
 .update-notice[hidden] { display: none; }
 .update-notice-icon {
@@ -580,8 +592,11 @@ textarea:focus-visible {
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  background: var(--accent-soft);
   color: var(--accent);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .update-notice-icon { background: color-mix(in srgb, var(--accent) 16%, transparent); }
 }
 .update-notice-icon svg { width: 18px; height: 18px; }
 .update-notice-text {
@@ -617,10 +632,13 @@ textarea:focus-visible {
   justify-content: center;
   gap: 14px;
   padding: 24px;
-  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  background: var(--bg);
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   animation: updateOverlayIn 220ms cubic-bezier(.25, 1, .5, 1) both;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .update-overlay { background: color-mix(in srgb, var(--bg) 62%, transparent); }
 }
 .update-overlay[hidden] { display: none; }
 /* Во время применения обновления UI под блуром не должен принимать ввод. */
@@ -628,10 +646,13 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
 .update-overlay-spinner {
   width: 42px;
   height: 42px;
-  border: 3px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 3px solid var(--accent-soft);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: updateOverlaySpin 900ms linear infinite;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .update-overlay-spinner { border: 3px solid color-mix(in srgb, var(--accent) 28%, transparent); }
 }
 .update-overlay-text {
   max-width: 260px;
@@ -725,8 +746,11 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
 }
 .danger-row b { color: var(--bad); }
 .recovery-block {
-  border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: var(--bg-elev); background: color-mix(in srgb, var(--accent-soft) 35%, var(--bg-elev));
+  border-color: var(--border);
+  background: var(--bg-elev);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .recovery-block { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 35%, var(--bg-elev)); }
 }
 /* P19: Focus trap for settings sheets */
 .settings-route-panel[inert] { pointer-events: none; }

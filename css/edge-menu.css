@@ -327,7 +327,10 @@
     place-items: center;
     border-radius: 10px;
     color: var(--accent);
-    background: color-mix(in srgb, var(--accent-soft) 88%, transparent);
+    background: var(--accent-soft);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .study-edge-icon { background: color-mix(in srgb, var(--accent-soft) 88%, transparent); }
   }
 
   .study-edge-icon svg {
@@ -366,9 +369,12 @@
   }
 
   .study-edge-mode {
-    border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    border-top: 1px solid var(--border);
     margin-top: 3px;
     padding-top: 3px;
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .study-edge-mode { border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent); }
   }
 
   .study-edge-mode-trigger {

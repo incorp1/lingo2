@@ -49,11 +49,17 @@
   transition: border-color .12s, background-color .12s;
 }
 .study-language-picker select:hover:not(:disabled) {
-  border-color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong));
+  border-color: var(--accent);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .study-language-picker select:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong)); }
 }
 .study-language-picker select:focus-visible {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .study-language-picker select:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
 }
 .study-language-picker select:disabled { opacity: .6; cursor: default; }
 .study-language-picker select option {
@@ -231,12 +237,15 @@
   position: absolute;
   inset: 0;
   border-radius: 6px;
-  background-color: color-mix(in srgb, var(--ink-muted) 34%, transparent);
+  background-color: transparent;
   opacity: .95;
   transition: opacity .34s ease, transform .34s ease, filter .34s ease;
   pointer-events: none;
   overflow: hidden;
   isolation: isolate;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .card-stage .pronunciation-spoiler .spoiler-cover { background-color: color-mix(in srgb, var(--ink-muted) 34%, transparent); }
 }
 .card-stage .pronunciation-spoiler .spoiler-cover::before,
 .card-stage .pronunciation-spoiler .spoiler-cover::after {
@@ -607,7 +616,10 @@
 .btn:active { transform: translateY(1px); }
 .btn.primary {
   background: var(--accent); color: #fff; border-color: var(--accent);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 6px 16px var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .btn.primary { box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 22%, transparent); }
 }
 .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn.ghost { background: transparent; border-color: var(--border); color: var(--ink-muted); }

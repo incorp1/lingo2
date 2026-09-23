@@ -50,16 +50,22 @@
     box-shadow: 0 1px 2px rgba(30, 27, 22, .04);
   }
   .topbar-right .topbar-add {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .topbar-right .topbar-add { border-color: color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
   .topbar-right .btn.topbar-bulk { color: var(--ink-muted); }
   .topbar-right .topbar-add:hover,
   .topbar-right .topbar-add:active {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
-    background: var(--accent-soft); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel));
+    border-color: var(--border);
+    background: var(--accent-soft);
     color: var(--accent-hover);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .topbar-right .topbar-add:hover, .topbar-right .topbar-add:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
   }
   .topbar-right .btn.topbar-bulk:hover,
   .topbar-right .btn.topbar-bulk:active {
@@ -139,16 +145,22 @@
     box-shadow: 0 1px 2px rgba(30, 27, 22, .04);
   }
   .browse-toolbar #addCardBtn2 {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .browse-toolbar #addCardBtn2 { border-color: color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
   .browse-toolbar #bulkBrowseBtn { color: var(--ink-muted); }
   .browse-toolbar #addCardBtn2:hover,
   .browse-toolbar #addCardBtn2:active {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
-    background: var(--accent-soft); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel));
+    border-color: var(--border);
+    background: var(--accent-soft);
     color: var(--accent-hover);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .browse-toolbar #addCardBtn2:hover, .browse-toolbar #addCardBtn2:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
   }
   .browse-toolbar #bulkBrowseBtn:hover,
   .browse-toolbar #bulkBrowseBtn:active {
@@ -321,24 +333,33 @@
   .selection-pop-actions .btn.primary,
   #smartDefaultsBtn,
   .ai-gen-btn {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent);
     font-weight: 600;
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .settings-block .settings-row .btn.primary, .selection-pop-actions .btn.primary, #smartDefaultsBtn, .ai-gen-btn { border-color: color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
   .settings-block .settings-row .btn.primary:hover,
   .selection-pop-actions .btn.primary:hover,
   #smartDefaultsBtn:hover,
   .ai-gen-btn:hover:not(.loading) {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
-    background: var(--accent-soft); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel));
+    border-color: var(--border);
+    background: var(--accent-soft);
     color: var(--accent-hover);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .settings-block .settings-row .btn.primary:hover, .selection-pop-actions .btn.primary:hover, #smartDefaultsBtn:hover, .ai-gen-btn:hover:not(.loading) { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
   }
   .modal-foot .btn.primary {
     border-color: var(--accent);
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 2px 7px color-mix(in srgb, var(--accent) 18%, transparent);
+    box-shadow: 0 2px 7px var(--accent-soft);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .modal-foot .btn.primary { box-shadow: 0 2px 7px color-mix(in srgb, var(--accent) 18%, transparent); }
   }
   .modal-foot .btn.primary:hover {
     border-color: var(--accent-hover);
@@ -347,14 +368,20 @@
   }
   .settings-block .settings-row .btn.danger,
   .modal-foot .btn.danger {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--bad) 25%, var(--border));
+    border-color: var(--border);
     background: var(--bad-soft);
     color: var(--bad);
   }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .settings-block .settings-row .btn.danger, .modal-foot .btn.danger { border-color: color-mix(in srgb, var(--bad) 25%, var(--border)); }
+  }
   #reviewAdvancedToggle.is-open {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    #reviewAdvancedToggle.is-open { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
   }
 
   .deck-row .deck-actions .deck-study-btn,
@@ -362,19 +389,25 @@
     min-height: 32px;
     padding: 5px 10px;
     justify-content: center;
-    border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+    border: 1px solid var(--border);
     border-radius: 9px;
     background: var(--accent-soft);
     box-shadow: 0 1px 2px rgba(30, 27, 22, .04);
     color: var(--accent);
   }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .deck-row .deck-actions .deck-study-btn, .decks-toolbar > .deck-tool-primary { border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border)); }
+  }
   .deck-row .deck-actions .deck-study-btn:hover,
   .deck-row .deck-actions .deck-study-btn:active,
   .decks-toolbar > .deck-tool-primary:hover,
   .decks-toolbar > .deck-tool-primary:active {
-    border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
-    background: var(--accent-soft); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel));
+    border-color: var(--border);
+    background: var(--accent-soft);
     color: var(--accent-hover);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .deck-row .deck-actions .deck-study-btn:hover, .deck-row .deck-actions .deck-study-btn:active, .decks-toolbar > .deck-tool-primary:hover, .decks-toolbar > .deck-tool-primary:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
   }
   .deck-row .deck-actions .deck-icon-btn,
   .decks-toolbar > .btn.deck-tool:not(.deck-tool-primary) {
@@ -991,13 +1024,15 @@ select {
   /* Первое значение — фолбэк: Safari 15 / iOS 15 не знает `color-mix()` и
      отбрасывает такое объявление целиком, оставляя дорожку невидимой. */
   background: rgba(47, 125, 91, .18);
-  background: color-mix(in srgb, var(--good) 18%, transparent);
   /* Собственный слой композитора: внутри прокручиваемой карточки iOS иначе
      не перерисовывает абсолютно позиционированный индикатор. */
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transition: opacity .18s cubic-bezier(.25, 1, .5, 1);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .example-refresh-bar { background: color-mix(in srgb, var(--good) 18%, transparent); }
 }
 .example-refresh-bar::before {
   content: "";
@@ -1245,18 +1280,24 @@ select {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+    border: 1px solid var(--border);
     border-radius: 9px;
     background: var(--accent-soft);
     box-shadow: 0 1px 2px rgba(30, 27, 22, .04);
     color: var(--accent);
     white-space: nowrap;
   }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .deck-row .deck-actions .deck-study-btn { border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); }
+  }
   .deck-row .deck-actions .deck-study-btn:hover,
   .deck-row .deck-actions .deck-study-btn:active {
-    border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border));
-    background: var(--accent-soft); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel));
+    border: 1px solid var(--border);
+    background: var(--accent-soft);
     color: var(--accent-hover);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .deck-row .deck-actions .deck-study-btn:hover, .deck-row .deck-actions .deck-study-btn:active { border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
   }
   .deck-row .deck-actions .deck-study-btn svg {
     width: 15px;

@@ -125,10 +125,13 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   margin-bottom: 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  background: var(--bg);
   box-shadow: 0 6px 18px rgba(31, 30, 29, 0.06);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  #deckBrowse .browse-toolbar { background: color-mix(in srgb, var(--bg) 92%, transparent); }
 }
 .browse-search-row { display: flex; align-items: center; gap: 8px; }
 .browse-search {
@@ -548,8 +551,11 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   background: var(--bg-elev);
 }
 .practice-q:focus-within {
-  border-color: var(--accent); border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .practice-q:focus-within { border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
 }
 .practice-q-label {
   color: var(--ink-muted);
@@ -573,10 +579,13 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   font-weight: 450;
   line-height: 1.42;
   text-decoration-line: underline;
-  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  text-decoration-color: var(--accent);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   resize: vertical;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .practice-answer { text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent); }
 }
 .practice-answer:focus {
   border-color: transparent;
@@ -787,20 +796,24 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   position: absolute;
   overflow: hidden;
   border-radius: 5px;
-  /* Translucent tint only: the layer is its own stacking context, so blend modes
-     would paint over the text instead of mixing with it. */
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 34%, transparent);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent-soft);
   animation: lookup-selection-enter 180ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .lookup-selection-mark { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 34%, transparent); }
 }
 .lookup-selection-mark::after {
   content: "";
   position: absolute;
   inset: 0;
   width: 48%;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+  background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
   transform: translateX(-140%);
   animation: lookup-selection-flow 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .lookup-selection-mark::after { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 16%, transparent), transparent); }
 }
 .lookup-selection-mark.is-start::before,
 .lookup-selection-mark.is-end::before {
@@ -810,7 +823,10 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   bottom: 22%;
   width: 2px;
   border-radius: 2px;
-  background: var(--accent); background: color-mix(in srgb, var(--accent) 82%, var(--ink));
+  background: var(--accent);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .lookup-selection-mark.is-start::before, .lookup-selection-mark.is-end::before { background: color-mix(in srgb, var(--accent) 82%, var(--ink)); }
 }
 .lookup-selection-mark.is-start::before { left: 1px; }
 .lookup-selection-mark.is-end::before { right: 1px; }
@@ -851,7 +867,7 @@ body.lookup-selecting .practice-q-label {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: var(--bg-elev); background: color-mix(in srgb, var(--bg-elev) 88%, var(--ink) 12%);
+  background: var(--bg-elev);
   /* Fade out only in the last few pixels near the edge, so the content
      (word, buttons, translation) always sits on a fully opaque surface. */
   -webkit-mask-image:
@@ -863,6 +879,9 @@ body.lookup-selecting .practice-q-label {
     linear-gradient(to bottom, transparent 0, #000 9px, #000 calc(100% - 9px), transparent 100%);
   mask-composite: intersect;
 }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .selection-popover::before { background: color-mix(in srgb, var(--bg-elev) 88%, var(--ink) 12%); }
+}
 @keyframes sel-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   .lookup-selection-mark,
@@ -873,14 +892,20 @@ body.lookup-selecting .practice-q-label {
 }
 html[data-theme="dark"] .lookup-selection-mark,
 html.dark .lookup-selection-mark {
-  background: color-mix(in srgb, var(--accent) 26%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  html[data-theme="dark"] .lookup-selection-mark, html.dark .lookup-selection-mark { background: color-mix(in srgb, var(--accent) 26%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
 }
 /* Dark theme: keep the popover surface at the app's own panel level —
    one soft step above the page background instead of a bright grey block. */
 html[data-theme="dark"] .selection-popover::before,
 html.dark .selection-popover::before {
-  background: color-mix(in srgb, var(--panel) 88%, var(--bg) 12%);
+  background: var(--panel);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  html[data-theme="dark"] .selection-popover::before, html.dark .selection-popover::before { background: color-mix(in srgb, var(--panel) 88%, var(--bg) 12%); }
 }
 /* Safari 15 / iOS 15 (the last release for iPhone 7) has no `color-mix()`.
    Without these fallbacks the whole declaration is dropped, so the long-press

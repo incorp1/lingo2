@@ -118,7 +118,8 @@ test("выделенное слово остаётся читаемым: под�
 
   const mark = css.match(/\.lookup-selection-mark\s*\{[\s\S]*?\}/)[0];
   assert.doesNotMatch(mark, /mix-blend-mode/);
-  assert.match(mark, /background: color-mix\(in srgb, var\(--accent\) \d+%, transparent\)/);
+  assert.doesNotMatch(mark, /color-mix/, "базовое правило — без color-mix (Safari 15)");
+  assert.match(css, /\.lookup-selection-mark \{[^}]*background: color-mix\(in srgb, var\(--accent\) \d+%, transparent\)/);
   assert.doesNotMatch(css, /\.lookup-selection-mark[^{]*\{[^}]*mix-blend-mode/);
   assert.doesNotMatch(css, /var\(--accent\) \d+%, var\(--panel\)\)/);
 });
@@ -126,6 +127,6 @@ test("выделенное слово остаётся читаемым: под�
 test("в тёмной теме меню не светлее фона, а на один мягкий шаг от него", () => {
   const css = read("css/features.css");
 
-  assert.match(css, /html\[data-theme="dark"\] \.selection-popover::before,\s*\nhtml\.dark \.selection-popover::before \{\s*\n\s*background: color-mix\(in srgb, var\(--panel\) 88%, var\(--bg\) 12%\);/);
+  assert.match(css, /html\[data-theme="dark"\] \.selection-popover::before,\s*html\.dark \.selection-popover::before \{\s*background: color-mix\(in srgb, var\(--panel\) 88%, var\(--bg\) 12%\);/);
   assert.match(css, /html\[data-theme="dark"\] \.lookup-selection-mark,[\s\S]*?background: color-mix\(in srgb, var\(--accent\) 26%, transparent\)/);
 });

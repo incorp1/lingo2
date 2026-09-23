@@ -6,9 +6,12 @@
   }
 
   body[data-view="settings"] .main {
-    background:
-      radial-gradient(circle at 50% -12%, color-mix(in srgb, var(--accent-soft) 45%, transparent), transparent 34%),
+    background: radial-gradient(circle at 50% -12%, transparent, transparent 34%),
       var(--bg);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    body[data-view="settings"] .main { background: radial-gradient(circle at 50% -12%, color-mix(in srgb, var(--accent-soft) 45%, transparent), transparent 34%),
+      var(--bg); }
   }
 
   body[data-view="settings"] .view-settings.active {
@@ -113,7 +116,10 @@
     padding: 12px;
     margin-bottom: 11px;
     border-radius: 13px;
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 3%, transparent);
+    box-shadow: 0 1px 0 transparent;
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .view-settings .settings-block { box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 3%, transparent); }
   }
 
   .view-settings .settings-block h3 {
@@ -477,9 +483,12 @@
   }
 
   body[data-view="settings"] .modal-backdrop {
-    background: color-mix(in srgb, #171512 38%, transparent);
+    background: transparent;
     backdrop-filter: blur(1.5px);
     -webkit-backdrop-filter: blur(1.5px);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    body[data-view="settings"] .modal-backdrop { background: color-mix(in srgb, #171512 38%, transparent); }
   }
 
   body[data-view="settings"] .modal-panel,
@@ -488,7 +497,10 @@
     max-height: min(78vh, 620px);
     border-radius: 20px 20px 0 0;
     padding-bottom: env(safe-area-inset-bottom);
-    box-shadow: 0 -16px 45px color-mix(in srgb, #171512 18%, transparent);
+    box-shadow: 0 -16px 45px transparent;
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    body[data-view="settings"] .modal-panel, body[data-view="settings"] .modal-panel.small { box-shadow: 0 -16px 45px color-mix(in srgb, #171512 18%, transparent); }
   }
 
   body[data-view="settings"] .modal-panel::before {
@@ -570,11 +582,17 @@
 }
 
 .view-settings #settings-data .settings-action-row:hover {
-  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+  background: transparent;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .view-settings #settings-data .settings-action-row:hover { background: color-mix(in srgb, var(--accent-soft) 42%, transparent); }
 }
 
 .view-settings #settings-data .settings-action-row:active {
-  background: color-mix(in srgb, var(--accent-soft) 68%, transparent);
+  background: var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .view-settings #settings-data .settings-action-row:active { background: color-mix(in srgb, var(--accent-soft) 68%, transparent); }
 }
 
 .view-settings #settings-data .settings-action-row b {
@@ -591,9 +609,12 @@
       max(10px, env(safe-area-inset-right))
       0
       max(10px, env(safe-area-inset-left));
-    background: color-mix(in srgb, #171512 38%, transparent);
+    background: transparent;
     backdrop-filter: blur(1.5px);
     -webkit-backdrop-filter: blur(1.5px);
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    body[data-view="settings"] #textInputModal { background: color-mix(in srgb, #171512 38%, transparent); }
   }
 
   body[data-view="settings"] #textInputModal .compact-modal-card {
@@ -610,7 +631,10 @@
     border-bottom: 0;
     border-radius: 20px 20px 0 0;
     background: var(--panel);
-    box-shadow: 0 -16px 45px color-mix(in srgb, #171512 18%, transparent);
+    box-shadow: 0 -16px 45px transparent;
+  }
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    body[data-view="settings"] #textInputModal .compact-modal-card { box-shadow: 0 -16px 45px color-mix(in srgb, #171512 18%, transparent); }
   }
 
   body[data-view="settings"] #textInputModal .compact-modal-card::before {

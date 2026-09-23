@@ -6,8 +6,11 @@
 }
 
 .settings-route-btn.is-selected {
-  border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-color: var(--border);
   background: var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .settings-route-btn.is-selected { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); }
 }
 
 .settings-route-btn.is-selected .route-chevron {

@@ -46,8 +46,11 @@
 }
 
 #editorModal .editor-word-card:focus-within {
-  border-color: var(--accent); border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  #editorModal .editor-word-card:focus-within { border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
 }
 
 #editorModal .editor-word-card label,
@@ -74,10 +77,13 @@
   font-weight: 520;
   line-height: 1.42;
   text-decoration-line: underline;
-  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  text-decoration-color: var(--accent);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   resize: none;
+}
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  #editorModal .editor-word-card textarea { text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent); }
 }
 
 #editorModal .editor-translation textarea {
