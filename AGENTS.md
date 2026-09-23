@@ -31,6 +31,8 @@
 - Для точечной правки **не устанавливай новый шаблон, фреймворк, backend и не меняй порядок скриптов**.
 - У `package.json` есть только команда `test`. Не придумывай команды `build`, `lint` или `dev`. Дополнительно есть служебный скрипт `node tools/bump-version.mjs`.
 - Версия ассетов PWA живёт в файле `VERSION` и проставляется автоматически: git-хук `.githooks/pre-commit` (включается один раз `git config core.hooksPath .githooks`) и workflow `.github/workflows/bump-version.yml`. Вручную версии в `index.html`, `sw.js`, `js/stats.js` не правь. Версия в `package.json` — отдельная метка пакета и не обязана совпадать с `VERSION`.
+- Никогда не правь `VERSION` вручную (в т.ч. через веб-интерфейс GitHub): это меняет только файл, а `?v=` в `index.html`/`sw.js` остаются старыми, кэш PWA не сбрасывается и изменения не видны. Всегда `node tools/bump-version.mjs`. Синхронность проверяет `tests/version-sync.test.js`.
+- Поле `#browseSearch` сбрасывает глобальный слой полей из `css/base.css` селектором по id (конец `css/features.css`); рамку рисует только обёртка `.browse-search`.
 
 
 ## 3. Обязательные ограничения

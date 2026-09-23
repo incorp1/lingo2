@@ -1339,3 +1339,27 @@ html.dark .selection-popover::before {
 .browse-search input[type="search"]::-webkit-search-decoration,
 .browse-search input[type="search"]::-webkit-search-results-button,
 .browse-search input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: none; display: none; }
+
+/* Поле поиска в окне колоды: рамку/фон рисует только обёртка .browse-search.
+   Селектор по id обязателен — глобальный слой полей в base.css
+   (input:not(...)x4, специфичность 0,4,1) иначе побеждает `.browse-search input`
+   и рисует внутри обёртки второе поле (особенно заметно на iOS/Safari 15). */
+#browseSearch,
+#browseSearch:focus,
+#browseSearch:focus-visible {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+  line-height: normal;
+}
