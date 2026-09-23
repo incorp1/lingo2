@@ -200,14 +200,17 @@
   position: relative;
   display: inline-block;
   vertical-align: baseline;
-  padding: 1px 4px;
+  padding: 0 4px;
   margin: 0 1px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 5px;
   background: transparent;
   font: inherit;
   font-family: var(--font-mono);
   font-size: 14px;
+  /* Ниже плашка: строка равна 1.15 кегля, без вертикальных отступов.
+     Ширина прежняя — по длине скрытой транскрипции. */
+  line-height: 1.15;
   color: var(--ink-muted);
   cursor: pointer;
   -webkit-appearance: none;
@@ -252,14 +255,17 @@
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='1'/%3E%3CfeFuncG type='discrete' tableValues='1'/%3E%3CfeFuncB type='discrete' tableValues='1'/%3E%3CfeFuncA type='discrete' tableValues='0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: .8;
   mix-blend-mode: screen;
-  animation: spoiler-static-a 1.15s steps(5, end) infinite;
+  /* Мерцание замедлено примерно вдвое: ~2 смены кадра в секунду на слой. */
+  -webkit-animation: spoiler-static-a 2.4s steps(5, end) infinite;
+  animation: spoiler-static-a 2.4s steps(5, end) infinite;
 }
 /* Тёмные точки — видны на светлом оформлении. */
 .card-stage .pronunciation-spoiler .spoiler-cover::after {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0'/%3E%3CfeFuncG type='discrete' tableValues='0'/%3E%3CfeFuncB type='discrete' tableValues='0'/%3E%3CfeFuncA type='discrete' tableValues='0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: .7;
   mix-blend-mode: multiply;
-  animation: spoiler-static-b .95s steps(4, end) infinite;
+  -webkit-animation: spoiler-static-b 2s steps(4, end) infinite;
+  animation: spoiler-static-b 2s steps(4, end) infinite;
 }
 @keyframes spoiler-static-a {
   0%   { transform: translate3d(0, 0, 0); }

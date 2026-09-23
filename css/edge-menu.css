@@ -177,6 +177,26 @@
     transform: rotate(135deg);
   }
 
+  /* Постоянный «зов» закрытого язычка в манере кнопок карточки: стрелка
+     дважды коротко подаётся влево и отдыхает. Анимируется только стрелка
+     (::before), а не сам язычок: его transform занят позиционированием
+     translateY(-50%) и перетаскиванием, поэтому кнопка и её зона касания
+     не двигаются. В открытом состоянии и при перетаскивании — без анимации. */
+  @-webkit-keyframes edge-tab-nudge {
+    0%, 40%, 100% { -webkit-transform: translate3d(0, 0, 0) rotate(-45deg); transform: translate3d(0, 0, 0) rotate(-45deg); }
+    10%, 30% { -webkit-transform: translate3d(-3px, 0, 0) rotate(-45deg); transform: translate3d(-3px, 0, 0) rotate(-45deg); }
+    20% { -webkit-transform: translate3d(0, 0, 0) rotate(-45deg); transform: translate3d(0, 0, 0) rotate(-45deg); }
+  }
+  @keyframes edge-tab-nudge {
+    0%, 40%, 100% { -webkit-transform: translate3d(0, 0, 0) rotate(-45deg); transform: translate3d(0, 0, 0) rotate(-45deg); }
+    10%, 30% { -webkit-transform: translate3d(-3px, 0, 0) rotate(-45deg); transform: translate3d(-3px, 0, 0) rotate(-45deg); }
+    20% { -webkit-transform: translate3d(0, 0, 0) rotate(-45deg); transform: translate3d(0, 0, 0) rotate(-45deg); }
+  }
+  .study-edge-tab:not(.is-open):not(.is-dragging)::before {
+    -webkit-animation: edge-tab-nudge 2.6s ease-in-out infinite;
+    animation: edge-tab-nudge 2.6s ease-in-out infinite;
+  }
+
   .study-edge-tab.is-dragging {
     cursor: grabbing;
     transform: translateY(-50%) scale(1.06);
@@ -434,5 +454,10 @@
   .study-edge-menu,
   .study-edge-scrim {
     transition: none;
+  }
+  .study-edge-tab::before,
+  .study-edge-tab:not(.is-open):not(.is-dragging)::before {
+    -webkit-animation: none;
+    animation: none;
   }
 }
