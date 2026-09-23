@@ -49,6 +49,7 @@
 | После перезапуска пропадают правки | место изменения → dirty-флаг → `js/state.js` → `saveAndFlush` | `storage.js` читать только после проверки этой цепочки |
 | Пустой экран при старте | `js/app-shell.js` → завершающий async-блок, сообщение `Boot failed` | `js/state.js` → `initState`; порядок `<script>` в `index.html`; ошибка консоли |
 | Справка о слове (кнопка «i» на карточке) | `js/study.js` → `openWordInfo`, `wordInfoInline` | `index.html` → `wordInfoModal`; `css/study.css`, `css/features.css`; `ai.js` |
+| Карточка колоды во вкладке «Колоды» (раскладка, чипы, тап по всей карточке) | `js/decks.js` → `createDeckRow`, `patchDeckRow` (`row.onclick`, `.is-zero`) | итоговые стили `#deckList …` в конце `css/deck-browser-vA.css`; поля списка на телефоне — `#decksOverview` в конце `css/polish.css` |
 | Межстрочный интервал и отступ абзаца в «Информация о слове» и «Практика чтения» | общие токены `--reading-line-height`, `--reading-paragraph-gap` | `css/study.css` (`:root` рядом с `.word-info-content`); используются в `.practice-story-body` (`css/features.css`) — менять только токены |
 | Не приходит обновление / не работает офлайн | `js/stats.js` → `registerSW`, `applyServiceWorkerUpdate` | `sw.js`, `_headers`, раздел 6 этой карты |
 | Баннер/оверлей обновления приложения | `js/stats.js` → работа с `#updateNotice`, `#updateOverlay` | `index.html` → `updateNotice`, `updateOverlay`; `css/stats-settings.css` |

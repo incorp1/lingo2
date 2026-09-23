@@ -1352,3 +1352,15 @@ select {
   width: 22px;
   height: 22px;
 }
+
+/* Вкладка «Колоды» на телефоне: #view-decks обнулён (deck-browser-vA.css) ради
+   браузера карточек, поэтому список колод получает такие же поля, как другие вкладки. */
+@media (max-width: 640px) {
+  #decksOverview {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px calc(64px + env(safe-area-inset-bottom));
+  }
+  #decksOverview[hidden] { display: none; }
+}

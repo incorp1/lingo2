@@ -323,3 +323,95 @@
   .deck-browse-header { grid-template-columns: 44px minmax(0, 1fr) 44px; }
   #deckBrowse #tableBody { padding-inline: 8px; }
 }
+/* ========================================================================
+   Deck list card (вкладка «Колоды»). Итоговые правила — держать последними:
+   #deckList повышает специфичность над legacy-правилами mobile/polish.css.
+   Раскладка: [название/описание/статус] сверху, [чипы счётчиков | кнопки] снизу.
+   ======================================================================== */
+#deckList { display: grid; gap: 10px; }
+#deckList .deck-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "info info" "counts actions";
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#deckList .deck-row:hover { border-color: var(--border-strong); }
+#deckList .deck-row:active { background: var(--bg-elev); }
+#deckList .deck-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#deckList .deck-info { grid-area: info; min-width: 0; cursor: pointer; }
+#deckList .deck-row:hover .deck-title { color: var(--accent); }
+#deckList .deck-info .deck-title { font-size: 18px; line-height: 1.25; }
+#deckList .deck-info .deck-desc {
+  margin-top: 3px; font-size: 13px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+#deckList .deck-info .deck-desc:empty { display: none; }
+#deckList .deck-status { margin-top: 6px; font-size: 12.5px; line-height: 1.35; }
+
+#deckList .deck-row .deck-counts-wrap {
+  grid-area: counts;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  min-width: 0;
+}
+#deckList .deck-row .deck-count {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  min-width: 0; padding: 4px 10px;
+  border: 0; border-radius: 999px;
+  text-align: left; white-space: nowrap;
+}
+#deckList .deck-row .deck-count b { display: inline; font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+#deckList .deck-row .deck-count span { font-size: 12px; color: inherit; opacity: .85; text-transform: none; letter-spacing: 0; }
+#deckList .deck-row .deck-count.new { background: var(--new-soft); color: var(--new); }
+#deckList .deck-row .deck-count.learn { background: var(--warn-soft); color: var(--warn); }
+#deckList .deck-row .deck-count.review { background: var(--good-soft); color: var(--good); }
+#deckList .deck-row .deck-count b { color: inherit; }
+#deckList .deck-row .deck-count.is-zero { background: var(--bg-elev); color: var(--ink-faint); }
+
+#deckList .deck-row .deck-actions {
+  grid-area: actions;
+  display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+  width: auto;
+}
+#deckList .deck-row .deck-actions .deck-study-btn {
+  flex: 0 0 auto;
+  width: auto; min-width: 0; height: 36px; min-height: 36px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 10px;
+  background: var(--accent-soft); color: var(--accent);
+  box-shadow: none;
+  font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+#deckList .deck-row .deck-actions .deck-study-btn:hover,
+#deckList .deck-row .deck-actions .deck-study-btn:active {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 80%, var(--panel));
+  color: var(--accent-hover);
+}
+#deckList .deck-row .deck-actions .deck-study-btn svg { width: 14px; height: 14px; }
+#deckList .deck-row .deck-actions .deck-menu-trigger {
+  width: 36px; height: 36px; min-width: 36px; min-height: 36px;
+  margin-left: 0; padding: 0;
+  display: grid; place-items: center;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg-elev); color: var(--ink-muted); box-shadow: none;
+}
+#deckList .deck-row .deck-actions .deck-menu-trigger:hover { color: var(--ink); border-color: var(--border-strong); }
+
+@media (max-width: 640px) {
+  /* Поля/прокрутка #decksOverview — в конце css/polish.css. */
+  #deckList { gap: 8px; }
+  #deckList .deck-row { padding: 14px; gap: 10px 10px; }
+  #deckList .deck-info .deck-title { font-size: 17px; }
+  #deckList .deck-row .deck-count { padding: 3px 8px; }
+}
+@media (max-width: 380px) {
+  #deckList .deck-row { grid-template-areas: "info info" "counts counts" "actions actions"; }
+  #deckList .deck-row .deck-actions .deck-study-btn { flex: 1 1 auto; }
+}

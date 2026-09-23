@@ -267,6 +267,7 @@ function patchDeckRow(row, d, s, shownNew, statusText, statusClass) {
   [[shownNew, "decks.cards.new"], [s.learning, "decks.cards.learn"], [s.review, "decks.cards.due"]].forEach(([value, key], index) => {
     counts[index].querySelector("b").textContent = value;
     counts[index].querySelector("span").textContent = t(key);
+    counts[index].classList.toggle("is-zero", !value);
   });
   row.querySelector(".deck-study-label").textContent = t("decks.study");
   const labels = { study: "decks.study", menu: "decks.moreActions" };
@@ -275,7 +276,18 @@ function patchDeckRow(row, d, s, shownNew, statusText, statusClass) {
     button.title = t(key);
     button.setAttribute("aria-label", t(key));
   }
-  info.onclick = () => openDeckBrowse(d.id);
+  // Вся карточка открывает колоду; кнопки внутри («Учить», «⋯») обрабатываются сами.
+  info.onclick = null;
+  row.tabIndex = 0;
+  row.onclick = event => {
+    if (event.target.closest("button, a, input, select, textarea")) return;
+    openDeckBrowse(d.id);
+  };
+  row.onkeydown = event => {
+    if (event.target !== row || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    openDeckBrowse(d.id);
+  };
   row.querySelector('[data-action="study"]').onclick = () => {
     state.activeDeckId = d.id;
     markMetaDirty();
