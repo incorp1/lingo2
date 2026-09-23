@@ -31,7 +31,7 @@
 /* Deck row action cluster: one clear "Study" CTA + intuitive icon buttons */
 .deck-actions { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
 .deck-menu-btn[aria-expanded="true"] {
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
   background: var(--accent-soft);
   color: var(--accent);
 }

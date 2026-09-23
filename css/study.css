@@ -49,7 +49,7 @@
   transition: border-color .12s, background-color .12s;
 }
 .study-language-picker select:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong));
+  border-color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong));
 }
 .study-language-picker select:focus-visible {
   border-color: var(--accent);

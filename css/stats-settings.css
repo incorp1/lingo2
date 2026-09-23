@@ -725,8 +725,8 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
 }
 .danger-row b { color: var(--bad); }
 .recovery-block {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent-soft) 35%, var(--bg-elev));
+  border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: var(--bg-elev); background: color-mix(in srgb, var(--accent-soft) 35%, var(--bg-elev));
 }
 /* P19: Focus trap for settings sheets */
 .settings-route-panel[inert] { pointer-events: none; }

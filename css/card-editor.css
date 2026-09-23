@@ -46,7 +46,7 @@
 }
 
 #editorModal .editor-word-card:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong));
+  border-color: var(--accent); border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 

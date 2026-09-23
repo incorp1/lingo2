@@ -548,7 +548,7 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   background: var(--bg-elev);
 }
 .practice-q:focus-within {
-  border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong));
+  border-color: var(--accent); border-color: color-mix(in srgb, var(--accent) 62%, var(--border-strong));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 .practice-q-label {
@@ -810,7 +810,7 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   bottom: 22%;
   width: 2px;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--accent) 82%, var(--ink));
+  background: var(--accent); background: color-mix(in srgb, var(--accent) 82%, var(--ink));
 }
 .lookup-selection-mark.is-start::before { left: 1px; }
 .lookup-selection-mark.is-end::before { right: 1px; }
@@ -851,7 +851,7 @@ body.lookup-selecting .practice-q-label {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: color-mix(in srgb, var(--bg-elev) 88%, var(--ink) 12%);
+  background: var(--bg-elev); background: color-mix(in srgb, var(--bg-elev) 88%, var(--ink) 12%);
   /* Fade out only in the last few pixels near the edge, so the content
      (word, buttons, translation) always sits on a fully opaque surface. */
   -webkit-mask-image:
@@ -1326,3 +1326,16 @@ html.dark .selection-popover::before {
   }
 }
 
+
+/* iOS Safari рисует у input[type=search] собственную рамку/фон, которая
+   накладывалась на обёртку .browse-search («два поля поиска»). Сбрасываем. */
+.browse-search input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  box-shadow: none;
+  height: 100%;
+}
+.browse-search input[type="search"]::-webkit-search-decoration,
+.browse-search input[type="search"]::-webkit-search-results-button,
+.browse-search input[type="search"]::-webkit-search-results-decoration { -webkit-appearance: none; display: none; }

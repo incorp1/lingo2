@@ -6,7 +6,7 @@
 }
 
 .settings-route-btn.is-selected {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-color: var(--border); border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
   background: var(--accent-soft);
 }
 
