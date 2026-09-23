@@ -35,3 +35,13 @@
   const themeColor = document.querySelector('meta[name="theme-color"]');
   if (themeColor) themeColor.setAttribute("content", resolved === "dark" ? "#1E1D1B" : "#C96442");
 })();
+
+/* Модальность ввода: рамка фокуса только при работе с клавиатуры (Safari 15 без :focus-visible). */
+(function () {
+  var root = document.documentElement;
+  root.classList.add("pointer-input");
+  function pointer() { root.classList.add("pointer-input"); }
+  function key(e) { if (e.key === "Tab" || e.key.indexOf("Arrow") === 0) root.classList.remove("pointer-input"); }
+  ["pointerdown", "touchstart", "mousedown"].forEach(function (t) { document.addEventListener(t, pointer, { capture: true, passive: true }); });
+  document.addEventListener("keydown", key, true);
+})();

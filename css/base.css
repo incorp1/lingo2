@@ -86,6 +86,10 @@
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
+/* Универсально: после касания/мыши и программного фокуса кольцо не рисуется. */
+html.pointer-input :focus,
+html.pointer-input :focus-visible,
+[tabindex="-1"]:focus { outline: none !important; }
 
 :where(.icon-btn, .bare-icon-btn, .deck-icon-btn, .speaker-btn, .row-actions button, .dc-actions button, .practice-history-del) {
   position: relative;

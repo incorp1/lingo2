@@ -7,9 +7,10 @@ const css = readFileSync(path.join(__dirname, "../css/settings-polish.css"), "ut
 const i = css.lastIndexOf("Единая сетка строк");
 const block = css.slice(css.lastIndexOf("/*", i));
 
-test("итоговый блок сетки настроек стоит последним и покрывает 4 раздела", () => {
+test("итоговый блок сетки настроек стоит последним и универсален для всех разделов", () => {
   assert.ok(i > 0);
-  for (const id of ["#settings-learning", "#settings-generation", "#settings-card-sound", "#settings-appearance"]) assert.ok(block.includes(id), id);
+  assert.ok(block.includes(".settings-route-panel"));
+  assert.doesNotMatch(block, /#settings-(learning|generation|card-sound|appearance)/, "правила должны быть универсальными, без id разделов");
 });
 test("поля и селекты фиксированной высоты 40px и 16px шрифта (без зума iOS)", () => {
   assert.match(block, /height: 40px;\s*min-height: 40px;\s*max-height: 40px;/);
@@ -20,7 +21,14 @@ test("блок совместим с Safari 15", () => {
   assert.doesNotMatch(code, /:has\(|color-mix\(|\bdvh\b|@container|@layer/);
 });
 test("строка темы в Оформлении остаётся в две колонки", () => {
-  assert.match(css, /appearance-theme-row,[\s\S]*?grid-template-columns: minmax\(0, 1fr\) minmax\(128px, 44%\)/);
+  assert.match(block, /settings-row:not\(\.settings-control-stack\)[\s\S]*?grid-template-columns: minmax\(0, 1fr\) minmax\(128px, 44%\)/);
   const js = readFileSync(path.join(__dirname, "../js/settings.js"), "utf8");
   assert.match(js, /themeRow\.classList\.remove\("settings-control-stack"\)/);
+});
+
+test("кольцо фокуса скрыто после касания и программного фокуса", () => {
+  const base = readFileSync(path.join(__dirname, "../css/base.css"), "utf8");
+  const init = readFileSync(path.join(__dirname, "../theme-init.js"), "utf8");
+  assert.match(base, /html\.pointer-input :focus/);
+  assert.match(init, /pointer-input/);
 });

@@ -938,12 +938,11 @@
   }
 }
 /*
- * Единая сетка строк в разделах «Обучение», «Генерация», «Карточка и звук»,
- * «Язык и оформление». Этот блок — последний источник истины для геометрии
+ * Единая сетка строк для всех разделов настроек (.settings-route-panel). Этот блок — последний источник истины для геометрии
  * строк и полей: подпись слева, контрол справа по центру строки, поля одной
  * высоты без лишних отступов. Safari 15: только :is(), без :has()/dvh/color-mix.
  */
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row {
+.view-settings .settings-route-panel .settings-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(128px, 44%);
   align-items: center;
@@ -954,37 +953,37 @@
   margin: 0;
   padding: 10px 0;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.toggle {
+.view-settings .settings-route-panel .settings-row.toggle {
   grid-template-columns: minmax(0, 1fr) auto;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.with-hint {
+.view-settings .settings-route-panel .settings-row.with-hint {
   align-items: center;
   padding: 10px 0;
 }
-.view-settings #settings-appearance .appearance-settings-block .settings-row {
+.view-settings .settings-route-panel .settings-block[class*="-settings-block"] .settings-row {
   padding: 10px 14px;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row > div:first-child {
+.view-settings .settings-route-panel .settings-row > div:first-child {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 3px;
   min-width: 0;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row label {
+.view-settings .settings-route-panel .settings-row label {
   margin: 0;
   font-size: 13px;
   line-height: 1.3;
   text-align: left;
   overflow-wrap: break-word;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row .row-hint {
+.view-settings .settings-route-panel .settings-row .row-hint {
   margin: 0;
   max-width: none;
   font-size: 11px;
   line-height: 1.35;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row :is(input[type="text"], input[type="number"], input[type="password"], select) {
+.view-settings .settings-route-panel .settings-row :is(input[type="text"], input[type="number"], input[type="password"], select) {
   box-sizing: border-box;
   width: 100% !important;
   min-width: 0;
@@ -1002,14 +1001,14 @@
   font-weight: 500;
   line-height: normal;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row select {
+.view-settings .settings-route-panel .settings-row select {
   padding-right: 30px !important;
   text-overflow: ellipsis;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row input[type="number"] {
+.view-settings .settings-route-panel .settings-row input[type="number"] {
   text-align: center;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row textarea {
+.view-settings .settings-route-panel .settings-row textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 64px;
@@ -1021,44 +1020,42 @@
   resize: vertical;
 }
 /* Составные контролы занимают всю ширину строки под подписью. */
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row:is(.ai-mode-row, .settings-control-stack, .ai-prompt-list-row, .ai-model-row, .tts-rate-row, .backup-actions) {
+.view-settings .settings-route-panel .settings-row:is(.ai-mode-row, .settings-control-stack, .ai-prompt-list-row, .ai-model-row, .tts-rate-row, .backup-actions) {
   grid-template-columns: minmax(0, 1fr);
 }
-.view-settings :is(#settings-learning, #settings-generation) :is(.ai-model-controls, .ai-key-row) {
+.view-settings .settings-route-panel :is(.ai-model-controls, .ai-key-row) {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
-.view-settings :is(#settings-learning, #settings-generation) :is(.ai-model-controls, .ai-key-row) > :is(select, input) {
+.view-settings .settings-route-panel :is(.ai-model-controls, .ai-key-row) > :is(select, input) {
   flex: 1 1 auto;
 }
-.view-settings :is(#settings-learning, #settings-generation) :is(.ai-model-controls, .ai-key-row) > .btn {
+.view-settings .settings-route-panel :is(.ai-model-controls, .ai-key-row) > .btn {
   flex: 0 0 auto;
   min-height: 40px;
 }
 @media (max-width: 360px) {
-  .view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.with-hint:not(.toggle) {
+  .view-settings .settings-route-panel .settings-row.with-hint:not(.toggle) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 /* Селекты никогда не переносятся под подпись: строка с одиночным select — всегда в две колонки. */
-.view-settings #settings-appearance .appearance-settings-block .settings-row.appearance-theme-row,
-.view-settings #settings-appearance .appearance-settings-block .settings-row.appearance-language-row,
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.settings-control-stack.select-row {
+.view-settings .settings-route-panel .settings-row:not(.settings-control-stack):not(.ai-mode-row):not(.ai-model-row):not(.tts-rate-row):not(.ai-prompt-list-row):not(.backup-actions) {
   grid-template-columns: minmax(0, 1fr) minmax(128px, 44%);
   align-items: center;
 }
 /* Заголовки блоков не прижимаются к верхней кромке карточки. */
-.view-settings :is(#settings-learning, #settings-card-sound) .settings-block > :is(h3, .block-heading):first-child {
+.view-settings .settings-route-panel .settings-block > :is(h3, .block-heading):first-child {
   margin: 0;
   padding: 14px 0 8px;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound) .settings-block > .block-header:first-child {
+.view-settings .settings-route-panel .settings-block > .block-header:first-child {
   padding-top: 12px;
   padding-bottom: 10px;
   align-items: center;
 }
-.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row > label:first-child {
+.view-settings .settings-route-panel .settings-row > label:first-child {
   align-self: center;
 }
