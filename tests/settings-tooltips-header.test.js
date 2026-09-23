@@ -264,7 +264,8 @@ test("interactive swipe-back is universal and bound to settings and decks", () =
   assert.match(ui, /g\.panel\.style\.minHeight/, "панель до низа экрана");
   assert.match(css, /\[data-swipe-back-fade\]/);
   assert.match(ui, /requestAnimationFrame\(\(\) => \{ g\.frame = 0; apply\(g, g\.x\); \}\)/, "не чаще кадра");
-  assert.match(ui, /const fade = Math\.round\(SWIPE_BACK_FADE_MIN_PX \+ progress \* g\.width \* SWIPE_BACK_FADE_MAX_RATIO\)/, "ширина градиента растёт с протяжкой");
+  assert.match(ui, /const fade = Math\.round\(SWIPE_BACK_FADE_MIN_PX \+ fadeT \* g\.width \* SWIPE_BACK_FADE_MAX_RATIO\)/, "ширина градиента растёт с протяжкой");
+  assert.match(ui, /const fadeT = 1 - Math\.pow\(1 - Math\.min\(1, progress \* 1\.6\), 3\)/, "быстрый рост в начале свайпа");
   assert.match(ui, /g\.panel\.style\.webkitMaskImage = mask;/, "Safari 15");
   assert.match(ui, /g\.panel\.style\.webkitMaskImage = g\.panel\.style\.maskImage = "";/, "маска снимается");
   assert.match(css, /\.swipe-back-panel \*[\s\S]*?backdrop-filter: none !important/);
