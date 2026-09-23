@@ -76,15 +76,36 @@ function difficultyScore(card, now = Date.now()) {
   return calculateDifficultyCache(cache.recent, now).score;
 }
 
+/* HSL -> [r, g, b] (0..255). Нужен, чтобы смешивать цвета в JS:
+   Safari 15 (iPhone 7) не знает color-mix, и CSS-переменная с ним
+   становится невалидной — заливка слова пропадала целиком. */
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return [f(0), f(8), f(4)].map(v => Math.round(v * 255));
+}
+
+function mixRgb(a, b, weightA) {
+  const mixed = a.map((v, i) => Math.round(v * weightA + b[i] * (1 - weightA)));
+  return `rgb(${mixed.join(", ")})`;
+}
+
+/* Все цвета возвращаются в rgb(), поддерживаемом любым браузером.
+   Не возвращать отсюда color-mix/oklch: значения пишутся в CSS-переменные. */
 function difficultyStyle(card, now = Date.now()) {
   const score = difficultyScore(card, now);
   const hue = Math.round(120 * (1 - score / 100));
   const lightness = Math.round(94 - score * 0.16);
+  const bg = hslToRgb(hue, 72, lightness);
+  const border = hslToRgb(hue, 54, Math.max(38, lightness - 24));
   return {
     score,
-    background: `hsl(${hue} 72% ${lightness}%)`,
-    border: `hsl(${hue} 54% ${Math.max(38, lightness - 24)}%)`,
-    foreground: `hsl(${hue} 48% 22%)`,
+    background: `rgb(${bg.join(", ")})`,
+    backgroundStrong: mixRgb(bg, border, 0.82),
+    border: `rgb(${border.join(", ")})`,
+    foreground: `rgb(${hslToRgb(hue, 48, 22).join(", ")})`,
   };
 }
 

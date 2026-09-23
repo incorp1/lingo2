@@ -626,7 +626,7 @@ function patchBrowseRow(row, card, index) {
   row.setAttribute("aria-selected", String(bulkSelected.has(card.id)));
 
   const frontWord = row.querySelector(".browse-front-word");
-  frontWord.style.setProperty("--difficulty-bg", `color-mix(in srgb, ${visual.background} 82%, ${visual.border} 18%)`);
+  frontWord.style.setProperty("--difficulty-bg", visual.backgroundStrong);
   frontWord.style.setProperty("--difficulty-border", visual.border);
   frontWord.style.setProperty("--difficulty-fg", visual.foreground);
   frontWord.dataset.difficultyScore = String(visual.score);

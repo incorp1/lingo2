@@ -33,6 +33,7 @@
 - Версия ассетов PWA живёт в файле `VERSION` и проставляется автоматически: git-хук `.githooks/pre-commit` (включается один раз `git config core.hooksPath .githooks`) и workflow `.github/workflows/bump-version.yml`. Вручную версии в `index.html`, `sw.js`, `js/stats.js` не правь. Версия в `package.json` — отдельная метка пакета и не обязана совпадать с `VERSION`.
 - Никогда не правь `VERSION` вручную (в т.ч. через веб-интерфейс GitHub): это меняет только файл, а `?v=` в `index.html`/`sw.js` остаются старыми, кэш PWA не сбрасывается и изменения не видны. Всегда `node tools/bump-version.mjs`. Синхронность проверяет `tests/version-sync.test.js`.
 - Поле `#browseSearch` сбрасывает глобальный слой полей из `css/base.css` селектором по id (конец `css/features.css`); рамку рисует только обёртка `.browse-search`.
+- Цвета сложности (`difficultyStyle` в `js/state.js`) возвращаются только в `rgb()`; смешивание делается в JS (`backgroundStrong`). Не записывать `color-mix()` в CSS-переменные из JS: Safari 15 (iPhone 7) считает переменную невалидной и заливка/цвет слова пропадают.
 
 
 ## 3. Обязательные ограничения

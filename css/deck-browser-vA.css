@@ -247,6 +247,7 @@
     background: var(--bg-elev);
   }
   #deckBrowse .table-row.is-selected {
+    box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px var(--accent);
     box-shadow: inset 3px 0 0 var(--accent), inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
     background: var(--accent-soft);
   }
@@ -308,7 +309,7 @@
   #deckBrowse .browse-state .state-pill {
     padding: 2px 6px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--panel) 62%, transparent);
+    background: rgba(127, 127, 127, .12); background: color-mix(in srgb, var(--panel) 62%, transparent);
     color: var(--difficulty-fg); color: color-mix(in srgb, var(--difficulty-fg) 78%, var(--ink-muted));
     font-size: 10.5px;
     font-weight: 600;

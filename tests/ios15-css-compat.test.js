@@ -26,3 +26,9 @@ test("поле поиска в колоде без нативной рамки i
   const css = readFileSync(path.join(cssDir, "features.css"), "utf8");
   assert.match(css, /\.browse-search input\[type="search"\]\s*\{[^}]*-webkit-appearance:\s*none/);
 });
+
+test("цвета сложности из JS без color-mix (Safari 15)", () => {
+  const js = ["state.js", "decks.js", "ai-practice.js"].map(f => readFileSync(path.join(__dirname, "..", "js", f), "utf8")).join("\n");
+  assert.doesNotMatch(js, /color-mix\(/);
+  assert.match(js, /backgroundStrong: mixRgb/);
+});
