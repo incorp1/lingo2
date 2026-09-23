@@ -937,3 +937,108 @@
     font-size: clamp(11px, 3.1vw, 12px);
   }
 }
+/*
+ * Единая сетка строк в разделах «Обучение», «Генерация», «Карточка и звук»,
+ * «Язык и оформление». Этот блок — последний источник истины для геометрии
+ * строк и полей: подпись слева, контрол справа по центру строки, поля одной
+ * высоты без лишних отступов. Safari 15: только :is(), без :has()/dvh/color-mix.
+ */
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(128px, 44%);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  height: auto;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 0;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.toggle {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.with-hint {
+  align-items: center;
+  padding: 10px 0;
+}
+.view-settings #settings-appearance .appearance-settings-block .settings-row {
+  padding: 10px 14px;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row > div:first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row label {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row .row-hint {
+  margin: 0;
+  max-width: none;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row :is(input[type="text"], input[type="number"], input[type="password"], select) {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0;
+  max-width: 100%;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  margin: 0;
+  padding: 0 10px !important;
+  justify-self: stretch;
+  align-self: center;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 16px; /* < 16px заставляет iOS Safari зумить страницу при фокусе */
+  font-weight: 500;
+  line-height: normal;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row select {
+  padding-right: 30px !important;
+  text-overflow: ellipsis;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row input[type="number"] {
+  text-align: center;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 64px;
+  height: auto;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 16px;
+  line-height: 1.4;
+  resize: vertical;
+}
+/* Составные контролы занимают всю ширину строки под подписью. */
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row:is(.ai-mode-row, .settings-control-stack, .ai-prompt-list-row, .ai-model-row, .tts-rate-row, .backup-actions) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.view-settings :is(#settings-learning, #settings-generation) :is(.ai-model-controls, .ai-key-row) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.view-settings :is(#settings-learning, #settings-generation) :is(.ai-model-controls, .ai-key-row) > :is(select, input) {
+  flex: 1 1 auto;
+}
+.view-settings :is(#settings-learning, #settings-generation) :is(.ai-model-controls, .ai-key-row) > .btn {
+  flex: 0 0 auto;
+  min-height: 40px;
+}
+@media (max-width: 360px) {
+  .view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.with-hint:not(.toggle) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
