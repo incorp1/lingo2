@@ -656,8 +656,17 @@
 .word-info-word { margin-top: 2px; font-size: 13px; color: var(--ink-muted); }
 .word-info-body { overflow-y: auto; }
 /* ----- Word info typography: structured, comfortable reading ----- */
-.word-info-content { overflow-wrap: anywhere; font-size: 14.5px; line-height: 1.62; }
-.word-info-content p.word-info-para { margin: 0 0 9px; }
+/* Shared reading typography for «Информация о слове» and «Практика чтения».
+   Change only these tokens so both windows stay identical.
+   Paragraph gap is a fixed px value (not em) so it is the same in both
+   windows despite their different font sizes. */
+:root {
+  --reading-line-height: 1.45;
+  --reading-paragraph-gap: 9px;
+}
+.word-info-content { overflow-wrap: anywhere; font-size: 14.5px; line-height: var(--reading-line-height); }
+.word-info-content p.word-info-para { margin: 0 0 var(--reading-paragraph-gap); }
+.word-info-content p.word-info-para:last-child { margin-bottom: 0; }
 .word-info-content .word-info-quote { font-style: italic; color: var(--accent); }
 .word-info-content strong { font-weight: 700; }
 .word-info-content h3.word-info-subject {

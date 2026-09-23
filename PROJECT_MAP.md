@@ -49,6 +49,7 @@
 | После перезапуска пропадают правки | место изменения → dirty-флаг → `js/state.js` → `saveAndFlush` | `storage.js` читать только после проверки этой цепочки |
 | Пустой экран при старте | `js/app-shell.js` → завершающий async-блок, сообщение `Boot failed` | `js/state.js` → `initState`; порядок `<script>` в `index.html`; ошибка консоли |
 | Справка о слове (кнопка «i» на карточке) | `js/study.js` → `openWordInfo`, `wordInfoInline` | `index.html` → `wordInfoModal`; `css/study.css`, `css/features.css`; `ai.js` |
+| Межстрочный интервал и отступ абзаца в «Информация о слове» и «Практика чтения» | общие токены `--reading-line-height`, `--reading-paragraph-gap` | `css/study.css` (`:root` рядом с `.word-info-content`); используются в `.practice-story-body` (`css/features.css`) — менять только токены |
 | Не приходит обновление / не работает офлайн | `js/stats.js` → `registerSW`, `applyServiceWorkerUpdate` | `sw.js`, `_headers`, раздел 6 этой карты |
 | Баннер/оверлей обновления приложения | `js/stats.js` → работа с `#updateNotice`, `#updateOverlay` | `index.html` → `updateNotice`, `updateOverlay`; `css/stats-settings.css` |
 | Версия ассетов не обновилась на iPhone | `tools/bump-version.mjs`, `VERSION` | `.githooks/pre-commit`, `.github/workflows/bump-version.yml`, раздел 6 |

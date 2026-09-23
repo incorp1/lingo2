@@ -511,9 +511,10 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 }
 .practice-story-body {
   font-family: var(--font-serif);
-  font-size: 18px; line-height: 1.7; color: var(--ink);
+  font-size: 18px; line-height: var(--reading-line-height, 1.45); color: var(--ink);
 }
-.practice-story-body p { margin: 0 0 12px; }
+/* Line height and paragraph gap are shared with .word-info-content (css/study.css). */
+.practice-story-body p { margin: 0 0 var(--reading-paragraph-gap, 9px); }
 .practice-story-body p:last-child { margin-bottom: 0; }
 .practice-target {
   background: var(--accent-soft); color: var(--accent);
