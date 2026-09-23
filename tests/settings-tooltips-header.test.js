@@ -260,6 +260,9 @@ test("interactive swipe-back is universal and bound to settings and decks", () =
   assert.match(ui, /initializeDeckBrowseSwipe\(\)/);
   assert.match(ui, /getUnder: \(\) => \$\("#decksOverview"\)/);
   assert.doesNotMatch(ui, /settingsEdgeSwipeBack/);
+  assert.match(ui, /g\.under\.inert = g\.underWasInert;\n    if \(restoreUnderHidden\)/, "inert всегда снимается");
+  assert.match(ui, /g\.panel\.style\.minHeight/, "панель до низа экрана");
+  assert.match(css, /\[data-swipe-back-fade\]/);
   assert.match(css, /\.swipe-back-active > \.swipe-back-under::after/);
   assert.doesNotMatch(css, /swipe-back[^{]*#/);
 });

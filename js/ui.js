@@ -638,7 +638,7 @@ function animateSettingsBack(targetRoute) {
    scrolling. Styles live in css/polish.css (.swipe-back-*). */
 const SWIPE_BACK_LOCK_PX = 10;
 const SWIPE_BACK_PARALLAX = 0.3;
-const SWIPE_BACK_DIM = 0.14;
+const SWIPE_BACK_DIM = 0.32;
 const SWIPE_BACK_NO_START = 'input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [data-no-swipe-back]';
 
 function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll = () => 0, isWindowScroll = false, onCommit }) {
@@ -654,6 +654,7 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
     g.panel.style.transform = `translate3d(${x}px,0,0)`;
     g.under.style.transform = `translate3d(${-g.width * SWIPE_BACK_PARALLAX * (1 - progress)}px,0,0)`;
     container.style.setProperty("--swipe-back-dim", String(SWIPE_BACK_DIM * (1 - progress)));
+    container.style.setProperty("--swipe-back-progress", String(progress));
   };
 
   const begin = g => {
@@ -675,16 +676,23 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
     g.under.style.top = `${pRect.top - cRect.top + scrollInside + currentScroll() - g.underScroll}px`;
     g.under.style.left = `${pRect.left - cRect.left}px`;
     g.under.style.width = `${pRect.width}px`;
+    // The detail panel must cover everything down to the viewport bottom,
+    // otherwise short sections leave the parent visible below them.
+    g.panel.style.minHeight = `${Math.max(pRect.height, window.innerHeight - pRect.top)}px`;
   };
 
   const cleanup = (g, restoreUnderHidden) => {
     container.classList.remove("swipe-back-active", "swipe-back-settling");
     container.style.removeProperty("--swipe-back-dim");
     container.style.removeProperty("--swipe-back-ms");
+    container.style.removeProperty("--swipe-back-progress");
     g.panel.classList.remove("swipe-back-panel");
     g.under.classList.remove("swipe-back-under");
-    for (const el of [g.panel, g.under]) el.style.transform = el.style.top = el.style.left = el.style.width = "";
-    if (restoreUnderHidden) { g.under.hidden = g.underWasHidden; g.under.inert = g.underWasInert; }
+    for (const el of [g.panel, g.under]) el.style.transform = el.style.top = el.style.left = el.style.width = el.style.minHeight = "";
+    // inert is ALWAYS restored: leaving it set made the parent screen
+    // permanently non-interactive after a committed swipe.
+    g.under.inert = g.underWasInert;
+    if (restoreUnderHidden) g.under.hidden = g.underWasHidden;
     settling = false;
   };
 
@@ -706,7 +714,7 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
   const cancel = (g, velocity = 0) => settle(g, 0, velocity, () => cleanup(g, true));
   const commit = (g, velocity) => settle(g, g.width, velocity, () => {
     cleanup(g, false);
-    if (onCommit() === false) { g.under.hidden = g.underWasHidden; g.under.inert = g.underWasInert; return; }
+    if (onCommit() === false) { g.under.hidden = g.underWasHidden; return; }
     if (isWindowScroll) window.scrollTo(0, g.underScroll); else container.scrollTop = g.underScroll;
   });
 
