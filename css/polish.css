@@ -1424,13 +1424,9 @@ select {
   backface-visibility: hidden;
   will-change: transform;
 }
-/* Soft leading edge: the departing card dissolves into the parent through
-   a gradient alpha mask instead of a hard cut. The -webkit- prefix is
-   required on Safari 15 (iPhone 7). */
-.swipe-back-active > .swipe-back-panel {
-  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.35) 12px, rgba(0, 0, 0, 0.8) 26px, #000 44px);
-  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.35) 12px, rgba(0, 0, 0, 0.8) 26px, #000 44px);
-}
+/* Soft leading edge: the departing card dissolves into the parent through a
+   gradient alpha mask whose width grows with the dragged distance. The mask
+   is written inline per frame by bindSwipeBack (js/ui.js). */
 .swipe-back-active > .swipe-back-under {
   display: block;
   position: absolute;

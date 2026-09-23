@@ -639,6 +639,9 @@ function animateSettingsBack(targetRoute) {
 const SWIPE_BACK_LOCK_PX = 10;
 const SWIPE_BACK_PARALLAX = 0.3;
 const SWIPE_BACK_DIM = 0.32;
+// Leading-edge fade width grows with the dragged distance.
+const SWIPE_BACK_FADE_MIN_PX = 8;
+const SWIPE_BACK_FADE_MAX_RATIO = 0.45;
 const SWIPE_BACK_NO_START = 'input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [data-no-swipe-back]';
 
 function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll = () => 0, isWindowScroll = false, onCommit }) {
@@ -653,6 +656,12 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
   const apply = (g, x) => {
     const progress = Math.min(1, Math.max(0, x / g.width));
     g.panel.style.transform = `translate3d(${x}px,0,0)`;
+    const fade = Math.round(SWIPE_BACK_FADE_MIN_PX + progress * g.width * SWIPE_BACK_FADE_MAX_RATIO);
+    // Set inline (not via var()) — Safari 15 does not reliably repaint masks
+    // driven by custom properties.
+    const mask = `linear-gradient(to right, rgba(0,0,0,0) 0, rgba(0,0,0,0.35) ${Math.round(fade * 0.3)}px, rgba(0,0,0,0.8) ${Math.round(fade * 0.6)}px, #000 ${fade}px)`;
+    g.panel.style.webkitMaskImage = mask;
+    g.panel.style.maskImage = mask;
     g.under.style.transform = `translate3d(${-g.width * SWIPE_BACK_PARALLAX * (1 - progress)}px,0,0)`;
     container.style.setProperty("--swipe-back-dim", (SWIPE_BACK_DIM * (1 - progress)).toFixed(3));
     container.style.setProperty("--swipe-back-progress", progress.toFixed(3));
@@ -702,6 +711,7 @@ function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll
     g.panel.classList.remove("swipe-back-panel");
     g.under.classList.remove("swipe-back-under");
     for (const el of [g.panel, g.under]) el.style.transform = el.style.top = el.style.left = el.style.width = el.style.minHeight = "";
+    g.panel.style.webkitMaskImage = g.panel.style.maskImage = "";
     // inert is ALWAYS restored: leaving it set made the parent screen
     // permanently non-interactive after a committed swipe.
     g.under.inert = g.underWasInert;
