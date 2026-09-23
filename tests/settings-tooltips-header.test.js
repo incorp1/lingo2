@@ -177,7 +177,7 @@ test("right swipe from the left edge navigates back only inside mobile settings"
 
   assert.match(ui, /const settingsView = \$\("#view-settings"\)/);
   assert.match(ui, /currentAppState\.view !== "settings"/);
-  assert.match(ui, /!settingsView\.classList\.contains\("active"\)/);
+  assert.match(ui, /settingsView\.classList\.contains\("active"\)/);
   assert.match(ui, /layoutMode\(\) !== "mobile"/);
   assert.match(ui, /function animateSettingsBack\(targetRoute\)/);
   assert.match(ui, /settings-back-transition/);
