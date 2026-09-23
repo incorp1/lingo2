@@ -185,7 +185,6 @@ async function applyServiceWorkerUpdate({ button = null, automatic = false } = {
       const draftsCommitted = commitSettingsDrafts("service-worker-update");
       if (!draftsCommitted) {
         if (button) button.disabled = false;
-        updatePwaStatus("update");
         const notice = $("#updateNotice");
         if (notice) notice.hidden = false;
         return false;
@@ -213,7 +212,6 @@ async function applyServiceWorkerUpdate({ button = null, automatic = false } = {
       swUpdateFallbackTimer = null;
     }
     if (button) button.disabled = false;
-    updatePwaStatus("update");
     const notice = $("#updateNotice");
     if (notice) notice.hidden = false;
     return false;
@@ -239,7 +237,6 @@ function maybeApplyStandaloneUpdate(registration) {
 
 function showUpdateAvailable(registration) {
   swRegistration = registration;
-  updatePwaStatus("update");
   const notice = $("#updateNotice");
   if (notice) {
     notice.hidden = false;
@@ -284,12 +281,7 @@ function requestServiceWorkerUpdate() {
 }
 
 function registerSW() {
-  updatePwaStatus();
-  window.addEventListener("online", () => {
-    updatePwaStatus(swRegistration?.waiting ? "update" : "online");
-    requestServiceWorkerUpdate();
-  });
-  window.addEventListener("offline", () => updatePwaStatus("offline"));
+  window.addEventListener("online", requestServiceWorkerUpdate);
   window.addEventListener("pageshow", requestServiceWorkerUpdate);
   document.addEventListener?.("visibilitychange", requestServiceWorkerUpdate);
   $("#applyUpdateBtn")?.addEventListener("click", event => {
@@ -304,19 +296,7 @@ function registerSW() {
     requestServiceWorkerUpdate();
   }).catch(err => {
     console.warn("SW register failed", err);
-    updatePwaStatus(navigator.onLine ? "online" : "offline");
   });
-}
-
-function updatePwaStatus(status = navigator.onLine ? "online" : "offline") {
-  const indicator = $("#pwaStatus");
-  if (!indicator) return;
-  const key = status === "update" ? "pwa.updateAvailable" : status === "offline" ? "pwa.offline" : "pwa.online";
-  const label = t(key);
-  indicator.dataset.status = status;
-  indicator.textContent = "";
-  indicator.setAttribute("aria-label", label);
-  indicator.title = label;
 }
 
 function formatDue(ms) {

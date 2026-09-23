@@ -648,17 +648,6 @@ async function ensureDifficultyCaches() {
   return staleCards.length;
 }
 
-function updateSaveStatus(status = window.LCStorage.getStatus?.().status || "saved") {
-  const indicator = $("#saveStatus");
-  if (!indicator) return;
-  const key = status === "saving" ? "storage.saving" : status === "error" ? "storage.error" : "storage.saved";
-  const label = t(key);
-  indicator.dataset.status = status;
-  indicator.textContent = "";
-  indicator.setAttribute("aria-label", label);
-  indicator.title = label;
-}
-
 async function flushState() {
   await window.LCStorage.flush();
 }
@@ -686,7 +675,6 @@ async function mutateAndFlush(mutator) {
 
 function reportSaveError(error) {
   console.error("Save failed", error);
-  updateSaveStatus("error");
 }
 
 function normalizeStudyCycles(raw, cards) {
@@ -945,7 +933,6 @@ function adoptLoadedState(value) {
 }
 
 function bindStorageEvents() {
-  window.addEventListener("lcstorage:status", event => updateSaveStatus(event.detail?.status));
   window.addEventListener("lcstorage:statecommitted", event => {
     if (!state) return;
     state.revision = event.detail?.revision || state.revision;
@@ -962,7 +949,6 @@ function bindStorageEvents() {
     }
     if (event.detail?.value) adoptLoadedState(event.detail.value);
   });
-  updateSaveStatus();
 }
 
 function isStudyViewActive() {

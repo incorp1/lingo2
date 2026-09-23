@@ -405,9 +405,6 @@ function applyLanguage() {
   $$(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === window.I18N_LANG));
   // Re-render dynamic content
   renderDeckSelector();
-  if (typeof updatePwaStatus === "function") {
-    updatePwaStatus($("#pwaStatus")?.dataset.status || (navigator.onLine ? "online" : "offline"));
-  }
   if ($("#view-study").classList.contains("active")) renderStudy();
   if ($("#view-decks").classList.contains("active")) renderDecks();
   if ($("#view-stats").classList.contains("active")) renderStats();

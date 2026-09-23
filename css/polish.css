@@ -15,7 +15,7 @@
   }
 
   .topbar {
-    padding: 8px 12px 7px;
+    padding: 0 12px;
     gap: 7px;
   }
   .page-title { font-size: 18px; line-height: 1.15; }

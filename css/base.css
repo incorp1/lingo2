@@ -255,62 +255,14 @@ label, select, .info-tip, .stat-chip, .table-row { touch-action: manipulation; }
 
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 28px;
+  /* Вертикальный padding намеренно 0 во всех брейкпоинтах (base/polish/mobile). */
+  padding: 0 28px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   position: sticky; top: 0; z-index: 5;
   gap: 12px;
 }
 .topbar-left { display: flex; align-items: center; gap: 10px; }
-.status-indicators {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 6px);
-  right: 8px;
-  z-index: 80;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 9px;
-  pointer-events: none;
-}
-.save-status,
-.pwa-status {
-  width: 8px;
-  height: 8px;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 8px;
-  font-size: 0;
-  line-height: 1;
-}
-.save-status::before {
-  content: "✓";
-  color: var(--good);
-  font-family: var(--font-sans);
-  font-size: 12px;
-  line-height: 1;
-  font-weight: 800;
-  transform: scale(.75);
-}
-.save-status[data-status="saving"]::before {
-  content: "!";
-  color: var(--warn);
-  animation: save-status-pulse .9s ease-in-out infinite alternate;
-}
-.save-status[data-status="error"]::before {
-  content: "×";
-  color: var(--bad);
-}
-@keyframes save-status-pulse { to { opacity: .28; } }
-.pwa-status::before {
-  content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--good);
-}
-.pwa-status[data-status="offline"]::before { background: var(--bad); }
-.pwa-status[data-status="update"]::before { background: var(--warn); }
 .topbar-right { display: flex; align-items: center; gap: 12px; min-width: 0; flex-wrap: wrap; justify-content: flex-end; }
 .topbar-tools { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
 
