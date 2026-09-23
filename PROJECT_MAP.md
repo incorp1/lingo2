@@ -55,6 +55,7 @@
 | Баннер/оверлей обновления приложения | `js/stats.js` → работа с `#updateNotice`, `#updateOverlay` | `index.html` → `updateNotice`, `updateOverlay`; `css/stats-settings.css` |
 | Версия ассетов не обновилась на iPhone | `tools/bump-version.mjs`, `VERSION` | `.githooks/pre-commit`, `.github/workflows/bump-version.yml`, раздел 6 |
 | Под открытой модалкой прокручивается/свайпается экран | `js/ui.js` → `bindModalScrollLock`, `syncModalScrollLock` (работает для всех `.modal` автоматически) | `css/stats-settings.css` → `html.modal-scroll-locked`; тест `modal-scroll-lock.test.js` |
+| Фон/подсветка кнопки остаётся после тапа | `@media (hover: hover)` вокруг `:hover`; `css/base.css` → `-webkit-tap-highlight-color` | `node tools/fix-hover.mjs`; тест `hover-guard.test.js` |
 | Клавиатура перекрывает элементы iPhone | `js/app-shell.js` → `updateAppViewportHeight`, `updateSettingsViewport` | `css/mobile.css`, профильный CSS; события `focusin` / `focusout` |
 
 
@@ -81,6 +82,7 @@
 ├── icon-192.png / icon-512.png  Иконки PWA
 ├── select-arrow.png            Графика select
 ├── VERSION                     Единственный источник версии ассетов PWA (?v=, CACHE, SERVICE_WORKER_URL)
+├── tools/fix-hover.mjs       Оборачивает :hover в @media (hover: hover)
 ├── tools/bump-version.mjs      Скрипт синхронного подъёма версии во всех ссылках
 ├── .githooks/pre-commit        Локальный автоподъём версии при коммите кода приложения
 ├── .github/workflows/bump-version.yml  Тот же подъём версии на стороне GitHub Actions
@@ -314,6 +316,7 @@ SW обслуживает навигацию из кэша с фоновым о�
 | Направление перевода выделения, юникод-буквы | `selection-translate-direction.test.js`, `selection-unicode-letters.test.js` |
 | Таб-бар при открытом select | `select-keeps-tabbar.test.js` |
 | Блокировка прокрутки под модалками | `modal-scroll-lock.test.js` |
+| Hover только для мыши, без фона при тапе | `hover-guard.test.js` |
 | Сводные исправления по анализу | `analysis-fixes.test.js` |
 
 Файлы `language-storage-harness.cjs` и `legacy-language-fixture.cjs` — вспомогательные хелперы, а не самостоятельные тесты.

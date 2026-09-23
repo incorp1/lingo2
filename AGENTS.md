@@ -47,6 +47,8 @@
 
 - Прокрутка под модалками блокируется глобально (`bindModalScrollLock` в `js/ui.js`) для любого `.modal`: новые окна делай с классом `.modal` и атрибутом `hidden`, своих блокировок скролла не добавляй. Прокручиваемая область внутри окна должна иметь `overflow-y: auto|scroll`.
 
+- Фон при тапе: все правила с `:hover` — только внутри `@media (hover: hover)` (iOS «залипает» в :hover после тапа). Приводится автоматически: `node tools/fix-hover.mjs`; страж — `tests/hover-guard.test.js`. Системная подсветка отключена глобально в `css/base.css` (`-webkit-tap-highlight-color`).
+
 ### Совместимость с iPhone 7 (Safari 15 / iOS 15)
 Каждая правка CSS/JS обязана корректно работать и выглядеть на iPhone 7 (максимум iOS 15; ориентир — Safari 15.0).
 - `color-mix()` — только внутри `@supports (color: color-mix(...))`, базовое правило — готовый цвет (`node tools/fix-color-mix.mjs`).

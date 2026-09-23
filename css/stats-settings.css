@@ -31,7 +31,9 @@
   min-height: 2px;
   transition: background .15s;
 }
+@media (hover: hover) {
 .bar-chart .bar:hover { background: var(--accent); }
+}
 .bar-chart .bar::after {
   content: attr(data-day);
   position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
@@ -43,7 +45,9 @@
   padding: 3px 8px; border-radius: 4px; font-size: 12px;
   opacity: 0; pointer-events: none; transition: opacity .12s; white-space: nowrap;
 }
+@media (hover: hover) {
 .bar-chart .bar:hover .tip { opacity: 1; }
+}
 
 /* Settings */
 .settings-route-panel[hidden] { display: none !important; }
@@ -93,7 +97,9 @@
   margin-bottom: 6px;
 }
 .settings-route-btn:last-child { margin-bottom: 0; }
+@media (hover: hover) {
 .settings-route-btn:hover { background: var(--bg-elev); border-color: var(--border-strong); }
+}
 .settings-route-btn:active { background: var(--accent-soft); }
 .settings-route-btn:focus-visible {
   outline: 2px solid var(--accent);
@@ -297,7 +303,9 @@
   cursor: pointer;
 }
 .study-mode-menu label + label { border-top: 1px solid var(--border); }
+@media (hover: hover) {
 .study-mode-menu label:hover { background: var(--bg-elev); }
+}
 .study-mode-menu input[type="checkbox"] { flex: none; width: 18px; height: 18px; }
 /* Both picker menus must escape the compact settings card on iPhone. */
 .card-front-mode-block {
@@ -351,7 +359,9 @@
   transition: transform .2s ease, color .12s;
   pointer-events: none;
 }
+@media (hover: hover) {
 .button-block .block-header:hover .chevron { color: var(--ink-muted); }
+}
 .button-block.collapsed .block-header { margin-bottom: 0; padding-bottom: 0; border-bottom-color: transparent; }
 .button-block.collapsed .block-header .chevron { transform: translateY(-50%) rotate(0deg); }
 .button-block.collapsed .settings-row,
@@ -455,7 +465,9 @@ html.modal-scroll-locked body { overflow: hidden; }
   font-weight: 650;
   cursor: pointer;
 }
+@media (hover: hover) {
 .duplicate-word:hover { border-bottom-style: solid; }
+}
 .duplicate-word:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 .modal-backdrop {
   position: absolute; inset: 0;
@@ -502,7 +514,9 @@ html.modal-scroll-locked body { overflow: hidden; }
   border-color: var(--bad);
   color: #fff;
 }
+@media (hover: hover) {
 .btn.danger:hover { filter: brightness(.94); }
+}
 .btn.danger:focus-visible { outline: 3px solid var(--bad-soft); outline-offset: 2px; }
 @supports (color: color-mix(in srgb, red 50%, blue)) {
   .btn.danger:focus-visible { outline: 3px solid color-mix(in srgb, var(--bad) 28%, transparent); }
@@ -564,7 +578,9 @@ textarea:focus-visible {
 }
 .toast-action:hover { background: transparent; }
 @supports (color: color-mix(in srgb, red 50%, blue)) {
-  .toast-action:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+  @media (hover: hover) {
+.toast-action:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+}
 }
 .toast-action:disabled { opacity: .55; cursor: default; }
 .toast[hidden] { display: none; }
@@ -785,7 +801,9 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
   cursor: pointer;
   transition: background 0.12s;
 }
+@media (hover: hover) {
 .settings-back-btn:hover { background: var(--accent-soft); }
+}
 .settings-back-btn svg { width: 16px; height: 16px; }
 .settings-panel-title {
   font-family: var(--font-serif);
@@ -839,7 +857,9 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
   transition: background 0.1s;
   touch-action: manipulation;
 }
+@media (hover: hover) {
 .stepper-btn:hover { background: var(--bg-elev); }
+}
 .stepper-btn:active { background: var(--accent-soft); }
 .stepper-input {
   width: 52px;
@@ -993,7 +1013,9 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
   background: var(--accent);
   color: #fff;
 }
+@media (hover: hover) {
 .algo-option:not(.active):hover { background: var(--bg-elev); }
+}
 
 /* P23: FSRS retention slider */
 .retention-row {
@@ -1067,7 +1089,9 @@ body.is-updating > *:not(.update-overlay) { pointer-events: none; }
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
+@media (hover: hover) {
 .expert-link-btn:hover { background: var(--bg-elev); color: var(--ink); }
+}
 
 /* P25-P26: Expert panel sections */
 .expert-section {

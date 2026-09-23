@@ -86,6 +86,10 @@
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
+/* Универсально: системная серая подсветка iOS при тапе отключена для всего
+   приложения; hover-фоны — только в @media (hover: hover) (tools/fix-hover.mjs). */
+html, body, * { -webkit-tap-highlight-color: transparent; }
+
 /* Универсально: после касания/мыши и программного фокуса кольцо не рисуется. */
 html.pointer-input :focus,
 html.pointer-input :focus-visible,
@@ -233,7 +237,9 @@ label, select, .info-tip, .stat-chip, .table-row { touch-action: manipulation; }
   transition: background .12s, color .12s;
 }
 .nav-item svg { width: 18px; height: 18px; flex: none; }
+@media (hover: hover) {
 .nav-item:hover { background: var(--bg-elev); color: var(--ink); }
+}
 .nav-item.active {
   background: var(--accent-soft);
   color: var(--accent);
@@ -312,7 +318,9 @@ label, select, .info-tip, .stat-chip, .table-row { touch-action: manipulation; }
   transition: background .12s, color .12s;
   font-family: var(--font-mono);
 }
+@media (hover: hover) {
 .lang-btn:hover { color: var(--ink); }
+}
 .lang-btn.active {
   background: var(--accent-soft);
   color: var(--accent);

@@ -585,7 +585,9 @@
   background: transparent;
 }
 @supports (color: color-mix(in srgb, red 50%, blue)) {
-  .view-settings #settings-data .settings-action-row:hover { background: color-mix(in srgb, var(--accent-soft) 42%, transparent); }
+  @media (hover: hover) {
+.view-settings #settings-data .settings-action-row:hover { background: color-mix(in srgb, var(--accent-soft) 42%, transparent); }
+}
 }
 
 .view-settings #settings-data .settings-action-row:active {

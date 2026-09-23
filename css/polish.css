@@ -58,21 +58,36 @@
     .topbar-right .topbar-add { border-color: color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
   .topbar-right .btn.topbar-bulk { color: var(--ink-muted); }
-  .topbar-right .topbar-add:hover,
   .topbar-right .topbar-add:active {
     border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent-hover);
   }
-  @supports (color: color-mix(in srgb, red 50%, blue)) {
-    .topbar-right .topbar-add:hover, .topbar-right .topbar-add:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+@media (hover: hover) {
+.topbar-right .topbar-add:hover {
+    border-color: var(--border);
+    background: var(--accent-soft);
+    color: var(--accent-hover);
   }
-  .topbar-right .btn.topbar-bulk:hover,
+}
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .topbar-right .topbar-add:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+@media (hover: hover) {
+.topbar-right .topbar-add:hover { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+}
+  }
   .topbar-right .btn.topbar-bulk:active {
     border-color: var(--border-strong);
     background: var(--panel);
     color: var(--ink);
   }
+@media (hover: hover) {
+.topbar-right .btn.topbar-bulk:hover {
+    border-color: var(--border-strong);
+    background: var(--panel);
+    color: var(--ink);
+  }
+}
   .topbar-right .btn.topbar-study,
   .topbar-right .icon-btn.topbar-tool {
     width: 32px;
@@ -153,21 +168,36 @@
     .browse-toolbar #addCardBtn2 { border-color: color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
   .browse-toolbar #bulkBrowseBtn { color: var(--ink-muted); }
-  .browse-toolbar #addCardBtn2:hover,
   .browse-toolbar #addCardBtn2:active {
     border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent-hover);
   }
-  @supports (color: color-mix(in srgb, red 50%, blue)) {
-    .browse-toolbar #addCardBtn2:hover, .browse-toolbar #addCardBtn2:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+@media (hover: hover) {
+.browse-toolbar #addCardBtn2:hover {
+    border-color: var(--border);
+    background: var(--accent-soft);
+    color: var(--accent-hover);
   }
-  .browse-toolbar #bulkBrowseBtn:hover,
+}
+  @supports (color: color-mix(in srgb, red 50%, blue)) {
+    .browse-toolbar #addCardBtn2:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+@media (hover: hover) {
+.browse-toolbar #addCardBtn2:hover { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+}
+  }
   .browse-toolbar #bulkBrowseBtn:active {
     border-color: var(--border-strong);
     background: var(--panel);
     color: var(--ink);
   }
+@media (hover: hover) {
+.browse-toolbar #bulkBrowseBtn:hover {
+    border-color: var(--border-strong);
+    background: var(--panel);
+    color: var(--ink);
+  }
+}
 
   select.filter,
   .settings-row select,
@@ -309,16 +339,18 @@
     text-decoration: none;
     transition: color .14s, background .14s, border-color .14s, box-shadow .14s, transform .08s;
   }
-  .settings-block .settings-row .btn:hover,
-  .modal-foot .btn:hover,
-  .selection-pop-actions .btn:hover,
-  #smartDefaultsBtn:hover,
-  #reviewAdvancedToggle:hover,
-  .ai-gen-btn:hover:not(.loading) {
+  @media (hover: hover) {
+.settings-block .settings-row .btn:hover,
+.modal-foot .btn:hover,
+.selection-pop-actions .btn:hover,
+#smartDefaultsBtn:hover,
+#reviewAdvancedToggle:hover,
+.ai-gen-btn:hover:not(.loading) {
     border-color: var(--border-strong);
     background: var(--panel);
     color: var(--ink);
   }
+}
   .settings-block .settings-row .btn:active,
   .modal-foot .btn:active,
   .selection-pop-actions .btn:active,
@@ -341,16 +373,23 @@
   @supports (color: color-mix(in srgb, red 50%, blue)) {
     .settings-block .settings-row .btn.primary, .selection-pop-actions .btn.primary, #smartDefaultsBtn, .ai-gen-btn { border-color: color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
-  .settings-block .settings-row .btn.primary:hover,
-  .selection-pop-actions .btn.primary:hover,
-  #smartDefaultsBtn:hover,
-  .ai-gen-btn:hover:not(.loading) {
+  @media (hover: hover) {
+.settings-block .settings-row .btn.primary:hover,
+.selection-pop-actions .btn.primary:hover,
+#smartDefaultsBtn:hover,
+.ai-gen-btn:hover:not(.loading) {
     border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent-hover);
   }
+}
   @supports (color: color-mix(in srgb, red 50%, blue)) {
-    .settings-block .settings-row .btn.primary:hover, .selection-pop-actions .btn.primary:hover, #smartDefaultsBtn:hover, .ai-gen-btn:hover:not(.loading) { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+    @media (hover: hover) {
+.settings-block .settings-row .btn.primary:hover,
+.selection-pop-actions .btn.primary:hover,
+#smartDefaultsBtn:hover,
+.ai-gen-btn:hover:not(.loading) { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+}
   }
   .modal-foot .btn.primary {
     border-color: var(--accent);
@@ -361,11 +400,13 @@
   @supports (color: color-mix(in srgb, red 50%, blue)) {
     .modal-foot .btn.primary { box-shadow: 0 2px 7px color-mix(in srgb, var(--accent) 18%, transparent); }
   }
-  .modal-foot .btn.primary:hover {
+  @media (hover: hover) {
+.modal-foot .btn.primary:hover {
     border-color: var(--accent-hover);
     background: var(--accent-hover);
     color: #fff;
   }
+}
   .settings-block .settings-row .btn.danger,
   .modal-foot .btn.danger {
     border-color: var(--border);
@@ -398,16 +439,27 @@
   @supports (color: color-mix(in srgb, red 50%, blue)) {
     .deck-row .deck-actions .deck-study-btn, .decks-toolbar > .deck-tool-primary { border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border)); }
   }
-  .deck-row .deck-actions .deck-study-btn:hover,
   .deck-row .deck-actions .deck-study-btn:active,
-  .decks-toolbar > .deck-tool-primary:hover,
-  .decks-toolbar > .deck-tool-primary:active {
+.decks-toolbar > .deck-tool-primary:active {
     border-color: var(--border);
     background: var(--accent-soft);
     color: var(--accent-hover);
   }
+@media (hover: hover) {
+.deck-row .deck-actions .deck-study-btn:hover,
+.decks-toolbar > .deck-tool-primary:hover {
+    border-color: var(--border);
+    background: var(--accent-soft);
+    color: var(--accent-hover);
+  }
+}
   @supports (color: color-mix(in srgb, red 50%, blue)) {
-    .deck-row .deck-actions .deck-study-btn:hover, .deck-row .deck-actions .deck-study-btn:active, .decks-toolbar > .deck-tool-primary:hover, .decks-toolbar > .deck-tool-primary:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+    .deck-row .deck-actions .deck-study-btn:active,
+.decks-toolbar > .deck-tool-primary:active { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+@media (hover: hover) {
+.deck-row .deck-actions .deck-study-btn:hover,
+.decks-toolbar > .deck-tool-primary:hover { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+}
   }
   .deck-row .deck-actions .deck-icon-btn,
   .decks-toolbar > .btn.deck-tool:not(.deck-tool-primary) {
@@ -418,11 +470,13 @@
     border-radius: 9px;
     background: var(--bg-elev);
   }
-  .deck-row .deck-actions .deck-icon-btn:hover,
-  .decks-toolbar > .btn.deck-tool:not(.deck-tool-primary):hover {
+  @media (hover: hover) {
+.deck-row .deck-actions .deck-icon-btn:hover,
+.decks-toolbar > .btn.deck-tool:not(.deck-tool-primary):hover {
     border-color: var(--border-strong);
     background: var(--panel);
   }
+}
 
   .stats-grid { gap: 7px; margin-bottom: 10px; }
   .stat-card { padding: 10px; }
@@ -919,12 +973,18 @@ select {
   color: #fff;
   font-weight: 600;
 }
-.add-card-trigger:hover,
 .add-card-trigger:active,
 .add-card-trigger[aria-expanded="true"] {
   border-color: var(--accent-hover);
   background: var(--accent-hover);
   color: #fff;
+}
+@media (hover: hover) {
+.add-card-trigger:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: #fff;
+}
 }
 .add-card-trigger > svg:first-child { width: 14px; height: 14px; }
 .add-card-chevron { width: 13px; height: 13px; margin-left: 1px; transition: transform .14s ease; }
@@ -956,9 +1016,13 @@ select {
   text-align: left;
   cursor: pointer;
 }
-.add-card-menu button:hover,
 .add-card-menu button:focus-visible {
   background: var(--bg-elev);
+}
+@media (hover: hover) {
+.add-card-menu button:hover {
+  background: var(--bg-elev);
+}
 }
 .add-card-menu button:focus-visible {
   outline: 3px solid var(--accent);
@@ -1158,19 +1222,25 @@ select {
 .deck-study-btn {
   color: var(--accent);
 }
-#topbarAddBtn:hover,
 #topbarAddBtn:active,
 #topbarAddBtn[aria-expanded="true"],
-#addCardBtn2:hover,
 #addCardBtn2:active,
 #addCardBtn2[aria-expanded="true"],
-#newDeckBtn:hover,
 #newDeckBtn:active,
-.deck-study-btn:hover,
 .deck-study-btn:active {
   color: var(--accent-hover);
 }
+@media (hover: hover) {
+#topbarAddBtn:hover,
+#addCardBtn2:hover,
+#newDeckBtn:hover,
+.deck-study-btn:hover {
+  color: var(--accent-hover);
+}
+}
+@media (hover: hover) {
 .deck-icon-btn.danger:hover { color: var(--bad); }
+}
 .bare-icon-btn svg,
 .deck-icon-btn svg,
 .deck-study-btn svg,
@@ -1290,14 +1360,23 @@ select {
   @supports (color: color-mix(in srgb, red 50%, blue)) {
     .deck-row .deck-actions .deck-study-btn { border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); }
   }
-  .deck-row .deck-actions .deck-study-btn:hover,
   .deck-row .deck-actions .deck-study-btn:active {
     border: 1px solid var(--border);
     background: var(--accent-soft);
     color: var(--accent-hover);
   }
+@media (hover: hover) {
+.deck-row .deck-actions .deck-study-btn:hover {
+    border: 1px solid var(--border);
+    background: var(--accent-soft);
+    color: var(--accent-hover);
+  }
+}
   @supports (color: color-mix(in srgb, red 50%, blue)) {
-    .deck-row .deck-actions .deck-study-btn:hover, .deck-row .deck-actions .deck-study-btn:active { border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+    .deck-row .deck-actions .deck-study-btn:active { border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+@media (hover: hover) {
+.deck-row .deck-actions .deck-study-btn:hover { border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 82%, var(--panel)); }
+}
   }
   .deck-row .deck-actions .deck-study-btn svg {
     width: 15px;

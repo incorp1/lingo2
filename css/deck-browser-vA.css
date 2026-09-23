@@ -355,11 +355,15 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+@media (hover: hover) {
 #deckList .deck-row:hover { border-color: var(--border-strong); }
+}
 #deckList .deck-row:active { background: var(--bg-elev); }
 #deckList .deck-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 #deckList .deck-info { grid-area: info; min-width: 0; cursor: pointer; }
+@media (hover: hover) {
 #deckList .deck-row:hover .deck-title { color: var(--accent); }
+}
 #deckList .deck-info .deck-title { font-size: 18px; line-height: 1.25; }
 #deckList .deck-info .deck-desc {
   margin-top: 3px; font-size: 13px; line-height: 1.4;
@@ -406,14 +410,23 @@
 @supports (color: color-mix(in srgb, red 50%, blue)) {
   #deckList .deck-row .deck-actions .deck-study-btn { border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); }
 }
-#deckList .deck-row .deck-actions .deck-study-btn:hover,
 #deckList .deck-row .deck-actions .deck-study-btn:active {
   border-color: var(--border);
   background: var(--accent-soft);
   color: var(--accent-hover);
 }
+@media (hover: hover) {
+#deckList .deck-row .deck-actions .deck-study-btn:hover {
+  border-color: var(--border);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+}
 @supports (color: color-mix(in srgb, red 50%, blue)) {
-  #deckList .deck-row .deck-actions .deck-study-btn:hover, #deckList .deck-row .deck-actions .deck-study-btn:active { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 80%, var(--panel)); }
+  #deckList .deck-row .deck-actions .deck-study-btn:active { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 80%, var(--panel)); }
+@media (hover: hover) {
+#deckList .deck-row .deck-actions .deck-study-btn:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 80%, var(--panel)); }
+}
 }
 #deckList .deck-row .deck-actions .deck-study-btn svg { width: 14px; height: 14px; }
 #deckList .deck-row .deck-actions .deck-menu-trigger {
@@ -423,7 +436,9 @@
   border: 1px solid var(--border); border-radius: 10px;
   background: var(--bg-elev); color: var(--ink-muted); box-shadow: none;
 }
+@media (hover: hover) {
 #deckList .deck-row .deck-actions .deck-menu-trigger:hover { color: var(--ink); border-color: var(--border-strong); }
+}
 
 @media (max-width: 640px) {
   /* Поля/прокрутка #decksOverview — в конце css/polish.css. */

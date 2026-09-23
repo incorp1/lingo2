@@ -31,11 +31,13 @@
     transition: border-color .12s, background .12s, color .12s;
   }
 
-  .desktop-study-action:hover {
+  @media (hover: hover) {
+.desktop-study-action:hover {
     border-color: var(--border);
     background: var(--bg-elev);
     color: var(--ink);
   }
+}
 
   .desktop-study-action:active {
     background: var(--accent-soft);
@@ -95,9 +97,11 @@
   height: 15px;
 }
 
+@media (hover: hover) {
 .card-stage .undo-link:hover:not(:disabled) {
   color: var(--accent);
   background: var(--accent-soft);
+}
 }
 
 .card-stage .undo-link:disabled,
@@ -310,10 +314,14 @@
     outline: none !important;
   }
 
-  .study-edge-action:hover,
   .study-edge-action:focus-visible {
     background: var(--accent-soft);
   }
+@media (hover: hover) {
+.study-edge-action:hover {
+    background: var(--accent-soft);
+  }
+}
 
   .study-edge-action:focus-visible {
     outline: 2px solid var(--accent);

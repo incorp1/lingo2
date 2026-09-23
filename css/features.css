@@ -23,7 +23,9 @@
   background: var(--bg-elev);
   transition: border-color .12s, background .12s;
 }
+@media (hover: hover) {
 .algo-option:hover .algo-card { border-color: var(--border-strong); }
+}
 .algo-option:has(input:checked) .algo-card,
 .algo-option.is-checked .algo-card {
   border-color: var(--accent);
@@ -288,7 +290,9 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 
 /* Icon-only topbar buttons (undo, swap) */
 .icon-btn { transition: background .12s, color .12s; }
+@media (hover: hover) {
 .icon-btn:hover { background: var(--bg-elev); color: var(--ink); }
+}
 .icon-btn:disabled { cursor: not-allowed; }
 
 /* Mobile tweaks */
@@ -361,9 +365,11 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   transition: background .12s, border-color .12s;
 }
 .ai-gen-btn svg { width: 13px; height: 13px; }
+@media (hover: hover) {
 .ai-gen-btn:hover:not(.loading) {
   background: var(--accent-soft);
   border-color: var(--accent);
+}
 }
 .ai-gen-btn.loading { cursor: wait; opacity: 0.6; }
 .ai-gen-btn .spinning { animation: aispin 1s linear infinite; }
@@ -458,7 +464,9 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   color: var(--ink-muted);
   font-size: 13px;
 }
+@media (hover: hover) {
 .period-opt:hover { border-color: var(--accent); }
+}
 .period-opt.active {
   background: var(--accent-soft);
   border-color: var(--accent);
@@ -476,7 +484,9 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 }
 .period-opt.active .period-count { color: var(--accent); border-color: var(--accent); }
 .period-opt[disabled] { opacity: .4; cursor: not-allowed; }
+@media (hover: hover) {
 .period-opt[disabled]:hover { border-color: var(--border-strong); }
+}
 
 /* Word preview chips */
 .practice-wordpreview { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -735,7 +745,9 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 }
 .practice-chip.selectable:not(.on) { opacity: .42; }
 .practice-chip.selectable.on { font-weight: 600; }
+@media (hover: hover) {
 .practice-chip.selectable:hover { border-color: var(--difficulty-fg); opacity: 1; }
+}
 
 .practice-history-block { display: flex; flex-direction: column; gap: 6px; }
 .practice-history-toggle { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; }
@@ -764,7 +776,9 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   background: transparent; border: none; padding: 9px 12px;
   display: flex; flex-direction: column; gap: 2px; color: var(--ink);
 }
+@media (hover: hover) {
 .practice-history-open:hover { background: var(--accent-soft); }
+}
 .practice-history-item-title { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .practice-history-item-meta { font-size: 12px; color: var(--ink-subtle); }
 .practice-history-del { flex-shrink: 0; margin-right: 4px; }
@@ -998,7 +1012,9 @@ html.dark .selection-popover::before {
   border: 0;
   box-shadow: none;
 }
+@media (hover: hover) {
 .selection-speak-btn:hover { color: var(--accent-hover); }
+}
 .selection-speak-btn:active { transform: scale(.94); }
 .selection-speak-btn:focus-visible {
   outline: 2px solid var(--accent);
@@ -1116,11 +1132,16 @@ html.dark .selection-popover::before {
   cursor: pointer;
   transition: background .12s ease, color .12s ease;
 }
-.info-tip-icon:hover,
 .info-tip-icon:focus-visible,
 .info-tip-icon--open {
   background: var(--accent-soft);
   color: var(--accent-hover);
+}
+@media (hover: hover) {
+.info-tip-icon:hover {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
 }
 .info-tip-icon svg { width: 14px; height: 14px; }
 .block-heading h3 {
@@ -1209,7 +1230,9 @@ html.dark .selection-popover::before {
   cursor: pointer;
   transition: border-color .12s, background .12s;
 }
+@media (hover: hover) {
 .bulk-check:hover { border-color: var(--border-strong); }
+}
 .bulk-check:has(input:checked),
 .bulk-check.is-checked {
   border-color: var(--accent);
@@ -1284,16 +1307,20 @@ html.dark .selection-popover::before {
     color: var(--accent);
     font-weight: 600;
   }
-  .settings-block .settings-row .btn.primary:hover,
-  .modal-foot .btn.primary:hover,
-  .selection-pop-actions .btn.primary:hover { color: var(--accent-hover); }
+  @media (hover: hover) {
+.settings-block .settings-row .btn.primary:hover,
+.modal-foot .btn.primary:hover,
+.selection-pop-actions .btn.primary:hover { color: var(--accent-hover); }
+}
   .settings-block .settings-row .btn.danger,
   .modal-foot .btn.danger {
     color: var(--bad);
     font-weight: 600;
   }
-  .settings-block .settings-row .btn.danger:hover,
-  .modal-foot .btn.danger:hover { color: var(--bad); }
+  @media (hover: hover) {
+.settings-block .settings-row .btn.danger:hover,
+.modal-foot .btn.danger:hover { color: var(--bad); }
+}
 
   /* Keep the two-button settings rows as a compact inline pair, not a
      full-width stack. */
