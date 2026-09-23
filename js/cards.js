@@ -276,7 +276,7 @@ function openDeckBrowse(deckId) {
   renderBrowse();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-function closeDeckBrowse() {
+function closeDeckBrowse({ instant = false } = {}) {
   viewingDeckId = null;
   clearBulkSelection();
   const overview = $("#decksOverview");
@@ -284,7 +284,7 @@ function closeDeckBrowse() {
   if (overview) overview.hidden = false;
   if (browser) browser.hidden = true;
   renderDecks();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!instant) window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function refreshDeckCardsModal() {
   if (viewingDeckId && !$("#deckBrowse")?.hidden) renderBrowse();

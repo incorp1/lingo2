@@ -630,76 +630,61 @@ function animateSettingsBack(targetRoute) {
   return navigateToSettings(targetRoute, { focus: true });
 }
 
-function settingsEdgeSwipeBack() {
-  if (currentAppState.view !== "settings" || layoutMode() !== "mobile") return false;
-  if (currentAppState.overlay) {
-    return navigateAppState({ view: "settings", overlay: null }, { replace: true });
-  }
-  if (currentAppState.settingsRoute !== "home") {
-    return animateSettingsBack("home");
-  }
-  // The root settings screen has no parent inside Settings.
-  return false;
-}
+/* Interactive swipe-back (iOS-style), universal for any "detail over parent"
+   screen: the detail panel follows the finger, the parent slides in from
+   underneath with parallax and a fading dim. Release decides by distance OR
+   velocity, then settles with a velocity-matched duration. Touch events are
+   used because only touchmove.preventDefault() reliably blocks Safari 15
+   scrolling. Styles live in css/polish.css (.swipe-back-*). */
+const SWIPE_BACK_LOCK_PX = 10;
+const SWIPE_BACK_PARALLAX = 0.3;
+const SWIPE_BACK_DIM = 0.14;
+const SWIPE_BACK_NO_START = 'input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [data-no-swipe-back]';
 
-/* Interactive swipe-back (iOS-style): the detail panel follows the finger,
-   the parent screen slides in from underneath with parallax and a fading dim.
-   Release decides by distance OR velocity, then the panel settles with a
-   velocity-matched duration. Touch events are used (not pointer events)
-   because only touchmove.preventDefault() reliably blocks Safari scrolling. */
-const SETTINGS_SWIPE_LOCK_PX = 10;
-const SETTINGS_SWIPE_PARALLAX = 0.3;
-const SETTINGS_SWIPE_DIM = 0.14;
-const SETTINGS_SWIPE_NO_START = 'input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [data-no-swipe-back]';
-
-function initializeSettingsEdgeSwipe() {
-  const settingsView = $("#view-settings");
-  if (!settingsView) return;
+function bindSwipeBack({ container, canStart, getPanel, getUnder, getUnderScroll = () => 0, isWindowScroll = false, onCommit }) {
+  if (!container) return;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let settling = false;
-
-  const canStart = target =>
-    !settling &&
-    currentAppState.view === "settings" &&
-    settingsView.classList.contains("active") &&
-    layoutMode() === "mobile" &&
-    currentAppState.settingsRoute !== "home" &&
-    !currentAppState.overlay &&
-    !target?.closest?.(SETTINGS_SWIPE_NO_START);
+  let gesture = null;
+  const currentScroll = () => (isWindowScroll ? window.scrollY : container.scrollTop);
 
   const paint = (g, x) => {
     const progress = Math.min(1, Math.max(0, x / g.width));
     g.x = x;
     g.panel.style.transform = `translate3d(${x}px,0,0)`;
-    g.under.style.transform = `translate3d(${-g.width * SETTINGS_SWIPE_PARALLAX * (1 - progress)}px,0,0)`;
-    settingsView.style.setProperty("--settings-swipe-dim", String(SETTINGS_SWIPE_DIM * (1 - progress)));
+    g.under.style.transform = `translate3d(${-g.width * SWIPE_BACK_PARALLAX * (1 - progress)}px,0,0)`;
+    container.style.setProperty("--swipe-back-dim", String(SWIPE_BACK_DIM * (1 - progress)));
   };
 
   const begin = g => {
     g.locked = true;
-    g.width = settingsView.clientWidth || window.innerWidth;
-    let underScroll = 0;
-    try {
-      underScroll = Number(sessionStorage.getItem(settingsScrollKey({ ...currentAppState, settingsRoute: "home" }))) || 0;
-    } catch {}
-    g.underScroll = underScroll;
+    g.width = container.clientWidth || window.innerWidth;
+    g.underScroll = getUnderScroll();
     const a = document.activeElement;
-    if (a && g.panel.contains(a) && a !== document.body) a.blur?.();
+    if (a && g.panel.contains(a)) a.blur?.();
+    // Positioning context must exist BEFORE measuring, otherwise offsets are
+    // taken against the wrong ancestor and the parent lands off-screen.
+    container.classList.add("swipe-back-active");
+    g.panel.classList.add("swipe-back-panel");
+    const cRect = container.getBoundingClientRect();
+    const pRect = g.panel.getBoundingClientRect();
+    const scrollInside = isWindowScroll ? 0 : container.scrollTop;
     g.under.hidden = false;
     g.under.inert = true;
-    g.under.style.top = `${g.panel.offsetTop - underScroll}px`;
-    g.under.style.left = `${g.panel.offsetLeft}px`;
-    g.under.style.width = `${g.panel.offsetWidth}px`;
-    settingsView.classList.add("settings-swipe-active");
+    g.under.classList.add("swipe-back-under");
+    g.under.style.top = `${pRect.top - cRect.top + scrollInside + currentScroll() - g.underScroll}px`;
+    g.under.style.left = `${pRect.left - cRect.left}px`;
+    g.under.style.width = `${pRect.width}px`;
   };
 
-  const cleanup = g => {
-    settingsView.classList.remove("settings-swipe-active", "settings-swipe-settling");
-    settingsView.style.removeProperty("--settings-swipe-dim");
-    settingsView.style.removeProperty("--settings-swipe-ms");
-    for (const el of [g.panel, g.under]) {
-      el.style.transform = el.style.top = el.style.left = el.style.width = "";
-    }
+  const cleanup = (g, restoreUnderHidden) => {
+    container.classList.remove("swipe-back-active", "swipe-back-settling");
+    container.style.removeProperty("--swipe-back-dim");
+    container.style.removeProperty("--swipe-back-ms");
+    g.panel.classList.remove("swipe-back-panel");
+    g.under.classList.remove("swipe-back-under");
+    for (const el of [g.panel, g.under]) el.style.transform = el.style.top = el.style.left = el.style.width = "";
+    if (restoreUnderHidden) { g.under.hidden = g.underWasHidden; g.under.inert = g.underWasInert; }
     settling = false;
   };
 
@@ -708,43 +693,35 @@ function initializeSettingsEdgeSwipe() {
     const speed = Math.max(Math.abs(velocity), 0.9); // px/ms
     const ms = reducedMotion.matches ? 0 : Math.round(Math.min(320, Math.max(160, distance / speed)));
     settling = true;
-    settingsView.style.setProperty("--settings-swipe-ms", `${ms}ms`);
-    settingsView.classList.add("settings-swipe-settling");
+    container.style.setProperty("--swipe-back-ms", `${ms}ms`);
+    container.classList.add("swipe-back-settling");
     let finished = false;
-    const finish = () => { if (finished) return; finished = true; done(); };
+    const finish = () => { if (!finished) { finished = true; done(); } };
     if (ms === 0 || distance < 1) { paint(g, toX); finish(); return; }
     g.panel.addEventListener("transitionend", event => { if (event.target === g.panel) finish(); }, { once: true });
     window.setTimeout(finish, ms + 80);
     requestAnimationFrame(() => paint(g, toX));
   };
 
-  const cancel = (g, velocity = 0) => settle(g, 0, velocity, () => {
-    if (currentAppState.settingsRoute !== "home") {
-      g.under.hidden = true;
-      g.under.inert = true;
-    }
-    cleanup(g);
-  });
-
+  const cancel = (g, velocity = 0) => settle(g, 0, velocity, () => cleanup(g, true));
   const commit = (g, velocity) => settle(g, g.width, velocity, () => {
-    if (!navigateToSettings("home", { focus: true })) { cancel(g); return; }
-    settingsView.scrollTop = g.underScroll;
-    cleanup(g);
+    cleanup(g, false);
+    if (onCommit() === false) { g.under.hidden = g.underWasHidden; g.under.inert = g.underWasInert; return; }
+    if (isWindowScroll) window.scrollTo(0, g.underScroll); else container.scrollTop = g.underScroll;
   });
 
-  let gesture = null;
-  settingsView.addEventListener("touchstart", event => {
+  container.addEventListener("touchstart", event => {
     gesture = null;
-    if (event.touches.length !== 1 || !canStart(event.target)) return;
-    const route = currentAppState.settingsRoute;
-    const panel = $(`#settings-${CSS.escape(route)}`);
-    const under = $("#settings-home");
-    if (!panel || !under) return;
+    if (settling || event.touches.length !== 1 || !canStart() || event.target?.closest?.(SWIPE_BACK_NO_START)) return;
+    const panel = getPanel();
+    const under = getUnder();
+    if (!panel || !under || panel.hidden) return;
     const t = event.touches[0];
-    gesture = { startX: t.clientX, startY: t.clientY, x: 0, locked: false, panel, under, samples: [{ x: 0, t: event.timeStamp }] };
+    gesture = { startX: t.clientX, startY: t.clientY, x: 0, locked: false, panel, under,
+      underWasHidden: under.hidden, underWasInert: under.inert, samples: [{ x: 0, t: event.timeStamp }] };
   }, { passive: true });
 
-  settingsView.addEventListener("touchmove", event => {
+  container.addEventListener("touchmove", event => {
     const g = gesture;
     if (!g) return;
     if (event.touches.length !== 1) { if (g.locked) cancel(g); gesture = null; return; }
@@ -752,7 +729,7 @@ function initializeSettingsEdgeSwipe() {
     const dx = t.clientX - g.startX;
     const dy = t.clientY - g.startY;
     if (!g.locked) {
-      if (Math.abs(dx) < SETTINGS_SWIPE_LOCK_PX && Math.abs(dy) < SETTINGS_SWIPE_LOCK_PX) return;
+      if (Math.abs(dx) < SWIPE_BACK_LOCK_PX && Math.abs(dy) < SWIPE_BACK_LOCK_PX) return;
       if (dx <= 0 || Math.abs(dx) < Math.abs(dy) * 1.2 || window.getSelection?.()?.toString()) { gesture = null; return; }
       begin(g);
     }
@@ -773,16 +750,50 @@ function initializeSettingsEdgeSwipe() {
     const velocity = (last.x - first.x) / Math.max(1, last.t - first.t);
     const shouldCommit = event.type !== "touchcancel" && velocity > -0.2 &&
       (g.x > g.width * 0.45 || (velocity > 0.35 && g.x > 24));
-    if (shouldCommit) commit(g, velocity);
-    else cancel(g, velocity);
+    if (shouldCommit) commit(g, velocity); else cancel(g, velocity);
   };
-  settingsView.addEventListener("touchend", end, { passive: true });
-  settingsView.addEventListener("touchcancel", end, { passive: true });
+  container.addEventListener("touchend", end, { passive: true });
+  container.addEventListener("touchcancel", end, { passive: true });
+}
+
+function initializeSettingsEdgeSwipe() {
+  const settingsView = $("#view-settings");
+  bindSwipeBack({
+    container: settingsView,
+    canStart: () => currentAppState.view === "settings" &&
+      settingsView.classList.contains("active") &&
+      layoutMode() === "mobile" &&
+      currentAppState.settingsRoute !== "home" &&
+      !currentAppState.overlay,
+    getPanel: () => $(`#settings-${CSS.escape(currentAppState.settingsRoute)}`),
+    getUnder: () => $("#settings-home"),
+    getUnderScroll: () => {
+      try { return Number(sessionStorage.getItem(settingsScrollKey({ ...currentAppState, settingsRoute: "home" }))) || 0; } catch { return 0; }
+    },
+    onCommit: () => navigateToSettings("home", { focus: true }),
+  });
+}
+
+function initializeDeckBrowseSwipe() {
+  const decksView = $("#view-decks");
+  bindSwipeBack({
+    container: decksView,
+    isWindowScroll: true,
+    canStart: () => currentAppState.view === "decks" &&
+      decksView.classList.contains("active") &&
+      layoutMode() !== "desktop" &&
+      !!viewingDeckId &&
+      !document.querySelector(".modal:not([hidden])"),
+    getPanel: () => $("#deckBrowse"),
+    getUnder: () => $("#decksOverview"),
+    onCommit: () => { closeDeckBrowse({ instant: true }); },
+  });
 }
 
 function initializeAppNavigation() {
   history.scrollRestoration = "manual";
   initializeSettingsEdgeSwipe();
+  initializeDeckBrowseSwipe();
   const settingsLayoutQuery = window.matchMedia("(min-width: 900px)");
   const syncSettingsLayout = () => {
     if (currentAppState.view !== "settings") return;

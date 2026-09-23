@@ -248,18 +248,18 @@ test("appearance groups language and theme with consistent mobile styling", () =
   assert.match(mobileCss, /\.settings-action-list > \.settings-action-row:first-of-type/);
   assert.match(mobileCss, /\.settings-action-list > \.settings-action-row:last-of-type/);
 });
-test("interactive swipe-back follows the finger and settles by distance or velocity", () => {
+test("interactive swipe-back is universal and bound to settings and decks", () => {
   const ui = read("js/ui.js");
-  const css = read("css/settings-responsive.css");
-  assert.match(ui, /settingsView\.addEventListener\("touchmove"[\s\S]*?event\.preventDefault\(\)[\s\S]*?\{ passive: false \}/);
-  assert.match(ui, /translate3d\(\$\{x\}px,0,0\)/);
-  assert.match(ui, /SETTINGS_SWIPE_PARALLAX/);
+  const css = read("css/polish.css");
+  assert.match(ui, /function bindSwipeBack\(/);
+  assert.match(ui, /container\.addEventListener\("touchmove"[\s\S]*?event\.preventDefault\(\)[\s\S]*?\{ passive: false \}/);
+  assert.match(ui, /container\.classList\.add\("swipe-back-active"\);[\s\S]*?getBoundingClientRect\(\)/, "класс позиционирования до измерения");
   assert.match(ui, /velocity > 0\.35/);
   assert.match(ui, /g\.width \* 0\.45/);
-  assert.match(ui, /touchcancel/);
   assert.match(ui, /prefers-reduced-motion/);
-  assert.match(ui, /currentAppState\.settingsRoute !== "home"/);
-  assert.match(css, /\.settings-swipe-active > \.settings-home-panel/);
-  assert.match(css, /--settings-swipe-dim/);
-  assert.doesNotMatch(css, /settings-swipe-active[^{]*#settings-/);
+  assert.match(ui, /initializeDeckBrowseSwipe\(\)/);
+  assert.match(ui, /getUnder: \(\) => \$\("#decksOverview"\)/);
+  assert.doesNotMatch(ui, /settingsEdgeSwipeBack/);
+  assert.match(css, /\.swipe-back-active > \.swipe-back-under::after/);
+  assert.doesNotMatch(css, /swipe-back[^{]*#/);
 });
