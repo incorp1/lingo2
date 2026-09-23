@@ -1344,3 +1344,11 @@ select {
   .study-filter-topline { gap: 10px; }
   .study-language-picker { max-width: 52vw; }
 }
+
+/* Плюс «Добавить карточку» — крупнее (было 18 px). Кнопка и зона касания
+   прежние; селектор с id перекрывает размеры из features.css/mobile.css. */
+.add-card-trigger.bare-icon-btn svg,
+#deckBrowse .browse-toolbar #addCardBtn2 svg {
+  width: 22px;
+  height: 22px;
+}
