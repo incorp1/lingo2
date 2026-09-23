@@ -19,3 +19,8 @@ test("блок совместим с Safari 15", () => {
   const code = block.replace(/\/\*[\s\S]*?\*\//g, "");
   assert.doesNotMatch(code, /:has\(|color-mix\(|\bdvh\b|@container|@layer/);
 });
+test("строка темы в Оформлении остаётся в две колонки", () => {
+  assert.match(css, /appearance-theme-row,[\s\S]*?grid-template-columns: minmax\(0, 1fr\) minmax\(128px, 44%\)/);
+  const js = readFileSync(path.join(__dirname, "../js/settings.js"), "utf8");
+  assert.match(js, /themeRow\.classList\.remove\("settings-control-stack"\)/);
+});

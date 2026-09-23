@@ -215,6 +215,7 @@ function mountSettingsRoutePanels() {
       const themeRow = block.querySelector("#setTheme")?.closest(".settings-row");
       if (themeRow && languageBlock) {
         themeRow.classList.add("appearance-theme-row");
+        themeRow.classList.remove("settings-control-stack");
         languageBlock.appendChild(themeRow);
       }
       panels["card-sound"].appendChild(block);

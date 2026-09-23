@@ -1042,3 +1042,23 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Селекты никогда не переносятся под подпись: строка с одиночным select — всегда в две колонки. */
+.view-settings #settings-appearance .appearance-settings-block .settings-row.appearance-theme-row,
+.view-settings #settings-appearance .appearance-settings-block .settings-row.appearance-language-row,
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row.settings-control-stack.select-row {
+  grid-template-columns: minmax(0, 1fr) minmax(128px, 44%);
+  align-items: center;
+}
+/* Заголовки блоков не прижимаются к верхней кромке карточки. */
+.view-settings :is(#settings-learning, #settings-card-sound) .settings-block > :is(h3, .block-heading):first-child {
+  margin: 0;
+  padding: 14px 0 8px;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound) .settings-block > .block-header:first-child {
+  padding-top: 12px;
+  padding-bottom: 10px;
+  align-items: center;
+}
+.view-settings :is(#settings-learning, #settings-generation, #settings-card-sound, #settings-appearance) .settings-row > label:first-child {
+  align-self: center;
+}
