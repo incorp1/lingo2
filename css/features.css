@@ -93,6 +93,7 @@ body:not([data-view="study"]) .study-only { display: none !important; }
 
 /* Virtualized browse body — fixed-height scroll container on every viewport */
 #tableBody {
+  height: clamp(280px, calc(var(--app-vh, 1vh) * 100 - 320px), 680px);
   height: clamp(280px, calc(100dvh - 320px), 680px);
   min-height: 240px;
   overflow-y: auto;
@@ -1296,7 +1297,7 @@ html.dark .selection-popover::before {
 
   /* Keep the two-button settings rows as a compact inline pair, not a
      full-width stack. */
-  .settings-block .settings-row:has(.btn) {
+  .settings-block .settings-row.has-btn {
     grid-template-columns: auto auto !important;
     justify-content: flex-start;
     gap: 22px !important;

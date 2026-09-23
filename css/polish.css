@@ -501,7 +501,7 @@
   .topbar-right .topbar-add,
   .topbar-right .btn.topbar-bulk { font-size: 13.5px; }
   .stat-chip { font-size: 12px; }
-  .settings-block .settings-row:has(.btn) { grid-template-columns: 1fr !important; }
+  .settings-block .settings-row.has-btn { grid-template-columns: 1fr !important; }
   .modal-foot { justify-content: flex-start; }
 }
 
@@ -567,19 +567,19 @@
     min-width: 0;
   }
 
-  .settings-block .settings-row:has(.btn) {
+  .settings-block .settings-row.has-btn {
     grid-template-columns: minmax(0, 1fr) !important;
     justify-items: start;
     width: 100%;
   }
 
-  .settings-block .settings-row:has(> .btn + .btn) {
+  .settings-block .settings-row.has-two-btn {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px !important;
     align-items: stretch;
   }
 
-  .settings-block .settings-row:has(> .btn + .btn) > .btn {
+  .settings-block .settings-row.has-two-btn > .btn {
     width: 100%;
     min-width: 0;
   }
@@ -644,7 +644,7 @@
     justify-self: stretch;
   }
 
-  .settings-block .settings-row:has(> .btn + .btn) {
+  .settings-block .settings-row.has-two-btn {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 

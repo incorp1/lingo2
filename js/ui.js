@@ -160,7 +160,7 @@ function closeDialog(modal) {
   modal.hidden = true;
   const index = dialogStack.indexOf(modal);
   if (index !== -1) dialogStack.splice(index, 1);
-  activeDialog = dialogStack.at(-1) || null;
+  activeDialog = dialogStack[dialogStack.length - 1] || null;
   const target = dialogReturnFocus.get(modal);
   dialogReturnFocus.delete(modal);
   requestAnimationFrame(() => {

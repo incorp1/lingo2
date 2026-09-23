@@ -613,7 +613,25 @@ document.addEventListener("focusout", (e) => {
 /* Boot */
 /* Fallback for browsers without CSS :has() (iOS Safari < 15.4).
    Mirrors `label:has(input:checked)` by toggling an .is-checked class. */
+function setupSettingsRowClasses() {
+  document.querySelectorAll(".settings-block .settings-row").forEach(row => {
+    const btns = Array.from(row.children).filter(el => el.classList.contains("btn"));
+    row.classList.toggle("has-btn", !!row.querySelector(".btn"));
+    row.classList.toggle("has-two-btn", btns.some(b => b.nextElementSibling && b.nextElementSibling.classList.contains("btn")));
+  });
+}
+
 function setupHasFallback() {
+  setupSettingsRowClasses();
+  window.__syncSettingsRows = setupSettingsRowClasses;
+  if (typeof MutationObserver === "function") {
+    let queued = false;
+    new MutationObserver(() => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; setupSettingsRowClasses(); });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
   try {
     if (typeof CSS !== "undefined" && CSS.supports && CSS.supports("selector(:has(*))")) return;
   } catch {}

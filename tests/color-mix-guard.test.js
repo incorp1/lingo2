@@ -41,3 +41,15 @@ test("JS не записывает color-mix в стили", () => {
   }
   assert.doesNotMatch(readFileSync(path.join(root, "index.html"), "utf8"), /color-mix\(/);
 });
+
+test("CSS без :has() и dvh без фолбэка (Safari 15)", () => {
+  const fs = require("fs"), path = require("path");
+  const dir = path.join(__dirname, "..", "css");
+  for (const f of fs.readdirSync(dir).filter(n => n.endsWith(".css"))) {
+    const lines = fs.readFileSync(path.join(dir, f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").split("\n");
+    lines.forEach((l, i) => {
+      if (/:has\(/.test(l) && !/,\s*$/.test(l)) throw new Error(`${f}:${i + 1} :has() без класса-фолбэка`);
+      if (/\d(dvh|svh|lvh)/.test(l) && !/app-vh/.test(lines[i - 1] || "")) throw new Error(`${f}:${i + 1} dvh без фолбэка`);
+    });
+  }
+});
