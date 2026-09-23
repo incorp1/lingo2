@@ -32,3 +32,10 @@ test("цвета сложности из JS без color-mix (Safari 15)", () =>
   assert.doesNotMatch(js, /color-mix\(/);
   assert.match(js, /backgroundStrong: mixRgb/);
 });
+
+test("state-pill в окне колоды: color-mix только внутри @supports", () => {
+  const css = readFileSync(path.join(cssDir, "deck-browser-vA.css"), "utf8");
+  const base = css.match(/#deckBrowse \.browse-state \.state-pill \{[^}]*\}/)[0];
+  assert.doesNotMatch(base, /color-mix/);
+  assert.match(css, /@supports \(color: color-mix\(in srgb, red 50%, blue\)\) \{\s*#deckBrowse \.browse-state \.state-pill/);
+});

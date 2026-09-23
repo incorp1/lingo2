@@ -34,6 +34,7 @@
 - Никогда не правь `VERSION` вручную (в т.ч. через веб-интерфейс GitHub): это меняет только файл, а `?v=` в `index.html`/`sw.js` остаются старыми, кэш PWA не сбрасывается и изменения не видны. Всегда `node tools/bump-version.mjs`. Синхронность проверяет `tests/version-sync.test.js`.
 - Поле `#browseSearch` сбрасывает глобальный слой полей из `css/base.css` селектором по id (конец `css/features.css`); рамку рисует только обёртка `.browse-search`.
 - Цвета сложности (`difficultyStyle` в `js/state.js`) возвращаются только в `rgb()`; смешивание делается в JS (`backgroundStrong`). Не записывать `color-mix()` в CSS-переменные из JS: Safari 15 (iPhone 7) считает переменную невалидной и заливка/цвет слова пропадают.
+- Каскадный фолбэк `prop: X; prop: color-mix(... var(--y) ...)` на Safari 15 не работает (var() откладывает проверку до вычисления, значение становится unset). Для таких случаев color-mix выносить в `@supports (color: color-mix(in srgb, red 50%, blue))`.
 
 
 ## 3. Обязательные ограничения
