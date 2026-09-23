@@ -762,8 +762,11 @@ body:not([data-view="study"]) .study-only { display: none !important; }
   max-height: 348px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  contain: strict;
+  /* Not `strict`: size containment ignores children, and with only max-height
+     the list collapsed to 0px, so tapping "Practice history" showed nothing. */
+  contain: layout paint;
 }
+.practice-history-list[hidden] { display: none; }
 .practice-history-spacer { width: 1px; pointer-events: none; }
 .practice-history-item {
   min-height: 52px;
