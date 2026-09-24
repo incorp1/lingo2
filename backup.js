@@ -268,6 +268,12 @@
                 meaning: cleanString(g.meaning ?? g.translation),
               }))
             : [];
+          entry.questions = Array.isArray(h.questions)
+            ? h.questions.slice(0, 20).map(q => typeof q === "string"
+                ? { q: cleanString(q, LIMITS.shortText), hint: "" }
+                : isRecord(q) ? { q: cleanString(q.q ?? q.question, LIMITS.shortText), hint: cleanString(q.hint, LIMITS.shortText) } : null)
+                .filter(q => q && q.q)
+            : [];
           entry.words = Array.isArray(h.words)
             ? h.words.slice(0, 1000).map(w => typeof w === "string"
                 ? cleanString(w, LIMITS.shortText)

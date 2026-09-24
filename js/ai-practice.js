@@ -1122,6 +1122,7 @@ function addPracticeHistory(entry) {
     title: payload.title,
     text: payload.text,
     glossary: payload.glossary,
+    questions: payload.questions,
     words,
   });
   markPracticeHistoryDirty(state.settings.practiceHistory[0]);
@@ -1324,25 +1325,28 @@ function openPracticeFromHistory(id) {
     title: h.title || "",
     text: h.text,
     glossary: h.glossary,
-    questions: [],
+    questions: Array.isArray(h.questions) ? h.questions.slice(0, 3) : [],
   });
   if (!payload?.text) return;
 
   cancelPracticeCheck("history opened");
   practiceState.id = `history-${h.id}`;
+  practiceState.learningLanguage = practiceHistoryLanguageOf(h);
   practiceState.payload = payload;
   practiceState.words = Array.isArray(h.words)
     ? h.words.map(word => ({ front: String(word?.front ?? word ?? ""), back: String(word?.back || "") }))
     : [];
   practiceState.answers = [];
   practiceState.feedback = null;
-  practiceShowStep("run");
   $("#practiceLoading").hidden = true;
-  renderPracticeStory();
-  $("#practiceQuestions").hidden = true;
-  $("#practiceCheckBtn").hidden = true;
   $("#practiceHistoryList").hidden = true;
-  persistPracticeDraft();
+  /* Same screen as right after generation: story, questions and answer check.
+     Legacy entries saved before questions were stored have none, so the
+     question block and check button stay hidden for them only. */
+  renderPracticeRun();
+  const hasQuestions = payload.questions.length > 0;
+  $("#practiceQuestions").hidden = !hasQuestions;
+  $("#practiceCheckBtn").hidden = !hasQuestions;
 }
 
 function uiLocale() {
