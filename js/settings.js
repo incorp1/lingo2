@@ -394,6 +394,10 @@ function renderSettings() {
   $("#setExampleSituations").value = s.exampleSituations;
   $("#setExampleStyles").value = s.exampleStyles;
   $("#setExampleTemperature").value = s.exampleTemperature;
+  $("#setPracticeTopics").value = s.practiceTopics;
+  $("#setPracticeSituations").value = s.practiceSituations;
+  $("#setPracticeStyles").value = s.practiceStyles;
+  $("#setPracticeTemperature").value = s.practiceTemperature;
   const aiNote = $("#aiLangNote");
   if (aiNote) aiNote.textContent = t("settings.ai.langNote", { lang: t("lang.name") });
   populateAiModels(s.aiProvider, s.aiModel);
@@ -544,6 +548,9 @@ const PROMPT_LIST_CONTROLS = Object.freeze({
   setExampleTopics: "exampleTopics",
   setExampleSituations: "exampleSituations",
   setExampleStyles: "exampleStyles",
+  setPracticeTopics: "practiceTopics",
+  setPracticeSituations: "practiceSituations",
+  setPracticeStyles: "practiceStyles",
 });
 
 function normalizePromptList(value) {
@@ -670,6 +677,7 @@ const NUMERIC_SETTING_CONTROLS = Object.freeze({
   setLeechThreshold: "leechThreshold",
   setLeechThresholdExpert: "leechThreshold",
   setExampleTemperature: "exampleTemperature",
+  setPracticeTemperature: "practiceTemperature",
 });
 
 function commitNumericDraft(input) {

@@ -346,6 +346,28 @@ const PRACTICE_FORMATS = {
   article: "a structured informative article with a descriptive title and 2–4 concise paragraphs; do not turn it into a fictional story",
 };
 
+function practiceTemperatureSetting(settings) {
+  const value = Number(settings?.practiceTemperature);
+  return Number.isFinite(value) && value >= 0 && value <= 2 ? value : 0.9;
+}
+
+function pickPracticeVariety(list) {
+  const items = String(list || "").split(";").map(item => item.trim()).filter(Boolean);
+  return items.length ? items[Math.floor(Math.random() * items.length)] : "";
+}
+
+function practiceVarietyPrompt(settings) {
+  const topic = pickPracticeVariety(settings?.practiceTopics);
+  const situation = pickPracticeVariety(settings?.practiceSituations);
+  const style = pickPracticeVariety(settings?.practiceStyles);
+  const lines = [];
+  if (topic) lines.push(`Topic: ${topic}.`);
+  if (situation) lines.push(`Situation / plot hook (includes setting): ${situation}.`);
+  if (style) lines.push(`Style / tone (includes narrator or point of view): ${style}.`);
+  if (!lines.length) return "";
+  return `${lines.join("\n")}\nBuild the text around this topic and situation and write it in this style, while respecting the format above. Avoid generic textbook plots and clichéd openings.`;
+}
+
 function practiceGenerationInstructions(level, format) {
   const safeLevel = Object.prototype.hasOwnProperty.call(PRACTICE_LEVELS, level) ? level : "auto";
   const safeFormat = Object.prototype.hasOwnProperty.call(PRACTICE_FORMATS, format) ? format : "story";
@@ -827,6 +849,7 @@ Output ONLY valid JSON. No prose, markdown, or code fences.`;
   const prompt = `Write one ${learnedName} reading-comprehension text using ALL target words below.
 The whole text, title and questions must be written in ${learnedName}.
 ${generation.prompt}
+${practiceVarietyPrompt(s)}
 Bold each target word with **double asterisks** in the text.
 Then create exactly 3 comprehension questions in ${learnedName} about the text. Questions must test understanding of context (mix of meaning, inference, and usage). Questions should be open-ended (short answer), not multiple choice.
 Also return a glossary: for each target word give its translation exactly as provided.
@@ -838,7 +861,7 @@ Return JSON with this exact shape:
 {"title":"...","story":"...","questions":[{"q":"...","hint":"..."},{"q":"...","hint":"..."},{"q":"...","hint":"..."}],"glossary":[{"word":"...","meaning":"..."}]}`;
 
   try {
-    const data = await window.LCAi.chatJson(s.aiProvider, s.aiModel || undefined, s.aiKey, sys, prompt, 0.7, {
+    const data = await window.LCAi.chatJson(s.aiProvider, s.aiModel || undefined, s.aiKey, sys, prompt, practiceTemperatureSetting(s), {
       signal: job.controller.signal,
       timeoutMs: AI_TIMEOUT_MS,
     });
