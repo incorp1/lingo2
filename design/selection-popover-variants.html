@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Варианты selectionPopover</title>
+<style>
+  :root {
+    --bg: #f5f5f7; --surface: #ffffff; --ink: #1d1d1f; --ink-muted: #6e6e73; --ink-faint: #a1a1a6;
+    --border: rgba(0,0,0,.08); --accent: #3b6cf6; --accent-soft: rgba(59,108,246,.12); --accent-ink: #fff;
+    --shadow: 0 10px 30px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06);
+    --glass: rgba(255,255,255,.72);
+  }
+  [data-theme="dark"] {
+    --bg: #0f1012; --surface: #1c1c1f; --ink: #f2f2f4; --ink-muted: #a0a0a8; --ink-faint: #6b6b73;
+    --border: rgba(255,255,255,.09); --accent: #6b8cff; --accent-soft: rgba(107,140,255,.16); --accent-ink: #0f1012;
+    --shadow: 0 12px 34px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+    --glass: rgba(34,34,38,.72);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 16px; background: var(--glass); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 16px; margin: 0 auto 0 0; }
+  header button { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; }
+  .card .note { margin: 0 0 12px; color: var(--ink-muted); font-size: 13px; }
+  .stage { position: relative; min-height: 250px; padding: 14px; border-radius: 12px; background: var(--bg); font-size: 16px; line-height: 1.7; }
+  .stage mark { background: var(--accent-soft); color: inherit; border-radius: 3px; padding: 0 1px; }
+  .pop-wrap { position: absolute; left: 14px; right: 14px; top: 92px; display: flex; justify-content: center; }
+  .pros { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--ink-muted); }
+  .i { width: 18px; height: 18px; flex: 0 0 18px; }
+  button { -webkit-tap-highlight-color: transparent; }
+
+  /* Общие элементы */
+  .spk { display: inline-grid; place-items: center; border: 0; background: transparent; color: var(--ink-muted); cursor: pointer; padding: 0; }
+  .word { font-weight: 650; letter-spacing: -.01em; }
+  .ipa { color: var(--ink-faint); font-size: 12.5px; }
+  .tr { color: var(--ink); }
+
+  /* A — Компактная пилюля (iOS-стиль) */
+  .A { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .A .word { padding: 0 8px 0 10px; font-size: 14px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .A .spk, .A .act { height: 32px; border-radius: 999px; }
+  .A .spk { width: 32px; }
+  .A .act { border: 0; font: inherit; font-size: 13.5px; font-weight: 600; padding: 0 12px; cursor: pointer; background: transparent; color: var(--ink); }
+  .A .act.pri { background: var(--accent); color: var(--accent-ink); }
+  .A .sep { width: 1px; height: 18px; background: var(--border); }
+  .A-tr { margin-top: 6px; padding: 7px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); font-size: 14px; }
+
+  /* B — Карточка-словарь */
+  .B { width: 260px; padding: 10px 12px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .B .top { display: flex; align-items: center; gap: 6px; }
+  .B .word { font-size: 17px; }
+  .B .spk { width: 28px; height: 28px; border-radius: 8px; margin-left: auto; background: var(--accent-soft); color: var(--accent); }
+  .B .tr { margin: 2px 0 8px; font-size: 14px; color: var(--ink-muted); }
+  .B .row { display: flex; gap: 6px; }
+  .B .row button { flex: 1; height: 32px; border-radius: 9px; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--ink); }
+  .B .row .pri { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+
+  /* C — Стекло + иконки */
+  .C { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 14px; background: var(--glass); -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .C button { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: 56px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font: inherit; font-size: 10.5px; font-weight: 600; cursor: pointer; }
+  .C button:hover { background: var(--accent-soft); }
+  .C button.pri { color: var(--accent); }
+  .C-tr { margin-top: 6px; padding: 8px 12px; border-radius: 12px; background: var(--glass); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid var(--border); box-shadow: var(--shadow); font-size: 14px; max-width: 250px; }
+  .C-tr b { font-weight: 650; }
+
+  /* D — Тёмный тултип (контраст в обеих темах) */
+  .D { display: inline-flex; flex-direction: column; border-radius: 12px; background: #1d1d1f; color: #f5f5f7; box-shadow: 0 10px 28px rgba(0,0,0,.35); overflow: hidden; position: relative; }
+  [data-theme="dark"] .D { background: #f2f2f4; color: #1d1d1f; }
+  .D .bar { display: flex; align-items: center; }
+  .D .bar button { height: 36px; padding: 0 12px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .D .bar button + button { border-left: 1px solid rgba(127,127,127,.3); }
+  .D .bar .pri { color: #8fb0ff; }
+  [data-theme="dark"] .D .bar .pri { color: #2f5fe0; }
+  .D .tr { padding: 7px 12px 8px; border-top: 1px solid rgba(127,127,127,.3); font-size: 14px; color: inherit; }
+  .D .tr .ipa { color: rgba(127,127,127,1); }
+  .D-arrow { width: 12px; height: 12px; background: #1d1d1f; transform: rotate(45deg); margin: -6px auto 0; border-radius: 2px; }
+  [data-theme="dark"] .D-arrow { background: #f2f2f4; }
+
+  /* E — Нижний лист (мобильный, большие цели) */
+  .stage.sheet { padding-bottom: 150px; }
+  .E { position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 6px 12px 12px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .E .grab { width: 36px; height: 4px; border-radius: 4px; background: var(--border); margin: 0 auto 8px; }
+  .E .top { display: flex; align-items: baseline; gap: 8px; }
+  .E .word { font-size: 19px; }
+  .E .spk { width: 34px; height: 34px; margin-left: auto; border-radius: 50%; background: var(--accent-soft); color: var(--accent); align-self: center; }
+  .E .tr { margin: 0 0 10px; color: var(--ink-muted); font-size: 14.5px; }
+  .E .row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; }
+  .E .row button { height: 40px; border-radius: 12px; font: inherit; font-weight: 600; font-size: 14.5px; border: 0; cursor: pointer; background: var(--bg); color: var(--ink); }
+  .E .row .pri { background: var(--accent); color: var(--accent-ink); }
+
+  /* F — Минимум: слово + перевод сразу, одна кнопка */
+  .F { display: inline-flex; align-items: center; gap: 10px; padding: 6px 6px 6px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); max-width: 300px; }
+  .F .txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+  .F .word { font-size: 14.5px; display: flex; align-items: center; gap: 4px; }
+  .F .word .spk { width: 22px; height: 22px; }
+  .F .tr { font-size: 13px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .F .add { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; cursor: pointer; }
+  .F .add.done { background: var(--accent-soft); color: var(--accent); }
+</style>
+</head>
+<body data-theme="light">
+<header>
+  <h1>Окно выделения слова — 6 вариантов</h1>
+  <button id="themeBtn" type="button">Тёмная тема</button>
+  <button id="trBtn" type="button">Показать перевод</button>
+</header>
+
+<main>
+  <!-- A -->
+  <section class="card">
+    <h2>A. Пилюля в одну строку</h2>
+    <p class="note">Как меню выделения в iOS: одна строка высотой около 38px</p>
+    <div class="stage">Jeg drikker kaffe hver morgen før jeg går på jobb. <mark>Kaffen</mark> er alltid sterk og varm, og den gir meg energi til dagen.
+      <div class="pop-wrap"><div>
+        <div class="A">
+          <span class="word">kaffen</span>
+          <button class="spk" aria-label="Произнести"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+          <span class="sep"></span>
+          <button class="act">Перевод</button>
+          <button class="act pri">+ Карточка</button>
+        </div>
+        <div class="A-tr tr-box" hidden>кофе <span class="ipa">[ˈkɑfːən]</span></div>
+      </div></div>
+    </div>
+    <ul class="pros"><li>Самый компактный, почти не закрывает текст</li><li>Перевод появляется отдельной строкой под пилюлей</li></ul>
+  </section>
+
+  <!-- B -->
+  <section class="card">
+    <h2>B. Мини-карточка словаря</h2>
+    <p class="note">Слово крупно, перевод под ним, внизу две равные кнопки</p>
+    <div class="stage">Jeg drikker kaffe hver morgen før jeg går på jobb. <mark>Kaffen</mark> er alltid sterk og varm, og den gir meg energi til dagen.
+      <div class="pop-wrap">
+        <div class="B">
+          <div class="top"><span class="word">kaffen</span><span class="ipa">[ˈkɑfːən]</span>
+            <button class="spk" aria-label="Произнести"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+          <div class="tr tr-box" hidden>кофе (определённая форма)</div>
+          <div class="row tr-toggle"><button>Перевести</button><button class="pri">Добавить</button></div>
+        </div>
+      </div>
+    </div>
+    <ul class="pros"><li>Всё видно сразу, текст хорошо читается</li><li>Похоже на всплывающий словарь в Kindle и Apple Books</li></ul>
+  </section>
+
+  <!-- C -->
+  <section class="card">
+    <h2>C. Стеклянная панель с иконками</h2>
+    <p class="note">Полупрозрачный фон с размытием, иконки с подписями</p>
+    <div class="stage">Jeg drikker kaffe hver morgen før jeg går på jobb. <mark>Kaffen</mark> er alltid sterk og varm, og den gir meg energi til dagen.
+      <div class="pop-wrap"><div>
+        <div class="C">
+          <button><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Звук</button>
+          <button><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c0 4-3 8-6 9"/><path d="m13 20 4-9 4 9M14.5 17h5"/></svg>Перевод</button>
+          <button class="pri"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>В колоду</button>
+        </div>
+        <div class="C-tr tr-box" hidden><b>kaffen</b> — кофе</div>
+      </div></div>
+    </div>
+    <ul class="pros"><li>Выглядит современно, как в iOS 17 и visionOS</li><li>Каждое действие легко найти глазами. Размытие работает в Safari начиная с iOS 9</li></ul>
+  </section>
+
+  <!-- D -->
+  <section class="card">
+    <h2>D. Контрастный тултип со стрелкой</h2>
+    <p class="note">Инвертированный цвет: в светлой теме тёмный, в тёмной светлый</p>
+    <div class="stage">Jeg drikker kaffe hver morgen før jeg går på jobb. <mark>Kaffen</mark> er alltid sterk og varm, og den gir meg energi til dagen.
+      <div class="pop-wrap"><div>
+        <div class="D">
+          <div class="bar">
+            <button aria-label="Произнести"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+            <button>Перевод</button>
+            <button class="pri">Добавить</button>
+          </div>
+          <div class="tr tr-box" hidden>кофе <span class="ipa">[ˈkɑfːən]</span></div>
+        </div>
+        <div class="D-arrow"></div>
+      </div></div>
+    </div>
+    <ul class="pros"><li>Сразу заметен поверх текста и не сливается с фоном</li><li>Стрелка показывает, к какому слову относится окно</li></ul>
+  </section>
+
+  <!-- E -->
+  <section class="card">
+    <h2>E. Нижний лист</h2>
+    <p class="note">Выезжает снизу экрана, текст выше остаётся открытым</p>
+    <div class="stage sheet">Jeg drikker kaffe hver morgen før jeg går på jobb. <mark>Kaffen</mark> er alltid sterk og varm, og den gir meg energi til dagen.
+      <div class="E">
+        <div class="grab"></div>
+        <div class="top"><span class="word">kaffen</span><span class="ipa">[ˈkɑfːən]</span>
+          <button class="spk" aria-label="Произнести"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>
+        <div class="tr tr-box" hidden>кофе</div>
+        <div class="row"><button>Перевести</button><button class="pri">Добавить карточку</button></div>
+      </div>
+    </div>
+    <ul class="pros"><li>Удобно нажимать большим пальцем, кнопки высотой 40px</li><li>Окно не прыгает за выделением и не перекрывает слово</li></ul>
+  </section>
+
+  <!-- F -->
+  <section class="card">
+    <h2>F. Минимализм: перевод сразу</h2>
+    <p class="note">Перевод загружается автоматически, остаётся одна кнопка «+»</p>
+    <div class="stage">Jeg drikker kaffe hver morgen før jeg går på jobb. <mark>Kaffen</mark> er alltid sterk og varm, og den gir meg energi til dagen.
+      <div class="pop-wrap">
+        <div class="F">
+          <div class="txt">
+            <span class="word">kaffen <button class="spk" aria-label="Произнести"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></span>
+            <span class="tr">кофе · сущ., опр. форма</span>
+          </div>
+          <button class="add" aria-label="Добавить карточку" onclick="this.classList.toggle('done');this.innerHTML=this.classList.contains('done')?'✓':'+'">+</button>
+        </div>
+      </div>
+    </div>
+    <ul class="pros"><li>На одно действие меньше: перевод виден сразу</li><li>Нажмите «+», чтобы увидеть состояние «добавлено». Минус: запрос к AI или словарю уходит при каждом выделении</li></ul>
+  </section>
+</main>
+
+<script>
+  const body = document.body;
+  document.getElementById("themeBtn").onclick = e => {
+    const dark = body.dataset.theme !== "dark";
+    body.dataset.theme = dark ? "dark" : "light";
+    e.target.textContent = dark ? "Светлая тема" : "Тёмная тема";
+  };
+  document.getElementById("trBtn").onclick = e => {
+    const boxes = document.querySelectorAll(".tr-box");
+    const show = boxes[0].hidden;
+    boxes.forEach(b => { b.hidden = !show; });
+    e.target.textContent = show ? "Скрыть перевод" : "Показать перевод";
+  };
+</script>
+</body>
+</html>
