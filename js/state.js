@@ -147,6 +147,7 @@ const defaultSettings = {
     review: true,
   },
   learnSteps: [1, 10],        // ordered learning delays in minutes
+  relearnSteps: [10],        // SM-2 delays after forgetting a review card
   graduatingInterval: 1,      // days after completing all learning steps
   easyInterval: 4,            // days when Easy skips learning
   startingEase: 250,          // 2.5
@@ -217,6 +218,7 @@ const NUMERIC_RANGES = Object.freeze({
 const SETTINGS_SCHEMA = Object.freeze({
   studyQueue: { type: "study-queue" },
   learnSteps: { type: "learning-steps" },
+  relearnSteps: { type: "learning-steps" },
   graduatingInterval: { type: "integer", ranges: NUMERIC_RANGES.graduatingInterval },
   easyInterval: { type: "integer", ranges: NUMERIC_RANGES.easyInterval },
   startingEase: { type: "integer", ranges: NUMERIC_RANGES.startingEase },

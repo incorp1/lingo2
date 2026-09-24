@@ -172,6 +172,8 @@ window.I18N.en = {
     "settings.backup.addDeckHint": "Keep current data and add cards",
     "settings.importConfirm": "Replace ALL local data with the file's contents (cards, progress and AI settings)?",
     "settings.learnSteps": "Learning steps (minutes)",
+    "settings.relearnSteps": "Relearning steps (minutes)",
+    "settings.relearnSteps.hint": "After forgetting a review card, it returns after these short delays before resuming its review interval.",
     "settings.startingEase": "How fast pauses grow (%)",
     "settings.graduatingInterval": "First pause after meeting a word (days)",
     "settings.easyInterval": "\"Easy\" interval (days)",
@@ -300,7 +302,7 @@ window.I18N.en = {
     "settings.again.keepInterval.hint": "Imagine you reviewed a word every 20 days, then suddenly forgot it. 0% — start this word over, like new. 25% — don't wipe everything, keep a quarter of the progress (≈5 days). The higher the %, the gentler the penalty for forgetting.",
     "settings.again.easePenalty": "How much harder the word gets after a miss (%)",
     "settings.again.easePenalty.hint": "After \"Again\", this word's pauses grow more slowly — it becomes a bit more \"stubborn\" and shows up more often. Default 20.",
-    "settings.again.example": "Saw the word {days} days ago. Pressed \"Again\" — next showing in {newDays}, and the word gets a bit more stubborn.",
+    "settings.again.example": "Saw the word {days} days ago. Pressed \"Again\" — next showing in {step}, then after relearning in {newDays}; the word gets a bit more stubborn.",
     "settings.again.exampleRestart": "Saw the word 10 days ago. Pressed \"Again\" — the word starts over (back into learning) and gets a bit more stubborn.",
 
     "settings.hard.title": "\"Hard\" button — barely recalled",

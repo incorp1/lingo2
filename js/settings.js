@@ -336,6 +336,7 @@ function renderSettings() {
   const s = state.settings;
   $("#setLang").value = s.language;
   $("#setLearnSteps").value = s.learnSteps.join(" ");
+  $("#setRelearnSteps").value = s.relearnSteps.join(" ");
   $("#setGraduatingInterval").value = s.graduatingInterval;
   $("#setEasyInterval").value = s.easyInterval;
   $("#setEaseStart").value = s.startingEase;
@@ -423,8 +424,8 @@ function parseLearningStepsInput(value) {
   return steps.slice(0, 20);
 }
 
-function commitLearningStepsDraft({ silent = false } = {}) {
-  const input = $("#setLearnSteps");
+function commitLearningStepsDraft({ silent = false, id = "setLearnSteps", key = "learnSteps" } = {}) {
+  const input = $(`#${id}`);
   if (!input) return true;
   const steps = parseLearningStepsInput(input.value);
   if (!steps) {
@@ -433,8 +434,8 @@ function commitLearningStepsDraft({ silent = false } = {}) {
   }
   input.removeAttribute("aria-invalid");
   input.value = steps.join(" ");
-  if (JSON.stringify(steps) === JSON.stringify(state.settings.learnSteps)) return true;
-  state.settings.learnSteps = steps;
+  if (JSON.stringify(steps) === JSON.stringify(state.settings[key])) return true;
+  state.settings[key] = steps;
   if (!silent) persistSettingsCommit();
   else {
     markSettingsDirty();
@@ -456,27 +457,24 @@ function updatePreviewExamples() {
     return `${(d / 365).toFixed(1)} ${t("preview.years")}`;
   };
 
-  // Again on a review card
-  let againDays;
-  if (s.lapseNewInterval > 0) {
-    againDays = Math.max(1, Math.round(sampleInterval * (s.lapseNewInterval / 100)));
-  } else {
-    againDays = null; // restart learning, ~1 minute
-  }
+  // Again on a review card: the short relearning step always comes first.
+  const againDays = s.lapseNewInterval > 0
+    ? Math.max(1, Math.round(sampleInterval * (s.lapseNewInterval / 100)))
+    : 1;
   const newEaseAgain = Math.max(130, sampleEase - s.lapseEasePenalty);
-  const againText = againDays === null
-    ? t("settings.again.exampleRestart")
-        .replace("{ease}", (sampleEase / 100).toFixed(2))
-        .replace("{newEase}", (newEaseAgain / 100).toFixed(2))
-    : t("settings.again.example")
-        .replace("{days}", sampleInterval)
-        .replace("{newDays}", fmt(againDays))
-        .replace("{ease}", (sampleEase / 100).toFixed(2))
-        .replace("{newEase}", (newEaseAgain / 100).toFixed(2));
+  const againText = t("settings.again.example")
+    .replace("{days}", sampleInterval)
+    .replace("{step}", `${s.relearnSteps[0]}m`)
+    .replace("{newDays}", fmt(againDays))
+    .replace("{ease}", (sampleEase / 100).toFixed(2))
+    .replace("{newEase}", (newEaseAgain / 100).toFixed(2));
   $("#setAgainPreview").textContent = againText;
 
   // Hard
-  const hardDays = Math.max(1, Math.round(sampleInterval * (s.hardFactor / 100) * mod));
+  const hardDays = Math.min(
+    Math.max(1, Math.round(sampleInterval * (s.hardFactor / 100) * mod)),
+    sm2HardCeiling({ interval: sampleInterval, ease: sampleEase }, s, sampleEase),
+  );
   const newEaseHard = Math.max(130, sampleEase - s.hardEasePenalty);
   $("#setHardPreview").textContent = t("settings.hard.example")
     .replace("{days}", sampleInterval)
@@ -596,8 +594,10 @@ function commitSettingsDrafts(reason = "navigation") {
     const input = $(`#${id}`);
     if (input && !commitNumericDraft(input, { silent: true })) invalid.push(input);
   }
-  const learnStepsInput = $("#setLearnSteps");
-  if (learnStepsInput && !commitLearningStepsDraft({ silent: true })) invalid.push(learnStepsInput);
+  for (const [id, key] of [["setLearnSteps", "learnSteps"], ["setRelearnSteps", "relearnSteps"]]) {
+    const input = $(`#${id}`);
+    if (input && !commitLearningStepsDraft({ silent: true, id, key })) invalid.push(input);
+  }
   for (const id of Object.keys(PROMPT_LIST_CONTROLS)) {
     const input = $(`#${id}`);
     if (input && !commitPromptListDraft(input, { silent: true })) invalid.push(input);
@@ -843,13 +843,14 @@ function bindSettings() {
     });
   }
 
-  const learnStepsInput = $("#setLearnSteps");
-  if (learnStepsInput) {
-    learnStepsInput.addEventListener("blur", () => commitLearningStepsDraft());
-    learnStepsInput.addEventListener("keydown", event => {
+  for (const [id, key] of [["setLearnSteps", "learnSteps"], ["setRelearnSteps", "relearnSteps"]]) {
+    const input = $(`#${id}`);
+    if (!input) continue;
+    input.addEventListener("blur", () => commitLearningStepsDraft({ id, key }));
+    input.addEventListener("keydown", event => {
       if (event.key !== "Enter") return;
       event.preventDefault();
-      commitLearningStepsDraft();
+      commitLearningStepsDraft({ id, key });
     });
   }
 

@@ -100,13 +100,18 @@ test("Again возвращает на первый шаг, Hard повторяе
   assert.ok(firstHardMinutes > 5.4 && firstHardMinutes <= 5.5);
 });
 
-test("hardLearningDelayMs: среднее только на первом шаге, далее повтор текущего, один шаг повторяет себя", () => {
+test("hardLearningDelayMs: first-step average, later-step repeat, single step at 1.5×", () => {
   const runtime = loadScheduler();
 
   assert.equal(runtime.hardLearningDelayMs([1, 10, 30], 0), 5.5 * 60000);
   assert.equal(runtime.hardLearningDelayMs([1, 10, 30], 1), 10 * 60000);
   assert.equal(runtime.hardLearningDelayMs([1, 10, 30], 2), 30 * 60000);
-  assert.equal(runtime.hardLearningDelayMs([10], 0), 10 * 60000);
+  assert.equal(runtime.hardLearningDelayMs([10], 0), 15 * 60000);
+  const value = card({ state: "learning" });
+  const oneStep = loadScheduler({ learnSteps: [10] });
+  oneStep.scheduleAnswerSM2(value, 1);
+  assert.ok((value.due - Date.now()) / 60000 > 14.9);
+  assert.equal(oneStep.previewIntervals(value).hard, "15m");
 });
 
 test("Easy review рассчитывает интервал по прежнему Ease и лишь затем повышает Ease", () => {
@@ -157,6 +162,57 @@ test("preview learning-карточки отражает последовате�
 
   value.step = 1;
   assert.equal(runtime.previewIntervals(value).good, "1d");
+});
+
+test("forgotten SM-2 review card relearns before retaining its reduced interval", () => {
+  for (const retainedPercent of [0, 25]) {
+    const runtime = loadScheduler({ relearnSteps: [10, 30], lapseNewInterval: retainedPercent });
+    runtime.Math.random = () => 0.5;
+    const value = card({ state: "review", interval: 20, ease: 250 });
+    runtime.scheduleAnswerSM2(value, 0);
+    assert.equal(value.state, "learning");
+    assert.equal(value.step, 0);
+    assert.equal(value.lapses, 1);
+    assert.equal(value.ease, 230);
+    assert.equal(value.relearnInterval, retainedPercent ? 5 : 1);
+    assert.ok((value.due - Date.now()) / 60000 > 9.9);
+    assert.equal(runtime.previewIntervals(value).good, "30m");
+    runtime.scheduleAnswerSM2(value, 1);
+    assert.equal(value.step, 0);
+    assert.ok((value.due - Date.now()) / 60000 > 19.9);
+    runtime.scheduleAnswerSM2(value, 2);
+    assert.equal(value.step, 1);
+    assert.ok((value.due - Date.now()) / 60000 > 29.9);
+    assert.equal(runtime.previewIntervals(value).good, `${retainedPercent ? 5 : 1}d`);
+    runtime.scheduleAnswerSM2(value, 2);
+    assert.equal(value.state, "review");
+    assert.equal(value.interval, retainedPercent ? 5 : 1);
+    assert.equal(value.relearnInterval, undefined);
+  }
+});
+
+test("Hard remains strictly shorter than Good across fuzz and the interval cap", () => {
+  for (const interval of [1, 2, 5, 10, 30, 100, 1824, 1825, 3000]) {
+    for (const intervalModifier of [10, 100, 300]) {
+      for (const hardFactor of [120, 500]) {
+        const runtime = loadScheduler({ intervalModifier, hardFactor });
+        const base = card({ state: "review", interval, ease: 130 });
+        const good = [];
+        const hard = [];
+        for (const random of [0, 0.999999]) {
+          runtime.Math.random = () => random;
+          const goodCard = { ...base };
+          const hardCard = { ...base };
+          runtime.scheduleAnswerSM2(goodCard, 2);
+          runtime.scheduleAnswerSM2(hardCard, 1);
+          good.push(goodCard.interval);
+          hard.push(hardCard.interval);
+        }
+        assert.ok(Math.max(...hard) < Math.min(...good),
+          `Hard must precede Good for interval=${interval}, modifier=${intervalModifier}, factor=${hardFactor}`);
+      }
+    }
+  }
 });
 
 test("старые per-button настройки мигрируют в последовательность без часового Easy", () => {

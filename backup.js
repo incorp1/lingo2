@@ -126,6 +126,7 @@
       step: finiteNumber(raw.step, 0, 0, 1000, true),
       ease: finiteNumber(raw.ease, 250, 130, 1000),
       interval: finiteNumber(raw.interval, 0, 0, 36500),
+      relearnInterval: finiteNumber(raw.relearnInterval, 0, 0, 36500),
       due: finiteNumber(raw.due, Date.now(), 0, Number.MAX_SAFE_INTEGER, true),
       reps: finiteNumber(raw.reps, 0, 0, 10000000, true),
       lapses: finiteNumber(raw.lapses, 0, 0, 10000000, true),
@@ -203,6 +204,12 @@
     if (isRecord(raw.studyQueue)) out.studyQueue = { new: raw.studyQueue.new !== false, learning: raw.studyQueue.learning !== false, review: raw.studyQueue.review !== false };
     if (Array.isArray(raw.learnSteps)) {
       out.learnSteps = raw.learnSteps
+        .slice(0, 20)
+        .map(v => finiteNumber(v, NaN, 0.01, 525600))
+        .filter(Number.isFinite);
+    }
+    if (Array.isArray(raw.relearnSteps)) {
+      out.relearnSteps = raw.relearnSteps
         .slice(0, 20)
         .map(v => finiteNumber(v, NaN, 0.01, 525600))
         .filter(Number.isFinite);

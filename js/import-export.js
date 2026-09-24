@@ -57,6 +57,7 @@ function resetCardProgress(card, startingEase, now) {
   reset.step = 0;
   reset.ease = startingEase;
   reset.interval = 0;
+  delete reset.relearnInterval;
   reset.due = now;
   reset.reps = 0;
   reset.lapses = 0;

@@ -68,6 +68,20 @@ function multiLanguageState() {
   };
 }
 
+test("relearning steps and a pending relearning interval survive a full backup", () => {
+  const backup = loadBackup();
+  const state = multiLanguageState();
+  state.settings.relearnSteps = [10, 30];
+  state.cards[1].state = "learning";
+  state.cards[1].step = 1;
+  state.cards[1].interval = 20;
+  state.cards[1].relearnInterval = 5;
+  const restored = backup.parse(backup.buildFullExport({ state, reviewEvents: [], practiceDraft: null }));
+  assert.equal(restored.kind, "full");
+  assert.deepEqual(restored.state.settings.relearnSteps, [10, 30]);
+  assert.equal(restored.state.cards.find(item => item.id === "card-nb").relearnInterval, 5);
+});
+
 test("format 3 round-trip keeps every language profile while nb is active", () => {
   const backup = loadBackup();
   const snapshot = { state: multiLanguageState(), reviewEvents: [], practiceDraft: null };

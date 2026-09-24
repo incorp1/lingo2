@@ -163,6 +163,7 @@ function migrateSchedulingSettings(s) {
     : null;
   const storedSteps = legacySteps?.length ? legacySteps : s.learnSteps;
   s.learnSteps = normalizeLearningSteps(storedSteps);
+  s.relearnSteps = normalizeLearningSteps(s.relearnSteps || [10]);
   s.easyInterval = Math.max(
     1,
     Math.round(Number(s.easyInterval) || (
@@ -179,13 +180,20 @@ function learningStepMs(steps, index) {
 
 function hardLearningDelayMs(steps, index) {
   const safeIndex = Math.min(Math.max(0, Number(index) || 0), steps.length - 1);
-  // Analysis fix #2 (Anki alignment): Hard averages the first two steps only
-  // on the very first step; every later step repeats its own delay. A
-  // single-step plan repeats that step.
-  const minutes = safeIndex === 0 && steps.length > 1
-    ? (steps[0] + steps[1]) / 2
-    : steps[safeIndex];
+  // On a single step, Hard waits 1.5 times as long without advancing.
+  const minutes = steps.length === 1 ? steps[0] * 1.5
+    : safeIndex === 0 ? (steps[0] + steps[1]) / 2 : steps[safeIndex];
   return Math.max(MINUTE_MS, minutes * MINUTE_MS);
+}
+
+function sm2GoodBaseInterval(card, settings, ease = card.ease) {
+  return Math.max(card.interval + 1,
+    Math.round(card.interval * (ease / 100) * (settings.intervalModifier / 100)));
+}
+
+function sm2HardCeiling(card, settings, ease) {
+  // Even the longest fuzzed Hard must precede the shortest fuzzed Good.
+  return Math.max(1, Math.min(365 * 5, sm2FuzzRange(sm2GoodBaseInterval(card, settings, ease)).min) - 1);
 }
 
 function sm2FuzzRange(interval) {
@@ -208,11 +216,12 @@ function fuzzSm2Interval(interval, random = Math.random) {
 function scheduleAnswerSM2(card, grade) {
   const s = state.settings;
   const now = Date.now();
-  const steps = normalizeLearningSteps(s.learnSteps);
+  const useFsrs = s.algorithm === "fsrs" && window.FSRS;
+  const steps = normalizeLearningSteps(card.relearnInterval > 0 && !useFsrs
+    ? s.relearnSteps || [10] : s.learnSteps);
   // Analysis fix #1: under FSRS the memory model is computed from the first
   // answer and kept on the card; the short steps only decide WHEN the card is
   // shown next. Under SM-2 the model is invalidated instead.
-  const useFsrs = s.algorithm === "fsrs" && window.FSRS;
   if (!useFsrs) delete card.fsrs;
 
   if (card.state === "new" || card.state === "learning") {
@@ -226,6 +235,7 @@ function scheduleAnswerSM2(card, grade) {
       card.state = "review";
       card.step = 0;
       card.interval = Math.max(1, Math.round(days));
+      delete card.relearnInterval;
       card.due = now + card.interval * DAY_MS;
     };
 
@@ -245,28 +255,24 @@ function scheduleAnswerSM2(card, grade) {
       } else {
         graduate(useFsrs
           ? window.FSRS.graduatingInterval(card, s)
-          : s.graduatingInterval);
+          : card.relearnInterval || s.graduatingInterval);
       }
     } else if (grade === 3) {
       card.ease += s.easyEaseBoost;
       graduate(useFsrs
         ? window.FSRS.graduatingInterval(card, s)
-        : s.easyInterval);
+        : card.relearnInterval || s.easyInterval);
     }
   } else if (card.state === "review") {
     if (grade === 0) {
       card.lapses += 1;
       card.ease = Math.max(130, card.ease - s.lapseEasePenalty);
-      if (s.lapseNewInterval > 0) {
-        card.state = "review";
-        const base = Math.max(1, Math.round(card.interval * (s.lapseNewInterval / 100)));
-        card.interval = fuzzSm2Interval(base);
-        card.due = now + card.interval * DAY_MS;
-      } else {
-        card.state = "learning";
-        card.step = 0;
-        card.due = now + learningStepMs(steps, 0);
-      }
+      card.relearnInterval = s.lapseNewInterval > 0
+        ? fuzzSm2Interval(Math.max(1, Math.round(card.interval * (s.lapseNewInterval / 100))))
+        : 1;
+      card.state = "learning";
+      card.step = 0;
+      card.due = now + learningStepMs(normalizeLearningSteps(s.relearnSteps || [10]), 0);
     } else {
       const mod = s.intervalModifier / 100;
       const previousEase = card.ease;
@@ -275,7 +281,7 @@ function scheduleAnswerSM2(card, grade) {
         card.ease = Math.max(130, previousEase - s.hardEasePenalty);
         baseInterval = Math.max(1, Math.round(card.interval * (s.hardFactor / 100) * mod));
       } else if (grade === 2) {
-        baseInterval = Math.max(card.interval + 1, Math.round(card.interval * (previousEase / 100) * mod));
+        baseInterval = sm2GoodBaseInterval(card, s);
       } else {
         baseInterval = Math.max(
           card.interval + 1,
@@ -283,7 +289,8 @@ function scheduleAnswerSM2(card, grade) {
         );
         card.ease = previousEase + s.easyEaseBoost;
       }
-      card.interval = Math.min(fuzzSm2Interval(baseInterval), 365 * 5);
+      card.interval = Math.min(fuzzSm2Interval(baseInterval),
+        grade === 1 ? sm2HardCeiling(card, s, previousEase) : 365 * 5);
       card.due = now + card.interval * DAY_MS;
     }
   }
@@ -345,7 +352,8 @@ function previewIntervals(card) {
     return `${(d / 365).toFixed(1)}y`;
   };
   const result = { again: "", hard: "", good: "", easy: "" };
-  const steps = normalizeLearningSteps(s.learnSteps);
+  const steps = normalizeLearningSteps(card.relearnInterval > 0 && !(s.algorithm === "fsrs" && window.FSRS)
+    ? s.relearnSteps || [10] : s.learnSteps);
   const fmtFuzzedDays = days => {
     const range = sm2FuzzRange(days);
     return range.min === range.max
@@ -367,19 +375,21 @@ function previewIntervals(card) {
     result.hard = fmt(hardLearningDelayMs(steps, step));
     result.good = step + 1 < steps.length
       ? fmt(learningStepMs(steps, step + 1))
-      : fmt((graduationPreview(3) || s.graduatingInterval) * DAY_MS);
-    result.easy = fmt((graduationPreview(4) || s.easyInterval) * DAY_MS);
+      : fmt(((useFsrs ? graduationPreview(3) : card.relearnInterval) || s.graduatingInterval) * DAY_MS);
+    result.easy = fmt(((useFsrs ? graduationPreview(4) : card.relearnInterval) || s.easyInterval) * DAY_MS);
     return result;
   }
   if (s.algorithm === "fsrs" && window.FSRS) {
     return window.FSRS.previewIntervals(card, s);
   }
   const mod = s.intervalModifier / 100;
-  result.again = s.lapseNewInterval > 0
-    ? fmtFuzzedDays(Math.max(1, Math.round(card.interval * (s.lapseNewInterval / 100))))
-    : fmt(learningStepMs(steps, 0));
-  result.hard = fmtFuzzedDays(Math.max(1, Math.round(card.interval * (s.hardFactor / 100) * mod)));
-  result.good = fmtFuzzedDays(Math.max(card.interval + 1, Math.round(card.interval * (card.ease / 100) * mod)));
+  result.again = fmt(learningStepMs(normalizeLearningSteps(s.relearnSteps || [10]), 0));
+  const hardRange = sm2FuzzRange(Math.max(1, Math.round(card.interval * (s.hardFactor / 100) * mod)));
+  const hardCeiling = sm2HardCeiling(card, s, card.ease);
+  result.hard = hardRange.min === hardRange.max || hardRange.min >= hardCeiling
+    ? fmt(Math.min(hardRange.min, hardCeiling) * DAY_MS)
+    : `${fmt(hardRange.min * DAY_MS)}–${fmt(Math.min(hardRange.max, hardCeiling) * DAY_MS)}`;
+  result.good = fmtFuzzedDays(sm2GoodBaseInterval(card, s));
   result.easy = fmtFuzzedDays(
     Math.max(card.interval + 1, Math.round(card.interval * (card.ease / 100) * (s.easyBonus / 100) * mod)),
   );
