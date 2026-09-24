@@ -262,7 +262,7 @@ const SETTINGS_SCHEMA = Object.freeze({
 const STEP_RATINGS = Object.freeze(["again", "hard", "good", "easy"]);
 const STEP_UNITS = Object.freeze(["m", "h", "d"]);
 const AI_PROVIDERS = Object.freeze(["openai", "google", "xai"]);
-const EXPANDED_BLOCK_IDS = new Set(["learning", "again", "hard", "good", "easy", "ai", "algo", "leech"]);
+const EXPANDED_BLOCK_IDS = new Set(["learning", "again", "hard", "good", "easy", "ai", "algo", "leech", "disclosure:aiExamplesDisclosure", "disclosure:aiPracticeDisclosure"]);
 
 function isSettingsRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);

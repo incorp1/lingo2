@@ -549,6 +549,8 @@ window.I18N.en = {
     "settings.ai.listHint": "Separate items with a semicolon (;).",
     "settings.ai.temperature": "Model temperature",
     "settings.ai.temperatureHint": "From 0 to 2. Higher values make examples more varied.",
+    "settings.ai.examplesGroup": "Example generation",
+    "settings.ai.practiceGroup": "Reading practice generation",
     "settings.ai.practiceTopics": "Reading practice topics",
     "settings.ai.practiceSituations": "Reading practice situations",
     "settings.ai.practiceStyles": "Reading practice styles",

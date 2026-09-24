@@ -1,6 +1,6 @@
 {
   "name": "lingo-cards",
-  "version": "3.20.75",
+  "version": "3.20.76",
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.js"

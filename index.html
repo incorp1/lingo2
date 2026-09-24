@@ -7,23 +7,23 @@
 <title>Lingo Cards — Spaced Repetition</title>
 <meta name="theme-color" content="#C96442" />
 <meta name="description" content="Spaced repetition for language learning" />
-<script src="theme-init.js?v=3.20.75"></script>
+<script src="theme-init.js?v=3.20.76"></script>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="apple-touch-icon" href="icon-192.png" />
-<link rel="stylesheet" href="css/base.css?v=3.20.75" />
-<link rel="stylesheet" href="css/study.css?v=3.20.75" />
-<link rel="stylesheet" href="css/decks.css?v=3.20.75" />
-<link rel="stylesheet" href="css/stats-settings.css?v=3.20.75" />
-<link rel="stylesheet" href="css/mobile.css?v=3.20.75" />
-<link rel="stylesheet" href="css/features.css?v=3.20.75" />
-<link rel="stylesheet" href="css/polish.css?v=3.20.75" />
-<link rel="stylesheet" href="css/edge-menu.css?v=3.20.75" />
-<link rel="stylesheet" href="css/settings-responsive.css?v=3.20.75" />
-<link rel="stylesheet" href="css/settings-polish.css?v=3.20.75" />
-<link rel="stylesheet" href="css/deck-browser-vA.css?v=3.20.75" />
-<link rel="stylesheet" href="css/card-editor.css?v=3.20.75" />
-<link rel="stylesheet" href="css/motion.css?v=3.20.75" />
+<link rel="stylesheet" href="css/base.css?v=3.20.76" />
+<link rel="stylesheet" href="css/study.css?v=3.20.76" />
+<link rel="stylesheet" href="css/decks.css?v=3.20.76" />
+<link rel="stylesheet" href="css/stats-settings.css?v=3.20.76" />
+<link rel="stylesheet" href="css/mobile.css?v=3.20.76" />
+<link rel="stylesheet" href="css/features.css?v=3.20.76" />
+<link rel="stylesheet" href="css/polish.css?v=3.20.76" />
+<link rel="stylesheet" href="css/edge-menu.css?v=3.20.76" />
+<link rel="stylesheet" href="css/settings-responsive.css?v=3.20.76" />
+<link rel="stylesheet" href="css/settings-polish.css?v=3.20.76" />
+<link rel="stylesheet" href="css/deck-browser-vA.css?v=3.20.76" />
+<link rel="stylesheet" href="css/card-editor.css?v=3.20.76" />
+<link rel="stylesheet" href="css/motion.css?v=3.20.76" />
 </head>
 <body>
   <div id="app">
@@ -307,7 +307,7 @@
             <span data-i18n="settings.back">Назад</span>
           </button>
           <div class="app-build-meta" id="appBuildMeta" aria-label="Application version">
-            <span class="app-build-version">v3.20.75</span>
+            <span class="app-build-version">v3.20.76</span>
             <time datetime="2026-07-19T17:00:00+03:00">19.07.2026 17:00</time>
           </div>
         </div>
@@ -728,6 +728,12 @@ FSRS — современный умный режим: он подстраива
                 <button class="btn ghost small" id="refreshAiModelsBtn" type="button" data-i18n="settings.ai.refreshModels">Refresh list</button>
               </div>
             </div>
+            <div class="settings-disclosure" data-disclosure-id="aiExamplesDisclosure">
+              <button type="button" class="settings-disclosure-trigger" id="aiExamplesDisclosureToggle" aria-expanded="false" aria-controls="aiExamplesDisclosurePanel">
+                <span class="settings-disclosure-title" data-i18n="settings.ai.examplesGroup">Example generation</span>
+                <svg class="settings-disclosure-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="settings-disclosure-panel" id="aiExamplesDisclosurePanel" role="region" aria-labelledby="aiExamplesDisclosureToggle" hidden>
             <div class="settings-row with-hint ai-prompt-list-row">
               <div>
                 <label for="setExampleTopics" data-i18n="settings.ai.exampleTopics">Example topics</label>
@@ -759,6 +765,14 @@ FSRS — современный умный режим: он подстраива
               </div>
               <input id="setExampleTemperature" type="number" min="0" max="2" step="0.1" inputmode="decimal" />
             </div>
+              </div>
+            </div>
+            <div class="settings-disclosure" data-disclosure-id="aiPracticeDisclosure">
+              <button type="button" class="settings-disclosure-trigger" id="aiPracticeDisclosureToggle" aria-expanded="false" aria-controls="aiPracticeDisclosurePanel">
+                <span class="settings-disclosure-title" data-i18n="settings.ai.practiceGroup">Reading practice generation</span>
+                <svg class="settings-disclosure-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="settings-disclosure-panel" id="aiPracticeDisclosurePanel" role="region" aria-labelledby="aiPracticeDisclosureToggle" hidden>
             <div class="settings-row with-hint ai-prompt-list-row">
               <div>
                 <label for="setPracticeTopics" data-i18n="settings.ai.practiceTopics"></label>
@@ -786,6 +800,8 @@ FSRS — современный умный режим: он подстраива
                 <div class="row-hint" data-i18n="settings.ai.practiceTemperatureHint"></div>
               </div>
               <input id="setPracticeTemperature" type="number" min="0" max="2" step="0.1" inputmode="decimal" />
+            </div>
+              </div>
             </div>
             <div class="ai-test-status" id="aiTestStatus" hidden></div>
           </div>
@@ -1407,31 +1423,31 @@ FSRS — современный умный режим: он подстраива
       <div class="update-overlay-text" data-i18n="pwa.updating">Updating the app…</div>
     </div>
 
-    <script src="languages.js?v=3.20.75"></script>
-    <script src="storage.js?v=3.20.75"></script>
-    <script src="fsrs.js?v=3.20.75"></script>
-    <script src="ai.js?v=3.20.75"></script>
-    <script src="seed.js?v=3.20.75"></script>
-    <script src="i18n/uk.js?v=3.20.75"></script>
-    <script src="i18n/ru.js?v=3.20.75"></script>
-    <script src="i18n/en.js?v=3.20.75"></script>
-    <script src="i18n/runtime.js?v=3.20.75"></script>
-    <script src="tooltips.js?v=3.20.75"></script>
-    <script src="backup.js?v=3.20.75"></script>
-    <script src="js/state.js?v=3.20.75"></script>
-    <script src="js/scheduler.js?v=3.20.75"></script>
-    <script src="js/ui.js?v=3.20.75"></script>
-    <script src="js/study.js?v=3.20.75"></script>
-    <script src="js/decks.js?v=3.20.75"></script>
-    <script src="js/stats.js?v=3.20.75"></script>
-    <script src="js/settings.js?v=3.20.75"></script>
-    <script src="js/ai-practice.js?v=3.20.75"></script>
-    <script src="js/cards.js?v=3.20.75"></script>
-    <script src="js/import-export.js?v=3.20.75"></script>
-    <script src="js/selection.js?v=3.20.75"></script>
-    <script src="js/edge-menu.js?v=3.20.75"></script>
-    <script src="js/motion.js?v=3.20.75"></script>
-    <script src="js/learning-language.js?v=3.20.75"></script>
-    <script src="js/app-shell.js?v=3.20.75"></script>
+    <script src="languages.js?v=3.20.76"></script>
+    <script src="storage.js?v=3.20.76"></script>
+    <script src="fsrs.js?v=3.20.76"></script>
+    <script src="ai.js?v=3.20.76"></script>
+    <script src="seed.js?v=3.20.76"></script>
+    <script src="i18n/uk.js?v=3.20.76"></script>
+    <script src="i18n/ru.js?v=3.20.76"></script>
+    <script src="i18n/en.js?v=3.20.76"></script>
+    <script src="i18n/runtime.js?v=3.20.76"></script>
+    <script src="tooltips.js?v=3.20.76"></script>
+    <script src="backup.js?v=3.20.76"></script>
+    <script src="js/state.js?v=3.20.76"></script>
+    <script src="js/scheduler.js?v=3.20.76"></script>
+    <script src="js/ui.js?v=3.20.76"></script>
+    <script src="js/study.js?v=3.20.76"></script>
+    <script src="js/decks.js?v=3.20.76"></script>
+    <script src="js/stats.js?v=3.20.76"></script>
+    <script src="js/settings.js?v=3.20.76"></script>
+    <script src="js/ai-practice.js?v=3.20.76"></script>
+    <script src="js/cards.js?v=3.20.76"></script>
+    <script src="js/import-export.js?v=3.20.76"></script>
+    <script src="js/selection.js?v=3.20.76"></script>
+    <script src="js/edge-menu.js?v=3.20.76"></script>
+    <script src="js/motion.js?v=3.20.76"></script>
+    <script src="js/learning-language.js?v=3.20.76"></script>
+    <script src="js/app-shell.js?v=3.20.76"></script>
 </body>
 </html>

@@ -409,6 +409,7 @@ function renderSettings() {
   renderSettingsSummaries();
   renderBackupMetadata().catch(() => {});
   setupCollapsibleBlocks();
+  setupSettingsDisclosures();
   applyAdvancedReviewState();
   if (window.initTooltips) window.initTooltips($("#view-settings"));
   syncCompactSelectWidths($("#view-settings"));
@@ -968,3 +969,33 @@ function bindSettings() {
   if (wipeBtn) wipeBtn.onclick = wipeAll;
 }
 
+
+/* Reusable disclosure: [data-disclosure-id] > .settings-disclosure-trigger + .settings-disclosure-panel.
+   Open state persists in settings.expandedBlocks as "disclosure:<id>". */
+function setupSettingsDisclosures(root = document) {
+  const key = id => `disclosure:${id}`;
+  root.querySelectorAll(".settings-disclosure[data-disclosure-id]").forEach(box => {
+    const id = box.dataset.disclosureId;
+    const trigger = box.querySelector(".settings-disclosure-trigger");
+    const panel = box.querySelector(".settings-disclosure-panel");
+    if (!id || !trigger || !panel) return;
+    const apply = open => {
+      box.classList.toggle("is-open", open);
+      panel.hidden = !open;
+      trigger.setAttribute("aria-expanded", String(open));
+    };
+    const list = Array.isArray(state.settings.expandedBlocks) ? state.settings.expandedBlocks : [];
+    apply(list.includes(key(id)));
+    if (trigger.dataset.disclosureBound) return;
+    trigger.dataset.disclosureBound = "1";
+    trigger.addEventListener("click", () => {
+      const open = panel.hidden;
+      apply(open);
+      const set = new Set(Array.isArray(state.settings.expandedBlocks) ? state.settings.expandedBlocks : []);
+      if (open) set.add(key(id)); else set.delete(key(id));
+      state.settings.expandedBlocks = [...set];
+      markSettingsDirty();
+      save();
+    });
+  });
+}

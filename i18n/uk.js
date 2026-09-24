@@ -610,6 +610,8 @@ window.I18N.uk = {
     "settings.ai.listHint": "Розділяй елементи крапкою з комою (;).",
     "settings.ai.temperature": "Температура моделі",
     "settings.ai.temperatureHint": "Від 0 до 2. Що вище значення, то різноманітніші приклади.",
+    "settings.ai.examplesGroup": "Генерація прикладів",
+    "settings.ai.practiceGroup": "Генерація практики читання",
     "settings.ai.practiceTopics": "Теми практики читання",
     "settings.ai.practiceSituations": "Ситуації практики читання",
     "settings.ai.practiceStyles": "Стилі практики читання",

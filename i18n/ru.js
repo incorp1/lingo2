@@ -548,6 +548,8 @@ window.I18N.ru = {
     "settings.ai.listHint": "Разделяй элементы точкой с запятой (;).",
     "settings.ai.temperature": "Температура модели",
     "settings.ai.temperatureHint": "От 0 до 2. Чем выше значение, тем разнообразнее примеры.",
+    "settings.ai.examplesGroup": "Генерация примеров",
+    "settings.ai.practiceGroup": "Генерация практики чтения",
     "settings.ai.practiceTopics": "Темы практики чтения",
     "settings.ai.practiceSituations": "Ситуации практики чтения",
     "settings.ai.practiceStyles": "Стили практики чтения",
