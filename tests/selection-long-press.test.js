@@ -97,7 +97,7 @@ test("фон меню повторяет форму всего блока и п�
 
   assert.match(css, /\.selection-popover\s*\{[\s\S]*?background: transparent;[\s\S]*?border: 0;[\s\S]*?box-shadow: none;/);
   assert.match(css, /\.selection-popover::before\s*\{[\s\S]*?border-radius: inherit;[\s\S]*?background: color-mix\(in srgb, var\(--bg-elev\) 88%, var\(--ink\) 12%\);/);
-  assert.match(css, /mask-image:[\s\S]*?linear-gradient\(to right, transparent 0, #000 10px, #000 calc\(100% - 10px\), transparent 100%\),[\s\S]*?linear-gradient\(to bottom, transparent 0, #000 9px, #000 calc\(100% - 9px\), transparent 100%\)/);
+  assert.match(css, /mask-image:[\s\S]*?linear-gradient\(to right, transparent 0, #000 6px, #000 calc\(100% - 6px\), transparent 100%\),[\s\S]*?linear-gradient\(to bottom, transparent 0, #000 5px, #000 calc\(100% - 5px\), transparent 100%\)/);
   assert.match(css, /mask-composite: intersect;/);
   assert.doesNotMatch(css, /\.selection-popover::before\s*\{[\s\S]*?radial-gradient/);
   assert.doesNotMatch(css, /\.selection-popover::before\s*\{[\s\S]*?drop-shadow/);
@@ -109,8 +109,8 @@ test("растворение начинается у самой кромки и 
   const popover = css.match(/\.selection-popover\s*\{[\s\S]*?\}/)[0];
   const padding = popover.match(/padding:\s*(\d+)px\s+(\d+)px/);
   assert.ok(padding, "меню должно задавать вертикальный и горизонтальный отступ");
-  assert.ok(Number(padding[1]) >= 9 + 4, "вертикальный отступ должен перекрывать зону растворения");
-  assert.ok(Number(padding[2]) >= 10 + 4, "горизонтальный отступ должен перекрывать зону растворения");
+  assert.ok(Number(padding[1]) >= 5 + 4, "вертикальный отступ должен перекрывать зону растворения");
+  assert.ok(Number(padding[2]) >= 6 + 4, "горизонтальный отступ должен перекрывать зону растворения");
 });
 
 test("выделенное слово остаётся читаемым: подсветка только полупрозрачная", () => {
