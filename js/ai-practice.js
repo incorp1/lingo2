@@ -858,6 +858,12 @@ Return JSON with this exact shape:
     practiceState.answers = [];
     practiceState.feedback = null;
     st.hidden = true;
+    /* History records every generated text at creation time, not after the
+       answer check: users often read the story and go back without checking. */
+    addPracticeHistory({
+      id: practiceState.id, createdAt: Date.now(), learningLanguage: learnCode,
+      words: practiceState.words, payload,
+    });
     renderPracticeRun();
   } catch (error) {
     if (!isAbortError(error) && isCurrentAiJob(job)) {
@@ -1007,12 +1013,6 @@ The items array must match the question order and length.`;
     if (!practiceCheckSnapshotIsCurrent(checkSnapshot)) return;
     practiceState.answers = answers.map(x => x.answer);
     showPracticeFeedback(result);
-    addPracticeHistory({
-      id: uid(), createdAt: Date.now(), period: practiceState.period, deckId: practiceState.deckId,
-      learningLanguage: practiceState.learningLanguage || activeLearningLanguageCode(),
-      words: [...practiceState.words], payload: normalizePracticePayload(practiceState.payload),
-      answers: [...practiceState.answers], results: result,
-    });
   } catch (error) {
     if (!isAbortError(error) && isCurrentAiJob(job)) {
       fb.hidden = false;
@@ -1107,6 +1107,8 @@ function addPracticeHistory(entry) {
   const payload = normalizePracticePayload(entry?.payload);
   if (!payload?.text) return;
   if (!Array.isArray(state.settings.practiceHistory)) state.settings.practiceHistory = [];
+  const entryId = String(entry.id || uid());
+  if (state.settings.practiceHistory.some(item => String(item?.id) === entryId)) return;
   const words = Array.isArray(entry.words)
     ? entry.words.map(word => String(word?.front ?? word ?? "")).filter(Boolean)
     : [];
@@ -1114,7 +1116,7 @@ function addPracticeHistory(entry) {
     ? window.LCLanguages.normalizeLanguageCode(entry.learningLanguage)
     : activeLearningLanguageCode();
   state.settings.practiceHistory.unshift({
-    id: String(entry.id || uid()),
+    id: entryId,
     at: Number(entry.createdAt || Date.now()),
     learningLanguage: code,
     title: payload.title,
