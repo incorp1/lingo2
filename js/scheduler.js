@@ -632,6 +632,25 @@ function isUrgentLearningCard(card, now = Date.now()) {
   return card.state === "review" && (Number(card.interval) || 0) === 0 && card.due <= now;
 }
 
+// Spreads new cards evenly between review/learning cards (keeping each group's
+// shuffled order) so new words never clump at the start or end of a batch.
+function interleaveNewStudyCards(cards) {
+  const fresh = cards.filter(card => card.state === "new");
+  const others = cards.filter(card => card.state !== "new");
+  if (!fresh.length || !others.length) return cards;
+  const result = [];
+  const total = cards.length;
+  let freshUsed = 0;
+  let othersUsed = 0;
+  for (let index = 0; index < total; index += 1) {
+    const freshTarget = Math.round(((index + 1) * fresh.length) / total);
+    if (freshUsed < freshTarget && freshUsed < fresh.length) result.push(fresh[freshUsed++]);
+    else if (othersUsed < others.length) result.push(others[othersUsed++]);
+    else result.push(fresh[freshUsed++]);
+  }
+  return result;
+}
+
 function refillStudyQueue(now = Date.now()) {
   if (!session) return;
   compactStudyQueue();
@@ -657,7 +676,7 @@ function refillStudyQueue(now = Date.now()) {
   // placed at the front of the queue ahead of reviews and new cards, like
   // Anki does; everything else keeps its shuffled order.
   const urgent = batch.filter(card => isUrgentLearningCard(card, now));
-  const regular = batch.filter(card => !isUrgentLearningCard(card, now));
+  const regular = interleaveNewStudyCards(batch.filter(card => !isUrgentLearningCard(card, now)));
   const head = session.queueHead || 0;
   for (let index = urgent.length - 1; index >= 0; index -= 1) {
     const card = urgent[index];

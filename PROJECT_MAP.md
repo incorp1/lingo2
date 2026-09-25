@@ -195,7 +195,7 @@ UI-оценка: `0=Again`, `1=Hard`, `2=Good`, `3=Easy`; `FSRS.schedule` пол
 Цикл вариантов word/sentence × english/local сохраняется в `studyCycles`. До окончания вариантов не выполняется полноценное планирование ответа; итог — худшая оценка `Math.min(...grades)`. Смена карточки в `grade()` происходит после `saveAndFlush()`.
 
 
-Очередь пополняется порциями по 50 (`STUDY_QUEUE_BATCH_SIZE`); это **не дневной лимит**. Цвет сложности вычисляется отдельным `difficultyCache` по reviewEvents и не равен параметру `D` в FSRS.
+Очередь пополняется порциями по 50 (`STUDY_QUEUE_BATCH_SIZE`); это **не дневной лимит**. В каждой порции срочные learning-карточки идут в начало, а новые равномерно распределяются между повторениями (`interleaveNewStudyCards` в `refillStudyQueue`). Цвет сложности вычисляется отдельным `difficultyCache` по reviewEvents и не равен параметру `D` в FSRS.
 
 
 ### Копии и опасные операции
